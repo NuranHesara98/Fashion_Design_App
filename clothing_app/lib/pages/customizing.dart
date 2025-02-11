@@ -83,24 +83,6 @@ class _CustomizePageState extends State<CustomizePage> {
           // Handle menu button press
         },
       ),
-      title: const Text(
-        'DressMe',
-        style: TextStyle(
-          fontFamily: 'Cursive',
-          fontSize: 24,
-          color: Colors.black,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-      centerTitle: true,
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.search, color: Colors.black),
-          onPressed: () {
-            // Handle search button press
-          },
-        ),
-      ],
     );
   }
 
@@ -291,8 +273,8 @@ class _CustomizePageState extends State<CustomizePage> {
         style: ElevatedButton.styleFrom(
           backgroundColor: const Color.fromARGB(255, 0, 0, 0),
           padding: const EdgeInsets.symmetric(
-            horizontal: 32,
-            vertical: 12,
+            horizontal: 130,
+            vertical: 5,
           ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(30),

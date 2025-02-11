@@ -51,14 +51,6 @@ class _HomePageState extends State<HomePage> {
             // Handle menu button press
           },
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.shopping_bag_outlined, color: Colors.black),
-            onPressed: () {
-              // Handle shopping bag button press
-            },
-          ),
-        ],
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -72,13 +64,17 @@ class _HomePageState extends State<HomePage> {
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 decoration: BoxDecoration(
                   color: const Color.fromARGB(255, 238, 238, 238),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(30),
+                  border: Border.all(
+                    color: Colors.black, // Black border color
+                    width: 1, // Border width
+                  ),
                 ),
                 child: TextField(
                   controller: searchController,
                   decoration: const InputDecoration(
                     hintText: "Search...",
-                    border: InputBorder.none,
+                    border: InputBorder.none, // Remove the default border
                     icon: Icon(Icons.search, color: Colors.black),
                   ),
                   onChanged: (value) {
@@ -89,16 +85,18 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
 
+              const SizedBox(height: 5),
+
               ClipRRect(
                 borderRadius: BorderRadius.circular(16.0),
                 child: Stack(
                   children: [
                     Image.asset(
-                      'assets/images/image17.jpg',
+                      'assets/images/image21.jpeg',
                       fit: BoxFit.cover,
-                      alignment: const Alignment(0, -0.2),
+                      alignment: const Alignment(0, -0.99),
                       width: double.infinity,
-                      height: 200,
+                      height: 300,
                     ),
                     Positioned(
                       bottom: 0,
@@ -106,17 +104,23 @@ class _HomePageState extends State<HomePage> {
                       right: 0,
                       child: Container(
                         decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.6),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.5),
+                              blurRadius: 8,
+                              offset: const Offset(2, 2),
+                            ),
+                          ],
                         ),
                         padding: const EdgeInsets.all(16.0),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             const Text(
-                              'Design your own wear',
+                              'D E S I G N   Y O U R\n O W N   W E A R',
                               style: TextStyle(
                                 color: Colors.white,
-                                fontSize: 25,
+                                fontSize: 22,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -178,7 +182,7 @@ class _HomePageState extends State<HomePage> {
                               horizontal: 16.0, vertical: 8.0),
                           decoration: BoxDecoration(
                             color: isSelected
-                                ? const Color.fromARGB(255, 71, 71, 71)
+                                ? const Color.fromARGB(255, 0, 0, 0)
                                 : Colors.grey.shade200,
                             borderRadius: BorderRadius.circular(12.0),
                           ),
@@ -239,7 +243,7 @@ class _HomePageState extends State<HomePage> {
                       backgroundColor: Colors.transparent,
                       elevation: 0,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(30),
                         side: const BorderSide(color: Colors.black, width: 2),
                       ),
                       padding: const EdgeInsets.symmetric(

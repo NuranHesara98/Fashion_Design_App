@@ -1,22 +1,5 @@
 import 'package:clothing_app/Onbording/onboarding_items.dart';
-import 'package:clothing_app/pages/login.dart';
 import 'package:flutter/material.dart';
-
-class HomePage extends StatelessWidget {
-  const HomePage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Home Page"),
-      ),
-      body: Center(
-        child: const Text("Welcome to the Home Page!"),
-      ),
-    );
-  }
-}
 
 class OnboardingView extends StatefulWidget {
   const OnboardingView({super.key});
@@ -46,7 +29,7 @@ class _OnboardingViewState extends State<OnboardingView> {
                       currentPage = index;
                     });
                   },
-                  itemBuilder: (context, index) { 
+                  itemBuilder: (context, index) {
                     final item = controller.items[index];
                     return Column(
                       children: [
@@ -61,7 +44,7 @@ class _OnboardingViewState extends State<OnboardingView> {
                           ),
                         ),
                         const SizedBox(height: 20),
-                        // Add the title here in bold and colored text
+                        // Title
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16.0),
                           child: Text(
@@ -69,12 +52,13 @@ class _OnboardingViewState extends State<OnboardingView> {
                             style: const TextStyle(
                               fontSize: 24.0,
                               fontWeight: FontWeight.bold,
-                              color: Colors.black, // Customize title color here
+                              color: Colors.black, // Title color
                             ),
                             textAlign: TextAlign.center,
                           ),
                         ),
                         const SizedBox(height: 20),
+                        // Description
                         Flexible(
                           flex: 1,
                           child: Padding(
@@ -107,9 +91,7 @@ class _OnboardingViewState extends State<OnboardingView> {
                     height: 8.0,
                     width: currentPage == index ? 16.0 : 8.0,
                     decoration: BoxDecoration(
-                      color: currentPage == index
-                          ? const Color.fromARGB(255, 0, 0, 0)
-                          : Colors.grey,
+                      color: currentPage == index ? Colors.black : Colors.grey,
                       borderRadius: BorderRadius.circular(4.0),
                     ),
                   ),
@@ -123,10 +105,8 @@ class _OnboardingViewState extends State<OnboardingView> {
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor:
-                            Colors.black, // Set the button color to black
-                        foregroundColor:
-                            Colors.white, // Set the text color to white
+                        backgroundColor: Colors.black,
+                        foregroundColor: Colors.white,
                       ),
                       onPressed: () {
                         if (currentPage < controller.items.length - 1) {
@@ -135,12 +115,8 @@ class _OnboardingViewState extends State<OnboardingView> {
                             curve: Curves.easeInOut,
                           );
                         } else {
-                          // Navigate to the new page (HomePage) instead of SplashScreen
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const LoginPage()),
-                          );
+                          // Navigate to WelcomeScreen instead of LoginPage
+                          Navigator.pushReplacementNamed(context, '/welcome');
                         }
                       },
                       child: Text(
@@ -154,7 +130,7 @@ class _OnboardingViewState extends State<OnboardingView> {
               ),
             ],
           ),
-          // Add "Skip" button at the top-right corner
+          // "Skip" button
           Positioned(
             top: 40.0,
             right: 16.0,
@@ -167,7 +143,7 @@ class _OnboardingViewState extends State<OnboardingView> {
                 style: TextStyle(
                   fontSize: 16.0,
                   fontWeight: FontWeight.bold,
-                  color: Color.fromARGB(255, 223, 219, 219),
+                  color: Colors.white70,
                 ),
               ),
             ),
