@@ -1,0 +1,11 @@
+{
+  "name": "fashion_design_app",
+  "version": "1.0.0",
+  "description": "A mobile app for personalized fashion design. Features include clothing sketch selection, photo-based suggestions, skin tone-based color recommendations, and ML-driven style recommendations. Intuitive, customizable, and user-friendly.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}
