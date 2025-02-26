@@ -11,50 +11,7 @@ class SuggestionPage extends StatelessWidget {
         children: [
           Column(
             children: [
-              // Header section
-              Stack(
-                children: [
-                  Container(
-                    color: const Color.fromARGB(255, 202, 220, 240),
-                    child: Padding(
-                      padding: const EdgeInsets.only(top: 10),
-                      child: ClipRRect(
-                        child: Image.asset(
-                          'assets/images/image27.png',
-                          fit: BoxFit.cover,
-                          height: 400,
-                          width: double.infinity,
-                          alignment: Alignment.centerLeft,
-                        ),
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    top: 200,
-                    left: 30,
-                    child: Column(
-                      children: const [
-                        Text(
-                          "P I C K U P\n Y O U R 'S ",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 50,
-                            fontWeight: FontWeight.bold,
-                            shadows: [
-                              Shadow(
-                                color: Colors.black, // Shadow color
-                                offset: Offset(1, 1), // Shadow position (x, y)
-                                blurRadius: 5, // Shadow blur radius
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 80),
               // "You also may like" section
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -83,10 +40,14 @@ class SuggestionPage extends StatelessWidget {
                         image: 'assets/images/image32.png',
                         title: "Wrap Dress",
                         price: "RS. 6500.00"),
+                    ProductCard(
+                        image: 'assets/images/image32.png',
+                        title: "Wrap Dress",
+                        price: "RS. 6500.00"),
                   ],
                 ),
               ),
-              const SizedBox(height: 20), // Extra space below product list
+              const SizedBox(height: 350),
             ],
           ),
           // Black 3-line menu icon at the top left corner

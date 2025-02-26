@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
+import 'finalProduct.dart';
+import 'package:flutter/widgets.dart'; // Add this import to use Navigator
 
 class StorePage extends StatelessWidget {
   const StorePage({super.key});
@@ -103,16 +105,24 @@ class _ToggleStoreBox extends StatefulWidget {
 class _ToggleStoreBoxState extends State<_ToggleStoreBox> {
   bool _isToggled = false;
 
-  void _toggleBox() {
+  void _toggleBox(BuildContext context) {
     setState(() {
       _isToggled = !_isToggled;
     });
+
+    // If the box is toggled and the "NEXT" is shown, navigate to the ProductPage
+    if (_isToggled) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => ProductPage()),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: _toggleBox,
+      onTap: () => _toggleBox(context), // Pass context to the _toggleBox method
       child: Container(
         padding: const EdgeInsets.all(16.0),
         decoration: BoxDecoration(

@@ -11,6 +11,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  image_picker: ^1.0.0
 
   cupertino_icons: ^1.0.8
   flutter_native_splash: ^2.4.4
@@ -53,6 +54,10 @@ flutter:
     - assets/images/image30.png
     - assets/images/image32.png
     - assets/images/image33.png
+    - assets/images/image35.jpg
+    - assets/images/image36.jpg
+    - assets/images/image37.jpg
+    - assets/images/image38.jpg
     - assets/images/Sketch1.png
     - assets/images/Sketch2.png
     - assets/images/Sketch3.png

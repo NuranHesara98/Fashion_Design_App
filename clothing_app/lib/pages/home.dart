@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:clothing_app/pages/uploadimage.dart';
 import 'package:clothing_app/pages/customizing.dart';
 
 class HomePage extends StatefulWidget {
@@ -125,28 +126,6 @@ class _HomePageState extends State<HomePage> {
                               ),
                             ),
                             const SizedBox(height: 8.0),
-                            ElevatedButton(
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => CustomizePage(),
-                                  ),
-                                );
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor:
-                                    const Color.fromARGB(255, 255, 255, 255),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(24),
-                                ),
-                              ),
-                              child: const Text(
-                                "+  Upload image",
-                                style: TextStyle(
-                                    color: Color.fromARGB(255, 3, 3, 3)),
-                              ),
-                            ),
                           ],
                         ),
                       ),

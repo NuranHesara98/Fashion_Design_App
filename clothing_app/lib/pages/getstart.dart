@@ -1,7 +1,7 @@
 import 'package:clothing_app/pages/login.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart'; // For animated illustrations
-import 'home.dart'; // Ensure HomePage is imported
+import 'twoOptions.dart'; // Ensure HomePage is imported
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
@@ -75,7 +75,8 @@ class WelcomeScreen extends StatelessWidget {
                   ),
                   onPressed: () {
                     Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(builder: (context) => const HomePage()),
+                      MaterialPageRoute(
+                          builder: (context) => const TwoOptionsPage()),
                     );
                   },
                   child: const Text(
