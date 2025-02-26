@@ -1,5 +1,5 @@
-import 'package:clothing_app/pages/store.dart';
 import 'package:flutter/material.dart';
+import 'modifyOutfit.dart'; // Ensure this path is correct
 
 class SuggestionPage extends StatelessWidget {
   const SuggestionPage({super.key});
@@ -68,7 +68,7 @@ class SuggestionPage extends StatelessWidget {
   }
 }
 
-// Product Card with navigation to ProductDetailPage
+// Product Card with heart icon and navigation to ModifyPage
 class ProductCard extends StatelessWidget {
   final String image;
   final String title;
@@ -88,7 +88,7 @@ class ProductCard extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => ProductDetailPage(
+            builder: (context) => ModifyPage(
               image: image,
               title: title,
             ),
@@ -99,7 +99,6 @@ class ProductCard extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 8),
         child: Container(
           width: 140,
-          height: 140,
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(16),
@@ -122,156 +121,56 @@ class ProductCard extends StatelessWidget {
                 child: Image.asset(
                   image,
                   fit: BoxFit.cover,
-                  height: 200,
                   width: 140,
+                  height: 200, // Keeps image height consistent
                 ),
               ),
-              Expanded(
-                child: Container(
-                  padding: const EdgeInsets.all(8),
-                  color: Colors.white,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                        ),
+              Container(
+                padding: const EdgeInsets.all(8),
+                color: Colors.white,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Product Title and Price
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            title,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            price,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        price,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey,
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                    // Heart Icon for Favorite
+                    IconButton(
+                      icon: const Icon(Icons.favorite_border,
+                          color: Colors.black),
+                      onPressed: () {
+                        // Handle favorite action
+                        print("Added $title to favorites!");
+                      },
+                    ),
+                  ],
                 ),
               ),
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class ProductDetailPage extends StatelessWidget {
-  final String image;
-  final String title;
-
-  const ProductDetailPage({
-    super.key,
-    required this.image,
-    required this.title,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        children: [
-          // Fullscreen product image
-          Image.asset(
-            'assets/images/image15.jpg',
-            fit: BoxFit.cover,
-            height: double.infinity,
-            width: double.infinity,
-          ),
-          // Product Details Card
-          Positioned(
-            bottom: 20,
-            left: 16,
-            right: 16,
-            child: Container(
-              height: 220,
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.9),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Small preview image
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: Image.asset(
-                      image,
-                      height: 150,
-                      width: 100,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  // Product Title and Description
-                  Expanded(
-                    child: Padding(
-                      padding:
-                          const EdgeInsets.only(top: 20), // Adjusted padding
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            title.toUpperCase(),
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 20), // Increased spacing
-                          const Text(
-                            "One button neck along long-sleeved waist female stitching dress",
-                            style: TextStyle(fontSize: 13),
-                            maxLines: 3,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          // Place Order Button
-          Positioned(
-            bottom: 40,
-            right: 42,
-            child: GestureDetector(
-              onTap: () {
-                // Navigate to StorePage
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const StorePage(),
-                  ),
-                );
-              },
-              child: const Text(
-                "Place Order",
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Color.fromARGB(255, 0, 0, 0),
-                ),
-              ),
-            ),
-          ),
-          // Back Button
-          Positioned(
-            top: 40,
-            left: 16,
-            child: IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.black),
-              onPressed: () => Navigator.pop(context),
-            ),
-          ),
-        ],
       ),
     );
   }

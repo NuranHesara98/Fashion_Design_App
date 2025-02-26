@@ -16,7 +16,7 @@ class ProfileEditPage extends StatelessWidget {
               children: [
                 Container(
                   decoration: BoxDecoration(
-                    color: const Color.fromARGB(255, 106, 160, 103),
+                    color: const Color.fromARGB(255, 2, 86, 151),
                     borderRadius: BorderRadius.only(
                       bottomLeft: Radius.circular(40),
                       bottomRight: Radius.circular(40),

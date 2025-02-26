@@ -69,7 +69,7 @@ class EditProfilePage extends StatelessWidget {
                 style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    color: Colors.green),
+                    color: const Color.fromARGB(255, 0, 0, 0)),
               ),
               const SizedBox(height: 70),
               _buildInfoRow("USERNAME", "@obileonardo"),

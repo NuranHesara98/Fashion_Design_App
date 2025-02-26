@@ -1,8 +1,15 @@
 import 'package:flutter/material.dart';
-import 'helpcenterDetailed.dart'; // Import FirstPage here
+import 'helpcenterDetailed.dart'; // Import FirstPage
 
-class HelpPage extends StatelessWidget {
+class HelpPage extends StatefulWidget {
   const HelpPage({super.key});
+
+  @override
+  State<HelpPage> createState() => _HelpPageState();
+}
+
+class _HelpPageState extends State<HelpPage> {
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +29,6 @@ class HelpPage extends StatelessWidget {
               Stack(
                 alignment: Alignment.center,
                 children: [
-                  // Chat bubble background
                   Positioned(
                     left: 40,
                     child: CircleAvatar(
@@ -37,7 +43,6 @@ class HelpPage extends StatelessWidget {
                       backgroundColor: Colors.red[300],
                     ),
                   ),
-                  // Question mark
                   Positioned(
                     child: Text(
                       '?',
@@ -59,7 +64,7 @@ class HelpPage extends StatelessWidget {
               ),
               SizedBox(height: 10),
               Text(
-                'Enter your details to proceed further\nadd more detail about your bio.',
+                'Enter your query to find relevant information.',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 16,
@@ -70,6 +75,7 @@ class HelpPage extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: TextField(
+                  controller: _searchController,
                   decoration: InputDecoration(
                     filled: true,
                     fillColor: Colors.white,
@@ -82,15 +88,18 @@ class HelpPage extends StatelessWidget {
                     prefixIcon: Icon(Icons.search),
                     suffixIcon: GestureDetector(
                       onTap: () {
-                        // Navigate to FirstPage when the arrow icon is tapped
+                        String keyword = _searchController.text.trim();
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => FirstPage()),
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                FirstPage(searchKeyword: keyword),
+                          ),
                         );
                       },
                       child: Icon(
                         Icons.arrow_forward,
-                        color: const Color.fromARGB(255, 0, 0, 0),
+                        color: Colors.black,
                       ),
                     ),
                   ),

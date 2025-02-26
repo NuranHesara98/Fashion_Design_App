@@ -13,9 +13,8 @@ class _CustomizePageState extends State<CustomizePage> {
   String? selectedPurpose;
   String? selectedMaterial;
   String? occasion;
-
-  // Track the selected skin tone
   Color? selectedTone;
+  bool isLoading = false; // Added missing variable
 
   @override
   Widget build(BuildContext context) {
@@ -235,7 +234,6 @@ class _CustomizePageState extends State<CustomizePage> {
               .map((color) => GestureDetector(
                     onTap: () {
                       setState(() {
-                        // Toggle selection when the user taps on a skin tone
                         selectedTone = (selectedTone == color) ? null : color;
                       });
                     },
@@ -266,25 +264,34 @@ class _CustomizePageState extends State<CustomizePage> {
 
   Widget _buildNextButton() {
     return Center(
-      child: ElevatedButton(
-        onPressed: () {
-          Navigator.pushNamed(context, '/suggestion');
-        },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: const Color.fromARGB(255, 0, 0, 0),
-          padding: const EdgeInsets.symmetric(
-            horizontal: 130,
-            vertical: 5,
-          ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(30),
-          ),
-        ),
-        child: const Text(
-          'NEXT',
-          style: TextStyle(fontSize: 16, color: Colors.white),
-        ),
-      ),
+      child: isLoading
+          ? const CircularProgressIndicator() // Show loading icon
+          : ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  isLoading = true; // Start loading
+                });
+
+                Future.delayed(const Duration(seconds: 2), () {
+                  setState(() {
+                    isLoading = false; // Stop loading
+                  });
+                  Navigator.pushNamed(context, '/suggestion'); // Navigate
+                });
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color.fromARGB(255, 0, 0, 0),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 130, vertical: 5),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30),
+                ),
+              ),
+              child: const Text(
+                'NEXT',
+                style: TextStyle(fontSize: 16, color: Colors.white),
+              ),
+            ),
     );
   }
 }

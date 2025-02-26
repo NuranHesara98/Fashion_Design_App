@@ -1,100 +1,150 @@
 import 'package:flutter/material.dart';
 
-class FirstPage extends StatelessWidget {
-  const FirstPage({super.key});
+class FirstPage extends StatefulWidget {
+  final String searchKeyword;
+
+  const FirstPage({super.key, required this.searchKeyword});
+
+  @override
+  _FirstPageState createState() => _FirstPageState();
+}
+
+class _FirstPageState extends State<FirstPage> {
+  late List<Map<String, String>> helpContent;
+  late List<Map<String, String>> filteredContent;
+
+  @override
+  void initState() {
+    super.initState();
+    // Define all help content
+    helpContent = [
+      {
+        'title': 'Creating an Account',
+        'description':
+            'Tap on Sign Up and enter your email/phone number. Set a password, verify via OTP, and complete your profile.'
+      },
+      {
+        'title': 'Navigating the App',
+        'description':
+            'Home Screen – Start customizing or explore designs. Menu – Access saved designs, orders, and settings.'
+      },
+      {
+        'title': 'System Requirements',
+        'description':
+            'Compatible with Android 7.0+ / iOS 12+. Requires an active internet connection.'
+      },
+      {
+        'title': 'How to Start Customizing',
+        'description':
+            'Select Start Customization, answer guided questions, and modify colors, patterns, and fabrics.'
+      },
+      {
+        'title': 'Editing & Saving Designs',
+        'description':
+            'Tap Save to store your design. Access saved designs in My Designs. Tap Edit to make changes.'
+      },
+      {
+        'title': 'Previewing Your Customization',
+        'description':
+            'Use the 360° View to see your outfit from all angles and share it before ordering.'
+      },
+      {
+        'title': 'Placing an Order',
+        'description':
+            'Select a saved design, choose a tailor/shop, confirm pricing, make payment, and receive confirmation.'
+      },
+      {
+        'title': 'Payment Options',
+        'description':
+            'Supports COD, bank transfers, and mobile payments like eZ Cash, FriMi, and PayHere.'
+      },
+      {
+        'title': 'Order Tracking & Delivery',
+        'description':
+            'Track your order status in the Orders section and receive notifications upon completion.'
+      },
+      {
+        'title': 'Updating Your Profile',
+        'description':
+            'Go to Account Settings > Edit Profile to update your details and password.'
+      },
+      {
+        'title': 'Managing Saved Designs',
+        'description':
+            'View all saved designs in My Designs. Delete unwanted designs if needed.'
+      },
+      {
+        'title': 'Language Settings',
+        'description': 'Switch between Sinhala and English in Settings.'
+      },
+      {
+        'title': 'Common Issues & Solutions',
+        'description':
+            'Fix app crashes, slow loading, and login issues. Refresh order updates if needed.'
+      },
+      {
+        'title': 'Contact Support',
+        'description':
+            'Live Chat available in-app, email support at support@yourapp.com, and phone support at +94 XXXXXXXX.'
+      },
+      {
+        'title': 'FAQs',
+        'description':
+            'Can I cancel my order? – Yes, before production starts.\n Delivery time? – 3-7 days.\n Changes after ordering? – Depends on tailor/shop.'
+      },
+    ];
+
+    // Apply filtering based on search keyword
+    _filterContent(widget.searchKeyword);
+  }
+
+  void _filterContent(String keyword) {
+    if (keyword.isEmpty) {
+      // Show all content if search is empty
+      filteredContent = List.from(helpContent);
+    } else {
+      List<String> searchWords =
+          keyword.toLowerCase().split(' '); // Split the search query into words
+
+      filteredContent = helpContent.where((item) {
+        List<String> titleWords =
+            item['title']!.toLowerCase().split(' '); // Split title into words
+
+        // Check if any search word matches any word in the title
+        return searchWords.any((word) => titleWords.contains(word));
+      }).toList();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Help Center'),
-        backgroundColor: Colors.blueAccent,
+        title: const Text('Help Center'),
+        backgroundColor: Colors.white,
       ),
       body: SingleChildScrollView(
-        // Added SingleChildScrollView here
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'How can we help you today?',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            SizedBox(height: 16),
-
-            SizedBox(height: 16),
-            Text(
-              'Top Articles',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            SizedBox(height: 8),
-            ArticleCard(
-              title: 'How do I cancel my auction bids for a place to stay?',
-              description:
-                  'You can cancel a reservation any time before or during your trip.',
-            ),
-            ArticleCard(
-              title: 'How to change my reservation?',
-              description:
-                  'Learn how to modify your existing reservations quickly and easily.',
-            ),
-            SizedBox(height: 16),
-            Text(
-              'Latest Discussions',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            SizedBox(height: 8),
-            // Replaced DiscussionCard with simple Text widgets
-            Text(
-              'How do I cancel my reservation?',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            Text(
-              '31 Oct 2020',
-              style: TextStyle(color: Colors.grey),
-            ),
-            SizedBox(height: 8),
-            Text(
-              'How do I change my reservation?',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            Text(
-              '30 Oct 2020',
-              style: TextStyle(color: Colors.grey),
-            ),
-          ],
+          children: filteredContent.isEmpty
+              ? [
+                  Center(
+                      child: Text(
+                          "No results found for '${widget.searchKeyword}'"))
+                ]
+              : filteredContent
+                  .map((item) =>
+                      _buildArticle(item['title']!, item['description']!))
+                  .toList(),
         ),
       ),
     );
   }
-}
 
-class ArticleCard extends StatelessWidget {
-  final String title;
-  final String description;
-
-  const ArticleCard(
-      {super.key, required this.title, required this.description});
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildArticle(String title, String description) {
     return Card(
-      margin: EdgeInsets.symmetric(vertical: 8),
+      margin: const EdgeInsets.symmetric(vertical: 8),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -102,12 +152,12 @@ class ArticleCard extends StatelessWidget {
           children: [
             Text(
               title,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            SizedBox(height: 4),
+            const SizedBox(height: 4),
             Text(description),
           ],
         ),
