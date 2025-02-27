@@ -13,6 +13,7 @@ class ModifyPage extends StatefulWidget {
 class _ModifyPageState extends State<ModifyPage> {
   String? _selectedSize;
   Color _selectedColor = Colors.black;
+  String? _selectedMaterial; // Variable to hold the selected material
 
   @override
   Widget build(BuildContext context) {
@@ -40,6 +41,8 @@ class _ModifyPageState extends State<ModifyPage> {
             _buildSizeChart(),
             SizedBox(height: 20),
             _buildColorPicker(),
+            SizedBox(height: 20),
+            _buildMaterialSelector(), // Material selector added below color picker
           ],
         ),
       ),
@@ -123,36 +126,108 @@ class _ModifyPageState extends State<ModifyPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          "Select a Color",
+          "Change the colour",
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         SizedBox(height: 10),
-        Wrap(
-          spacing: 4.0,
-          runSpacing: 4.0,
-          children: colors.map((color) {
-            return GestureDetector(
-              onTap: () {
-                setState(() {
-                  _selectedColor = color;
-                });
-              },
-              child: Container(
-                width: 20,
-                height: 20,
-                decoration: BoxDecoration(
-                  color: color,
-                  shape: BoxShape.rectangle,
-                  border: Border.all(
-                    color: _selectedColor == color
-                        ? Colors.black
-                        : Colors.transparent,
-                    width: 2,
+        Container(
+          padding: EdgeInsets.all(8.0),
+          decoration: BoxDecoration(
+            border:
+                Border.all(color: Colors.black), // Border around the container
+            borderRadius:
+                BorderRadius.circular(8.0), // Optional rounded corners
+          ),
+          child: Wrap(
+            spacing: 4.0,
+            runSpacing: 4.0,
+            children: colors.map((color) {
+              return GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _selectedColor = color;
+                  });
+                },
+                child: Container(
+                  width: 20,
+                  height: 20,
+                  decoration: BoxDecoration(
+                    color: color,
+                    shape: BoxShape.rectangle,
+                    border: Border.all(
+                      color: _selectedColor == color
+                          ? Colors.black
+                          : Colors.transparent,
+                      width: 2,
+                    ),
                   ),
                 ),
-              ),
-            );
-          }).toList(),
+              );
+            }).toList(),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // Material selector with images of fabric textures
+  Widget _buildMaterialSelector() {
+    List<String> materialImages = [
+      'assets/fabric1.jpg', // Placeholder image paths
+      'assets/fabric2.jpg',
+      'assets/fabric3.jpg',
+      'assets/fabric4.jpg',
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "Select Fabric Texture",
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        SizedBox(height: 10),
+        Container(
+          padding: EdgeInsets.all(8.0),
+          decoration: BoxDecoration(
+            border:
+                Border.all(color: Colors.black), // Border around the container
+            borderRadius:
+                BorderRadius.circular(8.0), // Optional rounded corners
+          ),
+          child: GridView.builder(
+            shrinkWrap: true,
+            physics: NeverScrollableScrollPhysics(),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 8.0,
+              mainAxisSpacing: 8.0,
+            ),
+            itemCount: materialImages.length,
+            itemBuilder: (context, index) {
+              return GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _selectedMaterial = materialImages[index];
+                  });
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: _selectedMaterial == materialImages[index]
+                          ? Colors.black
+                          : Colors.transparent,
+                      width: 2,
+                    ),
+                    image: DecorationImage(
+                      image: AssetImage(materialImages[index]),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
         ),
       ],
     );
