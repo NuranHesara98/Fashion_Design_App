@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Sketch Upload</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+            white-space: pre-wrap;
+        }
+        .preview {
+            max-width: 300px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test Sketch Upload</h1>
+    <form id="uploadForm" enctype="multipart/form-data">
+        <div class="form-group">
+            <label for="sketch">Sketch Image:</label>
+            <input type="file" id="sketch" name="sketch" accept="image/*" required>
+            <div id="imagePreview"></div>
+        </div>
+        <div class="form-group">
+            <label for="primaryPurpose">Primary Purpose:</label>
+            <input type="text" id="primaryPurpose" name="primaryPurpose" placeholder="e.g., casual wear, formal event" required>
+        </div>
+        <div class="form-group">
+            <label for="occasion">Occasion:</label>
+            <input type="text" id="occasion" name="occasion" placeholder="e.g., wedding, party, date night" required>
+        </div>
+        <div class="form-group">
+            <label for="materialPreference">Material Preference:</label>
+            <input type="text" id="materialPreference" name="materialPreference" placeholder="e.g., cotton, silk, leather" required>
+        </div>
+        <div class="form-group">
+            <label for="timeOfDay">Time of Day:</label>
+            <select id="timeOfDay" name="timeOfDay" required>
+                <option value="Day">Day</option>
+                <option value="Night">Night</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="skinTone">Skin Tone (Hex Color):</label>
+            <input type="color" id="skinTone" name="skinTone" value="#9F8880" required>
+        </div>
+        <div class="form-group">
+            <label for="styleKeywords">Style Keywords (Optional):</label>
+            <input type="text" id="styleKeywords" name="styleKeywords" placeholder="e.g., elegant, modern, chic">
+        </div>
+        <button type="submit">Generate Prompt</button>
+    </form>
+    <div id="result"></div>
+
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const resultDiv = document.getElementById('result');
+            
+            resultDiv.textContent = 'Processing...';
+            
+            try {
+                const response = await fetch('http://localhost:3000/api/prompts/generate-with-sketch', {
+                    method: 'POST',
+                    body: formData,
+                    mode: 'cors'
+                });
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Server responded with status ${response.status}: ${errorText}`);
+                }
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = `
+                        <h3>Generated Prompt:</h3>
+                        <p>${data.prompt}</p>
+                        ${data.sketchImage ? `
+                            <h3>Uploaded Sketch:</h3>
+                            <img src="${data.sketchImage.url}" alt="Uploaded sketch" class="preview">
+                            <h3>Detected Features:</h3>
+                            <pre>${JSON.stringify(data.sketchImage.features, null, 2)}</pre>
+                        ` : ''}
+                    `;
+                } else {
+                    resultDiv.textContent = `Error: ${data.error || 'Unknown error occurred'}`;
+                }
+            } catch (error) {
+                console.error('Error details:', error);
+                resultDiv.textContent = `Error: ${error.message}`;
+            }
+        });
+        
+        // Image preview
+        document.getElementById('sketch').addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('imagePreview');
+                    preview.innerHTML = `<img src="${e.target.result}" alt="Preview" class="preview">`;
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+    </script>
+</body>
+</html>

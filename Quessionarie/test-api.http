@@ -1,0 +1,40 @@
+### Test the prompt generation endpoint
+POST http://localhost:3002/api/prompts/generate
+Content-Type: application/json
+
+{
+  "primaryPurpose": "casual wear",
+  "occasion": "birthday party",
+  "materialPreference": "silk",
+  "timeOfDay": "Night",
+  "skinTone": "#9F8880",
+  "styleKeywords": "elegant, modern, chic"
+}
+
+### Test with different parameters
+POST http://localhost:3002/api/prompts/generate
+Content-Type: application/json
+
+{
+  "primaryPurpose": "formal event",
+  "occasion": "wedding",
+  "materialPreference": "satin",
+  "timeOfDay": "Day",
+  "skinTone": "#D4A76A",
+  "styleKeywords": "romantic, floral, delicate"
+}
+
+### Test with missing parameters (should return 400)
+POST http://localhost:3002/api/prompts/generate
+Content-Type: application/json
+
+{
+  "primaryPurpose": "casual wear",
+  "occasion": "birthday party",
+  "materialPreference": "silk"
+}
+
+### Note: Testing the sketch upload endpoint requires a multipart/form-data request
+### which is not easily done in this file format.
+### Please use the test-upload.html page or a tool like Postman for testing the sketch upload endpoint.
+### URL: http://localhost:3002/test-upload.html

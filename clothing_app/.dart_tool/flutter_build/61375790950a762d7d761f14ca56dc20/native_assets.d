@@ -1,0 +1,1 @@
+ D:\\DressMe\\Fashion_Design_App\\clothing_app\\.dart_tool\\flutter_build\\61375790950a762d7d761f14ca56dc20\\native_assets.yaml: 
