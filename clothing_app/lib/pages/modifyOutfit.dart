@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'finalProduct.dart';
+import 'store.dart';
 
 class ModifyPage extends StatefulWidget {
   final String image;
@@ -263,7 +263,7 @@ class _ModifyPageState extends State<ModifyPage> {
           // Navigate to ProfilePage when the menu icon is clicked
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const ProductPage()),
+            MaterialPageRoute(builder: (context) => const StorePage()),
           );
         },
         style: ElevatedButton.styleFrom(
