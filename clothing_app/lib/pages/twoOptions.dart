@@ -1,3 +1,4 @@
+import 'package:clothing_app/pages/home2.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'uploadimage.dart'; // Import UploadPage
@@ -14,7 +15,7 @@ class TwoOptionsPage extends StatelessWidget {
         leading: IconButton(
           icon: Icon(Icons.menu), // 3-line menu icon
           onPressed: () {
-           // Navigate to ProfilePage when the menu icon is clicked
+            // Navigate to ProfilePage when the menu icon is clicked
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const ProfilePage()),
