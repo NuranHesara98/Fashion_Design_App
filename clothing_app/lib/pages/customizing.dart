@@ -13,6 +13,7 @@ class _CustomizePageState extends State<CustomizePage> {
   String? selectedPurpose;
   String? selectedMaterial;
   String? occasion;
+  String? selectedClothingType;
   Color? selectedTone;
   bool isLoading = false; // Added missing variable
 
@@ -45,10 +46,10 @@ class _CustomizePageState extends State<CustomizePage> {
               ),
               const SizedBox(height: 16),
               _buildDropdown(
-                'What material do you prefer for this outfit?',
-                ['Cotton', 'Silk', 'Linen'],
-                selectedMaterial,
-                (value) => setState(() => selectedMaterial = value),
+                'What type of clothing are you looking for?',
+                ['Dress', 'Shirt/T-shirt', 'Pants/Jeans', 'Suit/Blazer'],
+                selectedClothingType,
+                (value) => setState(() => selectedClothingType = value),
               ),
               const SizedBox(height: 16),
               _buildRadioGroup(
@@ -280,17 +281,15 @@ class _CustomizePageState extends State<CustomizePage> {
                 });
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color.fromARGB(255, 0, 0, 0),
+                backgroundColor: Colors.black,
                 padding:
                     const EdgeInsets.symmetric(horizontal: 130, vertical: 5),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(30),
                 ),
               ),
-              child: const Text(
-                'NEXT',
-                style: TextStyle(fontSize: 16, color: Colors.white),
-              ),
+              child: const Text('NEXT',
+                  style: TextStyle(fontSize: 16, color: Colors.white)),
             ),
     );
   }

@@ -86,7 +86,7 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
 
-              const SizedBox(height: 5),
+              const SizedBox(height: 20),
 
               Container(
                 width: double.infinity,
@@ -96,12 +96,12 @@ class _HomePageState extends State<HomePage> {
                 child: Stack(
                   children: [
                     Image.asset(
-                      'assets/images/image21.jpeg',
+                      'assets/images/image36.jpg',
                       fit: BoxFit.cover,
-                      alignment: const Alignment(0, -0.99),
+                      alignment: const Alignment(0, -0.5),
                       width:
                           MediaQuery.of(context).size.width, // Ensure full widt
-                      height: 300,
+                      height: 400,
                     ),
                     Positioned(
                       bottom: 0,
