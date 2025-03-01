@@ -88,15 +88,19 @@ class _HomePageState extends State<HomePage> {
 
               const SizedBox(height: 5),
 
-              ClipRRect(
-                borderRadius: BorderRadius.circular(16.0),
+              Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16.0),
+                ),
                 child: Stack(
                   children: [
                     Image.asset(
                       'assets/images/image21.jpeg',
                       fit: BoxFit.cover,
                       alignment: const Alignment(0, -0.99),
-                      width: double.infinity,
+                      width:
+                          MediaQuery.of(context).size.width, // Ensure full widt
                       height: 300,
                     ),
                     Positioned(
@@ -104,6 +108,8 @@ class _HomePageState extends State<HomePage> {
                       left: 0,
                       right: 0,
                       child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(16.0),
                         decoration: BoxDecoration(
                           boxShadow: [
                             BoxShadow(
@@ -113,11 +119,10 @@ class _HomePageState extends State<HomePage> {
                             ),
                           ],
                         ),
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
+                        child: const Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
+                            Text(
                               'D E S I G N   Y O U R\n O W N   W E A R',
                               style: TextStyle(
                                 color: Colors.white,
@@ -125,7 +130,7 @@ class _HomePageState extends State<HomePage> {
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            const SizedBox(height: 8.0),
+                            SizedBox(height: 8.0),
                           ],
                         ),
                       ),
@@ -133,6 +138,7 @@ class _HomePageState extends State<HomePage> {
                   ],
                 ),
               ),
+
               const SizedBox(height: 24.0),
 
               const Text(

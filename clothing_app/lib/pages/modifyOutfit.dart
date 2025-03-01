@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'finalProduct.dart';
 
 class ModifyPage extends StatefulWidget {
   final String image;
@@ -13,7 +14,14 @@ class ModifyPage extends StatefulWidget {
 class _ModifyPageState extends State<ModifyPage> {
   String? _selectedSize;
   Color _selectedColor = Colors.black;
-  String? _selectedMaterial; // Variable to hold the selected material
+  String? _selectedMaterial;
+
+  final List<Map<String, String>> _materials = [
+    {'name': 'Velvet', 'image': 'assets/images/velvet.jpg'},
+    {'name': 'Cotton', 'image': 'assets/images/cotton.jpg'},
+    {'name': 'Wool Knitted', 'image': 'assets/images/woolknitted.jpg'},
+    {'name': 'Jacquard', 'image': 'assets/images/jaquard.jpg'},
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +50,9 @@ class _ModifyPageState extends State<ModifyPage> {
             SizedBox(height: 20),
             _buildColorPicker(),
             SizedBox(height: 20),
-            _buildMaterialSelector(), // Material selector added below color picker
+            _buildMaterialSelector(),
+            SizedBox(height: 20),
+            _buildNextButton(), // Added Next Button here
           ],
         ),
       ),
@@ -133,10 +143,8 @@ class _ModifyPageState extends State<ModifyPage> {
         Container(
           padding: EdgeInsets.all(8.0),
           decoration: BoxDecoration(
-            border:
-                Border.all(color: Colors.black), // Border around the container
-            borderRadius:
-                BorderRadius.circular(8.0), // Optional rounded corners
+            border: Border.all(color: Colors.black),
+            borderRadius: BorderRadius.circular(8.0),
           ),
           child: Wrap(
             spacing: 4.0,
@@ -170,15 +178,7 @@ class _ModifyPageState extends State<ModifyPage> {
     );
   }
 
-  // Material selector with images of fabric textures
   Widget _buildMaterialSelector() {
-    List<String> materialImages = [
-      'assets/fabric1.jpg', // Placeholder image paths
-      'assets/fabric2.jpg',
-      'assets/fabric3.jpg',
-      'assets/fabric4.jpg',
-    ];
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -187,49 +187,95 @@ class _ModifyPageState extends State<ModifyPage> {
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         SizedBox(height: 10),
-        Container(
-          padding: EdgeInsets.all(8.0),
-          decoration: BoxDecoration(
-            border:
-                Border.all(color: Colors.black), // Border around the container
-            borderRadius:
-                BorderRadius.circular(8.0), // Optional rounded corners
+        GridView.builder(
+          shrinkWrap: true,
+          physics: NeverScrollableScrollPhysics(),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            crossAxisSpacing: 8.0,
+            mainAxisSpacing: 8.0,
+            childAspectRatio: 0.8,
           ),
-          child: GridView.builder(
-            shrinkWrap: true,
-            physics: NeverScrollableScrollPhysics(),
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              crossAxisSpacing: 8.0,
-              mainAxisSpacing: 8.0,
-            ),
-            itemCount: materialImages.length,
-            itemBuilder: (context, index) {
-              return GestureDetector(
-                onTap: () {
-                  setState(() {
-                    _selectedMaterial = materialImages[index];
-                  });
-                },
-                child: Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: _selectedMaterial == materialImages[index]
-                          ? Colors.black
-                          : Colors.transparent,
-                      width: 2,
-                    ),
-                    image: DecorationImage(
-                      image: AssetImage(materialImages[index]),
-                      fit: BoxFit.cover,
+          itemCount: _materials.length,
+          itemBuilder: (context, index) {
+            return GestureDetector(
+              onTap: () {
+                setState(() {
+                  _selectedMaterial = _materials[index]['image'];
+                });
+                _showMaterialPopup(
+                    _materials[index]['image']!, _materials[index]['name']!);
+              },
+              child: Column(
+                children: [
+                  Expanded(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: _selectedMaterial == _materials[index]['image']
+                              ? Colors.black
+                              : Colors.transparent,
+                          width: 2,
+                        ),
+                        borderRadius: BorderRadius.circular(8.0),
+                        image: DecorationImage(
+                          image: AssetImage(_materials[index]['image']!),
+                          fit: BoxFit.cover,
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              );
-            },
-          ),
+                  SizedBox(height: 5),
+                  Text(
+                    _materials[index]['name']!,
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+            );
+          },
         ),
       ],
+    );
+  }
+
+  void _showMaterialPopup(String imagePath, String fabricName) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          backgroundColor: const Color.fromARGB(0, 0, 0, 0),
+          child: InteractiveViewer(
+            panEnabled: true,
+            minScale: 1.0,
+            maxScale: 4.0,
+            child: Image.asset(imagePath, fit: BoxFit.cover),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildNextButton() {
+    return Center(
+      child: ElevatedButton(
+        onPressed: () {
+          // Navigate to ProfilePage when the menu icon is clicked
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const ProductPage()),
+          );
+        },
+        style: ElevatedButton.styleFrom(
+          foregroundColor: Colors.white,
+          padding: EdgeInsets.symmetric(horizontal: 100, vertical: 12),
+          backgroundColor: Colors.black,
+          textStyle: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold), // Text color set to white
+        ),
+        child: Text("Next"),
+      ),
     );
   }
 }
