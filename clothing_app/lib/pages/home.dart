@@ -51,14 +51,6 @@ class _HomePageState extends State<HomePage> {
             // Handle menu button press
           },
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.shopping_bag_outlined, color: Colors.black),
-            onPressed: () {
-              // Handle shopping bag button press
-            },
-          ),
-        ],
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -72,13 +64,17 @@ class _HomePageState extends State<HomePage> {
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 decoration: BoxDecoration(
                   color: const Color.fromARGB(255, 238, 238, 238),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(30),
+                  border: Border.all(
+                    color: Colors.black, // Black border color
+                    width: 1, // Border width
+                  ),
                 ),
                 child: TextField(
                   controller: searchController,
                   decoration: const InputDecoration(
                     hintText: "Search...",
-                    border: InputBorder.none,
+                    border: InputBorder.none, // Remove the default border
                     icon: Icon(Icons.search, color: Colors.black),
                   ),
                   onChanged: (value) {
@@ -89,60 +85,51 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
 
-              ClipRRect(
-                borderRadius: BorderRadius.circular(16.0),
+              const SizedBox(height: 20),
+
+              Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16.0),
+                ),
                 child: Stack(
                   children: [
                     Image.asset(
-                      'assets/images/image17.jpg',
+                      'assets/images/image36.jpg',
                       fit: BoxFit.cover,
-                      alignment: const Alignment(0, -0.2),
-                      width: double.infinity,
-                      height: 200,
+                      alignment: const Alignment(0, -0.5),
+                      width:
+                          MediaQuery.of(context).size.width, // Ensure full widt
+                      height: 400,
                     ),
                     Positioned(
                       bottom: 0,
                       left: 0,
                       right: 0,
                       child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.6),
-                        ),
+                        width: double.infinity,
                         padding: const EdgeInsets.all(16.0),
-                        child: Column(
+                        decoration: BoxDecoration(
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.5),
+                              blurRadius: 8,
+                              offset: const Offset(2, 2),
+                            ),
+                          ],
+                        ),
+                        child: const Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'Design your own wear',
+                            Text(
+                              'D E S I G N   Y O U R\n O W N   W E A R',
                               style: TextStyle(
                                 color: Colors.white,
-                                fontSize: 25,
+                                fontSize: 22,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            const SizedBox(height: 8.0),
-                            ElevatedButton(
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => CustomizePage(),
-                                  ),
-                                );
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor:
-                                    const Color.fromARGB(255, 255, 255, 255),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(24),
-                                ),
-                              ),
-                              child: const Text(
-                                "+  Upload image",
-                                style: TextStyle(
-                                    color: Color.fromARGB(255, 3, 3, 3)),
-                              ),
-                            ),
+                            SizedBox(height: 8.0),
                           ],
                         ),
                       ),
@@ -150,6 +137,7 @@ class _HomePageState extends State<HomePage> {
                   ],
                 ),
               ),
+
               const SizedBox(height: 24.0),
 
               const Text(
@@ -178,7 +166,7 @@ class _HomePageState extends State<HomePage> {
                               horizontal: 16.0, vertical: 8.0),
                           decoration: BoxDecoration(
                             color: isSelected
-                                ? const Color.fromARGB(255, 71, 71, 71)
+                                ? const Color.fromARGB(255, 0, 0, 0)
                                 : Colors.grey.shade200,
                             borderRadius: BorderRadius.circular(12.0),
                           ),
@@ -239,7 +227,7 @@ class _HomePageState extends State<HomePage> {
                       backgroundColor: Colors.transparent,
                       elevation: 0,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(30),
                         side: const BorderSide(color: Colors.black, width: 2),
                       ),
                       padding: const EdgeInsets.symmetric(

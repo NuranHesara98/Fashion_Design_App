@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'store.dart'; // Import the store.dart file
+import 'modifyOutfit.dart'; // Ensure this path is correct
 
 class SuggestionPage extends StatelessWidget {
   const SuggestionPage({super.key});
@@ -7,223 +7,168 @@ class SuggestionPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.menu, color: Colors.black),
-          onPressed: () {
-            // Handle menu button press
-          },
-        ),
-        title: const Text(
-          'DressMe',
-          style: TextStyle(
-            fontFamily: 'Cursive',
-            fontSize: 24,
-            color: Colors.black,
-            fontWeight: FontWeight.bold,
+      body: Stack(
+        children: [
+          Column(
+            children: [
+              const SizedBox(height: 80),
+              // "You also may like" section
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Material(
+                  shape: const RoundedRectangleBorder(
+                    borderRadius:
+                        BorderRadius.vertical(top: Radius.circular(20)),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              // Product list with bottom space
+              Expanded(
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  children: const [
+                    ProductCard(
+                        image: 'assets/images/image30.png',
+                        title: "Puff long frock",
+                        price: "RS.4500.00"),
+                    ProductCard(
+                        image: 'assets/images/image33.png',
+                        title: "Cocoon Red Frock",
+                        price: "RS.6000.00"),
+                    ProductCard(
+                        image: 'assets/images/image32.png',
+                        title: "Wrap Dress",
+                        price: "RS. 6500.00"),
+                    ProductCard(
+                        image: 'assets/images/image32.png',
+                        title: "Wrap Dress",
+                        price: "RS. 6500.00"),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 350),
+            ],
           ),
-        ),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.search, color: Colors.black),
-            onPressed: () {
-              // Handle search button press
-            },
+          // Black 3-line menu icon at the top left corner
+          Positioned(
+            top: 40,
+            left: 16,
+            child: IconButton(
+              icon: const Icon(Icons.menu, color: Colors.black),
+              onPressed: () {
+                // Handle menu button press
+                print("Menu button pressed");
+              },
+            ),
           ),
         ],
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            const SizedBox(height: 16),
-            Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
-                    blurRadius: 8,
-                    offset: const Offset(2, 2),
-                  ),
-                ],
-              ),
-              child: Stack(
-                children: [
-                  Transform.translate(
-                    offset: const Offset(0, -1),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(20),
-                      child: Image.asset(
-                        'assets/images/image16.jpg',
-                        fit: BoxFit.cover,
-                        alignment: const Alignment(
-                            0, -0.1), // Adjust alignment to lower the imag
-                        width: double.infinity,
-                        height: 200,
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.6),
-                        borderRadius: const BorderRadius.only(
-                          bottomLeft: Radius.circular(16),
-                          bottomRight: Radius.circular(16),
-                        ),
-                      ),
-                      padding: const EdgeInsets.all(12.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'PICK YOUR\nFAVOURITE ITEM ',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 25,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
-            Expanded(
-              child: GridView.builder(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
-                  childAspectRatio: 3 / 4,
-                ),
-                itemCount: 3, // Number of product cards
-                itemBuilder: (context, index) {
-                  return ProductCard(index: index);
-                },
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
 }
 
+// Product Card with heart icon and navigation to ModifyPage
 class ProductCard extends StatelessWidget {
-  final int index;
+  final String image;
+  final String title;
+  final String price;
 
-  const ProductCard({super.key, required this.index});
+  const ProductCard({
+    super.key,
+    required this.image,
+    required this.title,
+    required this.price,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final List<String> images = [
-      'assets/images/Sketch5.png', // Image for the first card
-      'assets/images/Sketch1.png', // Image for the second card
-      'assets/images/Sketch4.png', // Image for the third card
-    ];
-
     return GestureDetector(
       onTap: () {
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ModifyPage(
+              image: image,
+              title: title,
+            ),
+          ),
+        );
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        child: Container(
+          width: 140,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 8,
+                offset: const Offset(2, 2),
               ),
-              contentPadding: const EdgeInsets.all(16),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Smaller image of the product
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(16),
-                    child: Image.asset(
-                      images[index],
-                      fit: BoxFit.cover,
-                      width: 150,
-                      height: 220,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      // Customize text
-                      Column(
-                        children: const [
+            ],
+            border: Border.all(color: Colors.black, width: 2),
+          ),
+          child: Column(
+            children: [
+              ClipRRect(
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(16),
+                  topRight: Radius.circular(16),
+                ),
+                child: Image.asset(
+                  image,
+                  fit: BoxFit.cover,
+                  width: 140,
+                  height: 200, // Keeps image height consistent
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.all(8),
+                color: Colors.white,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Product Title and Price
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
                           Text(
-                            'Customize',
-                            style: TextStyle(
-                              color: Color.fromARGB(255, 70, 70, 70),
-                              fontSize: 16,
+                            title,
+                            style: const TextStyle(
+                              fontSize: 14,
                               fontWeight: FontWeight.bold,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            price,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey,
                             ),
                           ),
                         ],
                       ),
-                      // Next text with navigation
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.pop(context); // Close the dialog
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const StorePage(),
-                            ),
-                          );
-                        },
-                        child: Column(
-                          children: const [
-                            Text(
-                              'Next',
-                              style: TextStyle(
-                                color: Color.fromARGB(255, 70, 70, 70),
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+                    ),
+                    // Heart Icon for Favorite
+                    IconButton(
+                      icon: const Icon(Icons.favorite_border,
+                          color: Colors.black),
+                      onPressed: () {
+                        // Handle favorite action
+                        print("Added $title to favorites!");
+                      },
+                    ),
+                  ],
+                ),
               ),
-            );
-          },
-        );
-      },
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 8,
-              offset: const Offset(2, 2),
-            ),
-          ],
-          border: Border.all(color: Colors.black, width: 1),
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(16),
-          child: Image.asset(
-            images[index],
-            fit: BoxFit.cover,
+            ],
           ),
         ),
       ),

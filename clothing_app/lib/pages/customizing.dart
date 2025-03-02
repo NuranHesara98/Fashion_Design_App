@@ -13,9 +13,9 @@ class _CustomizePageState extends State<CustomizePage> {
   String? selectedPurpose;
   String? selectedMaterial;
   String? occasion;
-
-  // Track the selected skin tone
+  String? selectedClothingType;
   Color? selectedTone;
+  bool isLoading = false; // Added missing variable
 
   @override
   Widget build(BuildContext context) {
@@ -46,10 +46,10 @@ class _CustomizePageState extends State<CustomizePage> {
               ),
               const SizedBox(height: 16),
               _buildDropdown(
-                'What material do you prefer for this outfit?',
-                ['Cotton', 'Silk', 'Linen'],
-                selectedMaterial,
-                (value) => setState(() => selectedMaterial = value),
+                'What type of clothing are you looking for?',
+                ['Dress', 'Shirt/T-shirt', 'Pants/Jeans', 'Suit/Blazer'],
+                selectedClothingType,
+                (value) => setState(() => selectedClothingType = value),
               ),
               const SizedBox(height: 16),
               _buildRadioGroup(
@@ -83,24 +83,6 @@ class _CustomizePageState extends State<CustomizePage> {
           // Handle menu button press
         },
       ),
-      title: const Text(
-        'DressMe',
-        style: TextStyle(
-          fontFamily: 'Cursive',
-          fontSize: 24,
-          color: Colors.black,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-      centerTitle: true,
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.search, color: Colors.black),
-          onPressed: () {
-            // Handle search button press
-          },
-        ),
-      ],
     );
   }
 
@@ -253,7 +235,6 @@ class _CustomizePageState extends State<CustomizePage> {
               .map((color) => GestureDetector(
                     onTap: () {
                       setState(() {
-                        // Toggle selection when the user taps on a skin tone
                         selectedTone = (selectedTone == color) ? null : color;
                       });
                     },
@@ -284,25 +265,32 @@ class _CustomizePageState extends State<CustomizePage> {
 
   Widget _buildNextButton() {
     return Center(
-      child: ElevatedButton(
-        onPressed: () {
-          Navigator.pushNamed(context, '/suggestion');
-        },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: const Color.fromARGB(255, 0, 0, 0),
-          padding: const EdgeInsets.symmetric(
-            horizontal: 32,
-            vertical: 12,
-          ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(30),
-          ),
-        ),
-        child: const Text(
-          'NEXT',
-          style: TextStyle(fontSize: 16, color: Colors.white),
-        ),
-      ),
+      child: isLoading
+          ? const CircularProgressIndicator() // Show loading icon
+          : ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  isLoading = true; // Start loading
+                });
+
+                Future.delayed(const Duration(seconds: 2), () {
+                  setState(() {
+                    isLoading = false; // Stop loading
+                  });
+                  Navigator.pushNamed(context, '/suggestion'); // Navigate
+                });
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.black,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 130, vertical: 5),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30),
+                ),
+              ),
+              child: const Text('NEXT',
+                  style: TextStyle(fontSize: 16, color: Colors.white)),
+            ),
     );
   }
 }

@@ -11,10 +11,16 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  image_picker: ^1.0.0
+  url_launcher: ^6.0.9
+  video_player: ^2.7.0
 
   cupertino_icons: ^1.0.8
   flutter_native_splash: ^2.4.4
   flick_video_player: ^0.9.0
+  lottie: ^3.3.1
+  flutter_colorpicker: ^1.1.0
+  flutter_drawing_board: ^0.9.5
 
 dev_dependencies:
   flutter_test:
@@ -26,6 +32,7 @@ flutter:
 
   # Add image assets
   assets:
+    
     - assets/images/logo.png
     - assets/images/image1.jpg
     - assets/images/image2.jpeg
@@ -42,7 +49,26 @@ flutter:
     - assets/images/image15.jpg
     - assets/images/image16.jpg
     - assets/images/image17.jpg
+    - assets/images/image19.jpeg
+    - assets/images/image21.jpeg
+    - assets/images/image23.jpeg
+    - assets/images/image24.jpeg
+    - assets/images/image25.jpeg
+    - assets/images/image26.jpeg
+    - assets/images/image27.png
+    - assets/images/image30.png
+    - assets/images/image32.png
+    - assets/images/image33.png
+    - assets/images/image35.jpg
+    - assets/images/image36.jpg
+    - assets/images/image37.jpg
+    - assets/images/image38.jpg
+    - assets/images/image36.jpg
+    - assets/images/cotton.jpg
+    - assets/images/velvet.jpg
+    - assets/images/jaquard.jpg
 
+    - assets/images/woolknitted.jpg
     - assets/images/Sketch1.png
     - assets/images/Sketch2.png
     - assets/images/Sketch3.png
@@ -51,6 +77,17 @@ flutter:
     - assets/images/image11.png
 
     - assets/images/google_icon.png
+    - assets/animations/Animation2.json
+    - assets/animations/Animation1.json
+    - assets/animations/Animation6.json
+    - assets/animations/Animation7.json
+    - assets/animations/Animation8.json
+    - assets/animations/Animation4.json
+    - assets/animations/Animation5.json
+    - assets/animations/Animation9.json
+    - assets/animations/Animation10.json
+    - assets/animations/Animation11.json
+    - assets/animations/Animation15.json
 
   # Add font assets
   fonts:
