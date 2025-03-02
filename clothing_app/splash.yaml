@@ -1,0 +1,11 @@
+flutter_native_splash:
+  color: "#ffffff" # Background color for light theme
+  color_dark: "#272727" # Background color for dark theme
+  image: assets\images\logo.png
+
+  android_12:
+    color: "#ffffff" # Android 12 light theme background color
+    color_dark: "#272727" # Android 12 dark theme background color
+    image: assets\images\logo.png
+
+  web: false # Disable web splash screen
