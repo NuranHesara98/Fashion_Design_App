@@ -2,7 +2,21 @@ import { Request, Response } from 'express';
 import { PromptGenerationRequest, FileRequest, ImageProcessingResult } from '../types';
 import { generateComplementaryPalette } from '../utils/colorUtils';
 import { processSketchImage, getImageUrl, processImage } from '../utils/imageProcessingService';
-import { generateTextWithGemini } from '../services/geminiService';
+import { generateImageWithGemini } from '../services/geminiService';
+import * as dotenv from 'dotenv';
+
+// Load environment variables
+dotenv.config();
+
+// Get API key - use the same approach as geminiService
+const API_KEY = 'AIzaSyCFa23ClOv6vBCrrLb8g3lzwB4m-KGmw5M';
+
+// Check for API key on startup
+if (!API_KEY) {
+  console.error('WARNING: API key is not properly configured.');
+} else {
+  console.log('Controller: API key is configured successfully.');
+}
 
 /**
  * Generate an AI image prompt based on user input and predefined dress sketch
@@ -18,175 +32,214 @@ export const generateImagePrompt = async (
   res: Response
 ): Promise<void> => {
   try {
+    console.log('Received prompt generation request:', req.body);
+    
     // Extract user input from request body
-    const {
-      primaryPurpose,
-      occasion,
-      materialPreference,
-      timeOfDay,
+    const { 
+      primaryPurpose, 
+      occasion, 
+      materialPreference, 
+      timeOfDay, 
       skinTone,
       styleKeywords = '' // Default to empty string if not provided
     } = req.body;
 
+    console.log('Extracted parameters:', { 
+      primaryPurpose, 
+      occasion, 
+      materialPreference, 
+      timeOfDay, 
+      skinTone,
+      styleKeywords 
+    });
+
     // Validate required inputs
     if (!primaryPurpose || !occasion || !materialPreference || !timeOfDay || !skinTone) {
+      console.log('Missing required fields:', { 
+        primaryPurpose: !!primaryPurpose, 
+        occasion: !!occasion, 
+        materialPreference: !!materialPreference, 
+        timeOfDay: !!timeOfDay, 
+        skinTone: !!skinTone 
+      });
+      
       res.status(400).json({
         error: 'Missing required fields. Please provide primaryPurpose, occasion, materialPreference, timeOfDay, and skinTone.'
       });
       return;
     }
 
-    // Validate skin tone format (should be a hex color code)
-    const hexColorRegex = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/;
-    if (!hexColorRegex.test(skinTone)) {
-      res.status(400).json({
-        error: 'Invalid skin tone format. Please provide a valid hex color code (e.g., "#9F8880").'
-      });
-      return;
-    }
-
     // Generate complementary color palette based on skin tone
+    console.log('Generating color palette for skin tone:', skinTone);
     const colorPalette = generateComplementaryPalette(skinTone);
+    console.log('Generated color palette:', colorPalette);
     
     // Format color palette as a readable string (use only first 2 colors to reduce tokens)
     const colorDescription = colorPalette.slice(0, 2).join(' and ');
-
-    // Simplified dress sketch description
-    const dressBaseDescription = 
-      'mini dress with fitted bustier top, puff sleeves, ruffled collar, chest cutout, flared skirt with vertical panels';
 
     // Simplified time-based description
     const timeStyle = timeOfDay === 'Night' ? 'deep tones, subtle shimmer' : 'bright colors, airy textures';
 
     // Get concise material description
     const materialDescription = getSimpleMaterialDescription(materialPreference);
+    console.log('Material description:', materialDescription);
 
     // Construct a more concise prompt
-    const prompt = `Fashion photo: dress on mannequin/dummy. ${dressBaseDescription}. ` +
-      `For ${primaryPurpose} at ${occasion}, ${materialDescription}. ` +
-      `${timeStyle}. Colors: ${colorDescription}, would match ${skinTone} skin tone. ` +
+    const prompt = `Fashion photo: ${primaryPurpose} dress for ${occasion}. ` +
+      `Made of ${materialDescription}. ${timeStyle}. ` +
+      `Colors: ${colorDescription}, would match ${skinTone} skin tone. ` +
       `${styleKeywords ? `Style: ${styleKeywords}. ` : ''}` +
       `High-res, studio lighting, neutral background. Photorealistic, not AI-generated looking.`;
 
-    try {
-      // Generate text response using Gemini API
-      const aiResponse = await generateTextWithGemini(prompt);
-      
-      // Return the generated prompt and AI response
-      res.status(200).json({ 
-        prompt,
-        aiResponse
-      });
-    } catch (error) {
-      console.error('Error generating text response:', error);
-      // If text generation fails, still return the prompt
-      res.status(200).json({ 
-        prompt,
-        error: 'Text generation failed, but prompt was created successfully'
-      });
-    }
+    console.log('Generated prompt:', prompt);
+
+    // Return just the prompt without calling Gemini API
+    res.json({ prompt });
   } catch (error) {
     console.error('Error generating prompt:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
+/**
+ * Generate an image prompt with a sketch
+ * 
+ * @param req Request with sketch file and prompt parameters
+ * @param res Response
+ */
+export const generateImagePromptWithSketch = async (req: FileRequest, res: Response): Promise<void> => {
+  try {
+    // Validate request
+    if (!req.file) {
+      res.status(400).json({ error: 'No sketch file uploaded' });
+      return;
+    }
+
+    // Extract parameters from request
+    const { 
+      primaryPurpose,
+      occasion,
+      materialPreference,
+      timeOfDay,
+      skinTone,
+      styleKeywords
+    } = req.body;
+
+    // Process the uploaded sketch image
+    const sketchPath = req.file.path;
+    const processedSketch = await processSketchImage(sketchPath);
+    
+    // Generate a prompt based on the parameters and sketch
+    const prompt = constructPrompt({
+      primaryPurpose,
+      occasion,
+      materialPreference,
+      timeOfDay,
+      skinTone,
+      styleKeywords,
+      sketchFeatures: processedSketch.features
+    });
+
+    console.log('Generated prompt:', prompt);
+
+    try {
+      // Generate the image using Gemini API
+      const result = await generateImageWithGemini(prompt, sketchPath);
+
+      // Prepare the response
+      const response: any = {
+        prompt,
+        sketchImage: {
+          url: getImageUrl(req, sketchPath),
+          ...processedSketch
+        }
+      };
+
+      // Add the generated image URL if available
+      if (result.imageUrl) {
+        response.generatedImage = {
+          url: result.imageUrl
+        };
+      }
+
+      // Add the text response if no image was generated
+      if (result.textResponse) {
+        response.aiResponse = result.textResponse;
+      }
+
+      res.json(response);
+    } catch (error) {
+      console.error('Error generating image:', error);
+      
+      // Check if it's an API key error
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      if (errorMessage.includes('API key')) {
+        res.status(500).json({ 
+          error: 'API configuration error', 
+          details: errorMessage,
+          prompt
+        });
+      } else {
+        res.status(500).json({ 
+          error: 'Failed to generate image', 
+          details: errorMessage,
+          prompt
+        });
+      }
+    }
+  } catch (error) {
+    console.error('Error generating image prompt with sketch:', error);
     res.status(500).json({ 
-      error: error instanceof Error ? error.message : 'An unknown error occurred' 
+      error: 'Failed to generate image prompt with sketch', 
+      details: error instanceof Error ? error.message : 'Unknown error' 
     });
   }
 };
 
 /**
- * Generate an AI image prompt based on user input and an uploaded sketch image
+ * Construct a prompt based on user input and sketch features
  * 
- * @param req Express request object containing user preferences and file
- * @param res Express response object
+ * @param params Object containing user input and sketch features
+ * @returns Constructed prompt string
  */
-export const generateImagePromptWithSketch = async (
-  req: FileRequest,
-  res: Response
-): Promise<void> => {
-  try {
-    // Check if file was uploaded
-    if (!req.file) {
-      res.status(400).json({ error: 'No sketch image uploaded' });
-      return;
-    }
+function constructPrompt(params: {
+  primaryPurpose: string;
+  occasion: string;
+  materialPreference: string;
+  timeOfDay: string;
+  skinTone: string;
+  styleKeywords?: string;
+  sketchFeatures?: any;
+}): string {
+  const {
+    primaryPurpose,
+    occasion,
+    materialPreference,
+    timeOfDay,
+    skinTone,
+    styleKeywords = '',
+    sketchFeatures = {}
+  } = params;
 
-    // Extract user input from request body
-    const {
-      primaryPurpose,
-      occasion,
-      materialPreference,
-      timeOfDay,
-      skinTone,
-      styleKeywords = '' // Default to empty string if not provided
-    } = req.body;
+  // Generate complementary color palette based on skin tone
+  const colorPalette = generateComplementaryPalette(skinTone);
+  
+  // Format color palette as a readable string (use only first 2 colors to reduce tokens)
+  const colorDescription = colorPalette.slice(0, 2).join(' and ');
 
-    // Validate required inputs
-    if (!primaryPurpose || !occasion || !materialPreference || !timeOfDay || !skinTone) {
-      res.status(400).json({
-        error: 'Missing required fields. Please provide primaryPurpose, occasion, materialPreference, timeOfDay, and skinTone.'
-      });
-      return;
-    }
+  // Simplified time-based description
+  const timeStyle = timeOfDay === 'Night' ? 'deep tones, subtle shimmer' : 'bright colors, airy textures';
 
-    // Process the uploaded sketch image
-    const sketchImageResult: ImageProcessingResult = await processSketchImage(req.file.path);
-    
-    // Generate image URL
-    const imageUrl = getImageUrl(req, req.file.path);
+  // Get concise material description
+  const materialDescription = getSimpleMaterialDescription(materialPreference);
 
-    // Generate complementary color palette based on skin tone
-    const colorPalette = generateComplementaryPalette(skinTone);
-    
-    // Format color palette as a readable string (use only first 2 colors to reduce tokens)
-    const colorDescription = colorPalette.slice(0, 2).join(' and ');
-
-    // Simplified time-based description
-    const timeStyle = timeOfDay === 'Night' ? 'deep tones, subtle shimmer' : 'bright colors, airy textures';
-
-    // Get concise material description
-    const materialDescription = getSimpleMaterialDescription(materialPreference);
-
-    // Construct a more concise prompt with reference to the uploaded sketch
-    const prompt = `Fashion photo: dress from uploaded sketch on mannequin/dummy. ` +
-      `For ${primaryPurpose} at ${occasion}, ${materialDescription}. ` +
-      `${timeStyle}. Colors: ${colorDescription}, would match ${skinTone} skin tone. ` +
-      `${styleKeywords ? `Style: ${styleKeywords}. ` : ''}` +
-      `High-res, studio lighting, neutral background. Photorealistic, not AI-generated looking.`;
-
-    try {
-      // Generate text response using Gemini API with the sketch as reference
-      const aiResponse = await generateTextWithGemini(prompt);
-      
-      // Return the generated prompt, sketch info, and AI response
-      res.status(200).json({ 
-        prompt,
-        sketchImage: {
-          url: imageUrl,
-          path: req.file.path,
-          features: sketchImageResult.features
-        },
-        aiResponse
-      });
-    } catch (error) {
-      console.error('Error generating text response with sketch:', error);
-      // If text generation fails, still return the prompt and sketch info
-      res.status(200).json({ 
-        prompt,
-        sketchImage: {
-          url: imageUrl,
-          path: req.file.path,
-          features: sketchImageResult.features
-        },
-        error: 'Text generation failed, but prompt was created successfully'
-      });
-    }
-  } catch (error) {
-    console.error('Error generating prompt with sketch:', error);
-    res.status(500).json({ 
-      error: error instanceof Error ? error.message : 'An unknown error occurred' 
-    });
-  }
-};
+  // Construct a more concise prompt with reference to the uploaded sketch
+  return `Fashion photo: dress based on the uploaded sketch. ` +
+    `For ${primaryPurpose} at ${occasion}, made of ${materialDescription}. ` +
+    `${timeStyle}. Colors: ${colorDescription}, would match ${skinTone} skin tone. ` +
+    `${styleKeywords ? `Style: ${styleKeywords}. ` : ''}` +
+    `High-res, studio lighting, neutral background. Photorealistic, not AI-generated looking.`;
+}
 
 /**
  * Helper function to generate simplified material descriptions
@@ -235,3 +288,17 @@ function getMaterialDescription(material: string): string {
   return materialDescriptions[material.toLowerCase()] || 
     `crafted from ${material} fabric that drapes beautifully, highlighting the dress structure and adding texture to the overall design`;
 }
+
+/**
+ * Check if the API key is configured
+ * @param req - Express request object
+ * @param res - Express response object
+ */
+export const checkApiConfig = (req: Request, res: Response): void => {
+    const apiKey = API_KEY;
+    
+    res.json({
+        apiKeyConfigured: !!apiKey,
+        message: apiKey ? 'API key is configured' : 'API key is not configured'
+    });
+};

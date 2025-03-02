@@ -8,9 +8,19 @@ import promptRoutes from './routes/promptRoutes';
 // Load environment variables
 dotenv.config();
 
+// Check for required environment variables - use hardcoded API key
+const API_KEY = 'AIzaSyCFa23ClOv6vBCrrLb8g3lzwB4m-KGmw5M';
+
+// Log API key status
+if (!API_KEY) {
+  console.error('ERROR: API key is not properly configured.');
+} else {
+  console.log('Server: API key is configured successfully.');
+}
+
 // Create Express app
 const app: Express = express();
-const port = process.env.PORT || 3002;
+const port = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors({
@@ -32,7 +42,19 @@ app.use('/api/prompts', promptRoutes);
 
 // Default route
 app.get('/', (req: Request, res: Response) => {
-  res.json({ message: 'Welcome to Quessionarie API' });
+  res.json({ 
+    message: 'Welcome to Quessionarie API',
+    apiStatus: API_KEY ? 'API key is configured' : 'API key is not configured'
+  });
+});
+
+// Error handling middleware
+app.use((err: any, req: Request, res: Response, next: any) => {
+  console.error('Server error:', err);
+  res.status(500).json({
+    error: 'Internal server error',
+    details: err.message
+  });
 });
 
 // Start server

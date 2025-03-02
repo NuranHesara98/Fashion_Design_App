@@ -1,5 +1,5 @@
-import multer from 'multer';
-import path from 'path';
+import * as multer from 'multer';
+import * as path from 'path';
 import { Request } from 'express';
 
 // Configure storage
@@ -25,7 +25,7 @@ const fileFilter = (req: Request, file: Express.Multer.File, cb: multer.FileFilt
 };
 
 // Create the multer instance
-const upload = multer({ 
+const upload = multer.default({ 
   storage: storage,
   fileFilter: fileFilter,
   limits: {

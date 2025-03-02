@@ -29,9 +29,20 @@ A TypeScript Express.js backend application for generating AI image prompts base
 Create a `.env` file in the root directory with the following variables:
 
 ```
-PORT=3000
+PORT=3003
 NODE_ENV=development
+GEMINI_API_KEY=your_api_key_here
 ```
+
+### Google Gemini API Key
+
+This application requires a Google Gemini API key to function properly:
+
+1. Visit [Google AI Studio](https://ai.google.dev/) and sign up or log in
+2. Create a new API key
+3. Copy the API key and add it to your `.env` file as `GEMINI_API_KEY=your_api_key_here`
+
+Without a valid API key, the prompt generation and image creation features will not work.
 
 ## API Endpoints
 

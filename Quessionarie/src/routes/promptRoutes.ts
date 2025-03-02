@@ -1,11 +1,11 @@
-import express, { Router } from 'express';
-import { generateImagePrompt, generateImagePromptWithSketch } from '../controllers/promptController';
+import express from 'express';
+import { generateImagePrompt, generateImagePromptWithSketch, checkApiConfig } from '../controllers/promptController';
 import upload from '../middleware/uploadMiddleware';
 
 /**
  * Router for prompt-related endpoints
  */
-const router: Router = express.Router();
+const router: express.Router = express.Router();
 
 /**
  * POST /api/prompts/generate
@@ -30,8 +30,8 @@ router.post('/generate', generateImagePrompt);
  * 
  * Generates an AI image prompt based on user input and an uploaded sketch image
  * 
- * Request body (multipart/form-data):
- * - sketch: File (The sketch image file)
+ * Request body:
+ * - sketch: File (The uploaded sketch image)
  * - primaryPurpose: string (e.g., "casual wear", "formal event")
  * - occasion: string (e.g., "wedding", "party", "date night")
  * - materialPreference: string (e.g., "cotton", "silk", "leather")
@@ -42,7 +42,20 @@ router.post('/generate', generateImagePrompt);
  * Response:
  * - prompt: string (The generated AI image prompt)
  * - sketchImage: object (Information about the uploaded sketch)
+ * - generatedImage: object (Information about the generated image, if available)
+ * - aiResponse: string (Text response from the AI, if no image was generated)
  */
 router.post('/generate-with-sketch', upload.single('sketch'), generateImagePromptWithSketch);
+
+/**
+ * GET /api/prompts/check-api-config
+ * 
+ * Checks if the API key is properly configured
+ * 
+ * Response:
+ * - apiKeyConfigured: boolean (Whether the API key is configured)
+ * - message: string (A message indicating the API key status)
+ */
+router.get('/check-api-config', checkApiConfig);
 
 export default router;
