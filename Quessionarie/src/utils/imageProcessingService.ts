@@ -48,6 +48,37 @@ export const processSketchImage = async (filePath: string): Promise<ImageProcess
 };
 
 /**
+ * Process an image
+ * 
+ * This is a generic function to process any image, not just sketches.
+ * 
+ * @param filePath Path to the image file
+ * @returns Promise with the processing result
+ */
+export const processImage = async (filePath: string): Promise<ImageProcessingResult> => {
+  try {
+    // Verify the file exists
+    if (!fs.existsSync(filePath)) {
+      throw new Error(`File not found: ${filePath}`);
+    }
+    
+    // For now, we'll just return the file path and some placeholder data
+    return {
+      imagePath: filePath,
+      features: {
+        // These would be actual features extracted from the image in a real implementation
+        colors: ['#FFFFFF', '#000000'],
+        dominant_color: '#FFFFFF',
+        image_type: 'sketch'
+      }
+    };
+  } catch (error) {
+    console.error('Error processing image:', error);
+    throw error;
+  }
+};
+
+/**
  * Get the absolute URL for an image file
  * 
  * @param req Express request object

@@ -11,8 +11,15 @@
             margin: 0 auto;
             padding: 20px;
         }
-        .form-group {
-            margin-bottom: 15px;
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        form {
+            margin-bottom: 20px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
         }
         label {
             display: block;
@@ -22,6 +29,9 @@
         input, select {
             width: 100%;
             padding: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
             box-sizing: border-box;
         }
         button {
@@ -29,118 +39,176 @@
             color: white;
             padding: 10px 15px;
             border: none;
+            border-radius: 4px;
             cursor: pointer;
             font-size: 16px;
         }
         button:hover {
             background-color: #45a049;
         }
-        #result {
+        .result {
             margin-top: 20px;
             padding: 15px;
             border: 1px solid #ddd;
-            border-radius: 4px;
+            border-radius: 5px;
             background-color: #f9f9f9;
             white-space: pre-wrap;
         }
-        .preview {
-            max-width: 300px;
-            margin-top: 10px;
+        .image-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .image-box {
+            width: 48%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .image-box img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+        .image-box h3 {
+            text-align: center;
+            margin-top: 0;
+        }
+        .error {
+            color: red;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
     <h1>Test Sketch Upload</h1>
-    <form id="uploadForm" enctype="multipart/form-data">
-        <div class="form-group">
-            <label for="sketch">Sketch Image:</label>
-            <input type="file" id="sketch" name="sketch" accept="image/*" required>
-            <div id="imagePreview"></div>
+    
+    <form id="sketchForm">
+        <div>
+            <label for="sketchImage">Upload Sketch Image:</label>
+            <input type="file" id="sketchImage" name="sketch" accept="image/*" required>
         </div>
-        <div class="form-group">
+        
+        <div>
             <label for="primaryPurpose">Primary Purpose:</label>
-            <input type="text" id="primaryPurpose" name="primaryPurpose" placeholder="e.g., casual wear, formal event" required>
+            <input type="text" id="primaryPurpose" name="primaryPurpose" placeholder="e.g., casual wear" required>
         </div>
-        <div class="form-group">
+        
+        <div>
             <label for="occasion">Occasion:</label>
-            <input type="text" id="occasion" name="occasion" placeholder="e.g., wedding, party, date night" required>
+            <input type="text" id="occasion" name="occasion" placeholder="e.g., birthday party" required>
         </div>
-        <div class="form-group">
+        
+        <div>
             <label for="materialPreference">Material Preference:</label>
-            <input type="text" id="materialPreference" name="materialPreference" placeholder="e.g., cotton, silk, leather" required>
+            <select id="materialPreference" name="materialPreference" required>
+                <option value="">Select a material</option>
+                <option value="cotton">Cotton</option>
+                <option value="silk">Silk</option>
+                <option value="satin">Satin</option>
+                <option value="linen">Linen</option>
+                <option value="velvet">Velvet</option>
+                <option value="leather">Leather</option>
+                <option value="lace">Lace</option>
+                <option value="chiffon">Chiffon</option>
+                <option value="denim">Denim</option>
+                <option value="wool">Wool</option>
+            </select>
         </div>
-        <div class="form-group">
+        
+        <div>
             <label for="timeOfDay">Time of Day:</label>
             <select id="timeOfDay" name="timeOfDay" required>
+                <option value="">Select time of day</option>
                 <option value="Day">Day</option>
                 <option value="Night">Night</option>
             </select>
         </div>
-        <div class="form-group">
+        
+        <div>
             <label for="skinTone">Skin Tone (Hex Color):</label>
             <input type="color" id="skinTone" name="skinTone" value="#9F8880" required>
         </div>
-        <div class="form-group">
-            <label for="styleKeywords">Style Keywords (Optional):</label>
+        
+        <div>
+            <label for="styleKeywords">Style Keywords (comma separated):</label>
             <input type="text" id="styleKeywords" name="styleKeywords" placeholder="e.g., elegant, modern, chic">
         </div>
+        
         <button type="submit">Generate Prompt</button>
     </form>
-    <div id="result"></div>
-
+    
+    <div id="result" class="result" style="display: none;">
+        <h2>Generated Prompt:</h2>
+        <div id="promptResult"></div>
+    </div>
+    
+    <div id="imageContainer" class="image-container" style="display: none;">
+        <div class="image-box">
+            <h3>Uploaded Sketch</h3>
+            <img id="uploadedImage" src="" alt="Uploaded Sketch">
+        </div>
+        <div class="image-box">
+            <h3>AI Response</h3>
+            <div id="aiResponseContainer" style="padding: 10px; max-height: 300px; overflow-y: auto;">
+                <p id="aiResponseText"></p>
+            </div>
+        </div>
+    </div>
+    
     <script>
-        document.getElementById('uploadForm').addEventListener('submit', async function(e) {
+        document.getElementById('sketchForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
             const formData = new FormData(this);
-            const resultDiv = document.getElementById('result');
+            const resultDiv = document.getElementById('promptResult');
+            const result = document.getElementById('result');
+            const imageContainer = document.getElementById('imageContainer');
+            const uploadedImage = document.getElementById('uploadedImage');
             
+            result.style.display = 'block';
             resultDiv.textContent = 'Processing...';
+            imageContainer.style.display = 'none';
             
             try {
-                const response = await fetch('http://localhost:3000/api/prompts/generate-with-sketch', {
+                const response = await fetch('http://localhost:3002/api/prompts/generate-with-sketch', {
                     method: 'POST',
                     body: formData,
                     mode: 'cors'
                 });
                 
                 if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(`Server responded with status ${response.status}: ${errorText}`);
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Failed to generate prompt');
                 }
                 
                 const data = await response.json();
                 
-                if (response.ok) {
-                    resultDiv.innerHTML = `
-                        <h3>Generated Prompt:</h3>
-                        <p>${data.prompt}</p>
-                        ${data.sketchImage ? `
-                            <h3>Uploaded Sketch:</h3>
-                            <img src="${data.sketchImage.url}" alt="Uploaded sketch" class="preview">
-                            <h3>Detected Features:</h3>
-                            <pre>${JSON.stringify(data.sketchImage.features, null, 2)}</pre>
-                        ` : ''}
-                    `;
-                } else {
-                    resultDiv.textContent = `Error: ${data.error || 'Unknown error occurred'}`;
+                // Display the prompt
+                resultDiv.textContent = data.prompt;
+                
+                // Display the uploaded sketch
+                if (data.sketchImage && data.sketchImage.url) {
+                    uploadedImage.src = data.sketchImage.url;
+                    imageContainer.style.display = 'flex';
                 }
+                
+                // Display the AI response
+                if (data.aiResponse) {
+                    document.getElementById('aiResponseText').textContent = data.aiResponse;
+                } else if (data.error) {
+                    // Show error message if text generation failed
+                    const errorElement = document.createElement('p');
+                    errorElement.className = 'error';
+                    errorElement.textContent = data.error;
+                    document.getElementById('aiResponseContainer').prepend(errorElement);
+                }
+                
             } catch (error) {
-                console.error('Error details:', error);
-                resultDiv.textContent = `Error: ${error.message}`;
-            }
-        });
-        
-        // Image preview
-        document.getElementById('sketch').addEventListener('change', function() {
-            const file = this.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const preview = document.getElementById('imagePreview');
-                    preview.innerHTML = `<img src="${e.target.result}" alt="Preview" class="preview">`;
-                }
-                reader.readAsDataURL(file);
+                console.error('Error:', error);
+                resultDiv.innerHTML = `<span class="error">Error: ${error.message}</span>`;
             }
         });
     </script>

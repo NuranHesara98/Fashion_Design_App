@@ -1,7 +1,8 @@
 import { Request, Response } from 'express';
 import { PromptGenerationRequest, FileRequest, ImageProcessingResult } from '../types';
 import { generateComplementaryPalette } from '../utils/colorUtils';
-import { processSketchImage, getImageUrl } from '../utils/imageProcessingService';
+import { processSketchImage, getImageUrl, processImage } from '../utils/imageProcessingService';
+import { generateTextWithGemini } from '../services/geminiService';
 
 /**
  * Generate an AI image prompt based on user input and predefined dress sketch
@@ -61,17 +62,34 @@ export const generateImagePrompt = async (
     const materialDescription = getSimpleMaterialDescription(materialPreference);
 
     // Construct a more concise prompt
-    const prompt = `Fashion photo: model in ${dressBaseDescription}. ` +
+    const prompt = `Fashion photo: dress on mannequin/dummy. ${dressBaseDescription}. ` +
       `For ${primaryPurpose} at ${occasion}, ${materialDescription}. ` +
-      `${timeStyle}. Colors: ${colorDescription}, matching ${skinTone} skin tone. ` +
+      `${timeStyle}. Colors: ${colorDescription}, would match ${skinTone} skin tone. ` +
       `${styleKeywords ? `Style: ${styleKeywords}. ` : ''}` +
       `High-res, studio lighting, neutral background. Photorealistic, not AI-generated looking.`;
 
-    // Return the generated prompt
-    res.status(200).json({ prompt });
+    try {
+      // Generate text response using Gemini API
+      const aiResponse = await generateTextWithGemini(prompt);
+      
+      // Return the generated prompt and AI response
+      res.status(200).json({ 
+        prompt,
+        aiResponse
+      });
+    } catch (error) {
+      console.error('Error generating text response:', error);
+      // If text generation fails, still return the prompt
+      res.status(200).json({ 
+        prompt,
+        error: 'Text generation failed, but prompt was created successfully'
+      });
+    }
   } catch (error) {
-    console.error('Error generating image prompt:', error);
-    res.status(500).json({ error: 'Failed to generate image prompt' });
+    console.error('Error generating prompt:', error);
+    res.status(500).json({ 
+      error: error instanceof Error ? error.message : 'An unknown error occurred' 
+    });
   }
 };
 
@@ -129,24 +147,44 @@ export const generateImagePromptWithSketch = async (
     const materialDescription = getSimpleMaterialDescription(materialPreference);
 
     // Construct a more concise prompt with reference to the uploaded sketch
-    const prompt = `Fashion photo: model in dress from uploaded sketch. ` +
+    const prompt = `Fashion photo: dress from uploaded sketch on mannequin/dummy. ` +
       `For ${primaryPurpose} at ${occasion}, ${materialDescription}. ` +
-      `${timeStyle}. Colors: ${colorDescription}, matching ${skinTone} skin tone. ` +
+      `${timeStyle}. Colors: ${colorDescription}, would match ${skinTone} skin tone. ` +
       `${styleKeywords ? `Style: ${styleKeywords}. ` : ''}` +
       `High-res, studio lighting, neutral background. Photorealistic, not AI-generated looking.`;
 
-    // Return the generated prompt along with the image information
-    res.status(200).json({ 
-      prompt,
-      sketchImage: {
-        url: imageUrl,
-        path: req.file.path,
-        features: sketchImageResult.features
-      }
-    });
+    try {
+      // Generate text response using Gemini API with the sketch as reference
+      const aiResponse = await generateTextWithGemini(prompt);
+      
+      // Return the generated prompt, sketch info, and AI response
+      res.status(200).json({ 
+        prompt,
+        sketchImage: {
+          url: imageUrl,
+          path: req.file.path,
+          features: sketchImageResult.features
+        },
+        aiResponse
+      });
+    } catch (error) {
+      console.error('Error generating text response with sketch:', error);
+      // If text generation fails, still return the prompt and sketch info
+      res.status(200).json({ 
+        prompt,
+        sketchImage: {
+          url: imageUrl,
+          path: req.file.path,
+          features: sketchImageResult.features
+        },
+        error: 'Text generation failed, but prompt was created successfully'
+      });
+    }
   } catch (error) {
-    console.error('Error generating image prompt with sketch:', error);
-    res.status(500).json({ error: 'Failed to generate image prompt with sketch' });
+    console.error('Error generating prompt with sketch:', error);
+    res.status(500).json({ 
+      error: error instanceof Error ? error.message : 'An unknown error occurred' 
+    });
   }
 };
 

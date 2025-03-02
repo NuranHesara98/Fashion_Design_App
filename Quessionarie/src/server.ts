@@ -23,6 +23,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Serve static files
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+app.use('/generated-images', express.static(path.join(__dirname, '../public/generated-images')));
 app.use(express.static(path.join(__dirname, '../public')));
 
 // Routes
