@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'editprofile.dart'; // Ensure this file contains the UserProfilePage class
+=======
 import 'editprofile.dart';
 import 'helpcenter.dart'; // Ensure this file exists
 
@@ -48,8 +50,13 @@ class ProfilePage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 20),
+
+            _buildMenuItem(context, Icons.person, "Edit Profile",
+                UserProfilePage()), // Updated to UserProfilePage
+=======
             _buildMenuItem(
                 context, Icons.person, "Edit Profile", const EditProfilePage()),
+
             _buildMenuItem(context, Icons.payment, "Payment Method", null),
             _buildMenuItem(context, Icons.language, "Language", null),
             _buildMenuItem(context, Icons.history, "Order History", null),
