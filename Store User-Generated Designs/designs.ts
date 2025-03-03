@@ -1,5 +1,5 @@
 import express, { Request, Response } from 'express';
-import Design from '../Store User-Generated Designs';
+import Design from '../Store User-Generated Designs/designs'; // Corrected import path
 
 const router = express.Router();
 
