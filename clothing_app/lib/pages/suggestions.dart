@@ -26,7 +26,7 @@ class SuggestionPage extends StatelessWidget {
               // Product list with bottom space
               Expanded(
                 child: ListView(
-                  scrollDirection: Axis.horizontal,
+                  scrollDirection: Axis.vertical, // Changed to vertical
                   children: const [
                     ProductCard(
                         image: 'assets/images/image30.png',
@@ -47,7 +47,7 @@ class SuggestionPage extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(height: 350),
+              const SizedBox(height: 16), // Added bottom padding
             ],
           ),
           // Black 3-line menu icon at the top left corner
@@ -96,9 +96,10 @@ class ProductCard extends StatelessWidget {
         );
       },
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8),
+        padding: const EdgeInsets.symmetric(
+            horizontal: 16, vertical: 8), // Adjusted padding
         child: Container(
-          width: 140,
+          width: double.infinity, // Full width for vertical layout
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(16),
@@ -112,6 +113,8 @@ class ProductCard extends StatelessWidget {
             border: Border.all(color: Colors.black, width: 2),
           ),
           child: Column(
+            crossAxisAlignment:
+                CrossAxisAlignment.start, // Align content to the start
             children: [
               ClipRRect(
                 borderRadius: const BorderRadius.only(
@@ -121,13 +124,12 @@ class ProductCard extends StatelessWidget {
                 child: Image.asset(
                   image,
                   fit: BoxFit.cover,
-                  width: 140,
+                  width: double.infinity, // Full width for vertical layout
                   height: 200, // Keeps image height consistent
                 ),
               ),
-              Container(
+              Padding(
                 padding: const EdgeInsets.all(8),
-                color: Colors.white,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -139,7 +141,7 @@ class ProductCard extends StatelessWidget {
                           Text(
                             title,
                             style: const TextStyle(
-                              fontSize: 14,
+                              fontSize: 16, // Increased font size
                               fontWeight: FontWeight.bold,
                             ),
                             maxLines: 1,
@@ -149,7 +151,7 @@ class ProductCard extends StatelessWidget {
                           Text(
                             price,
                             style: const TextStyle(
-                              fontSize: 12,
+                              fontSize: 14, // Increased font size
                               color: Colors.grey,
                             ),
                           ),
