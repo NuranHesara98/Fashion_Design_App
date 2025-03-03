@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart'; // Import image_picker
 import 'dart:io'; // For File class
+import 'dart:html' as html; // For web-specific file handling
+import 'package:flutter/foundation.dart'; // For kIsWeb
 
 class UserProfilePage extends StatefulWidget {
   @override
@@ -9,7 +11,8 @@ class UserProfilePage extends StatefulWidget {
 
 class _UserProfilePageState extends State<UserProfilePage> {
   bool isEditing = false;
-  File? _profileImage; // To store the selected image file
+  File? _profileImage; // To store the selected image file (for mobile)
+  String? _imageUrl; // To store the image URL (for web)
   final ImagePicker _picker = ImagePicker(); // ImagePicker instance
 
   Map<String, String> userData = {
@@ -53,9 +56,20 @@ class _UserProfilePageState extends State<UserProfilePage> {
   Future<void> _pickImage(ImageSource source) async {
     final XFile? image = await _picker.pickImage(source: source);
     if (image != null) {
-      setState(() {
-        _profileImage = File(image.path); // Store the selected file
-      });
+      if (kIsWeb) {
+        // For web, convert the file to a URL
+        final bytes = await image.readAsBytes();
+        final blob = html.Blob([bytes]);
+        final url = html.Url.createObjectUrlFromBlob(blob);
+        setState(() {
+          _imageUrl = url;
+        });
+      } else {
+        // For mobile, use the file directly
+        setState(() {
+          _profileImage = File(image.path);
+        });
+      }
     }
   }
 
@@ -190,15 +204,25 @@ class _UserProfilePageState extends State<UserProfilePage> {
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(60),
-                  child: _profileImage != null
-                      ? Image.file(
-                          _profileImage!,
-                          fit: BoxFit.cover,
-                        )
-                      : Image.asset(
-                          'assets/images/profile_placeholder.jpg',
-                          fit: BoxFit.cover,
-                        ),
+                  child: kIsWeb
+                      ? _imageUrl != null
+                          ? Image.network(
+                              _imageUrl!,
+                              fit: BoxFit.cover,
+                            )
+                          : Image.asset(
+                              'assets/images/profile_placeholder.jpg',
+                              fit: BoxFit.cover,
+                            )
+                      : _profileImage != null
+                          ? Image.file(
+                              _profileImage!,
+                              fit: BoxFit.cover,
+                            )
+                          : Image.asset(
+                              'assets/images/profile_placeholder.jpg',
+                              fit: BoxFit.cover,
+                            ),
                 ),
               ),
             ),
@@ -259,155 +283,116 @@ class _UserProfilePageState extends State<UserProfilePage> {
 
   Widget _buildDetailsCard(ThemeData theme) {
     return Card(
-      margin: EdgeInsets.symmetric(vertical: 8),
       child: Padding(
-        padding: EdgeInsets.all(16),
+        padding: EdgeInsets.all(24),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: userData.entries.map((entry) {
-            return Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    entry.key,
-                    style: theme.textTheme.bodyLarge,
-                  ),
-                  isEditing
-                      ? Expanded(
-                          child: _buildEditableField(
-                            controllers[entry.key]!,
-                            style: theme.textTheme.bodyLarge,
-                            textAlign: TextAlign.end,
-                          ),
-                        )
-                      : Text(
-                          entry.value,
-                          style: theme.textTheme.bodyLarge,
-                        ),
-                ],
-              ),
-            );
-          }).toList(),
+          children: [
+            _buildDetailItem(
+              theme: theme,
+              icon: Icons.cake_rounded,
+              label: 'Birthday',
+              controller: controllers['birthday']!,
+            ),
+            _buildDivider(),
+            _buildDetailItem(
+              theme: theme,
+              icon: Icons.phone_rounded,
+              label: 'Phone',
+              controller: controllers['phoneNumber']!,
+            ),
+            _buildDivider(),
+            _buildDetailItem(
+              theme: theme,
+              icon: Icons.email_rounded,
+              label: 'Email',
+              controller: controllers['email']!,
+            ),
+            _buildDivider(),
+            _buildDetailItem(
+              theme: theme,
+              icon: Icons.location_on_rounded,
+              label: 'Address',
+              controller: controllers['address']!,
+            ),
+            _buildDivider(),
+            _buildDetailItem(
+              theme: theme,
+              icon: Icons.lock_rounded,
+              label: 'Password',
+              controller: controllers['password']!,
+              isPassword: true, // Added password field
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildEditableField(TextEditingController controller,
-      {TextStyle? style, TextAlign? textAlign}) {
+  Widget _buildEditableField(
+    TextEditingController controller, {
+    TextStyle? style,
+    TextAlign textAlign = TextAlign.start,
+    bool isPassword = false, // Added isPassword parameter
+  }) {
     return TextField(
       controller: controller,
       style: style,
-      textAlign: textAlign ?? TextAlign.start,
+      textAlign: textAlign,
+      obscureText: isPassword, // Hide text for password field
       decoration: InputDecoration(
-        border: InputBorder.none,
-        contentPadding: EdgeInsets.zero,
-=======
-import 'editprofile2.dart'; // Ensure this file is correctly named and exists
-
-class EditProfilePage extends StatelessWidget {
-  const EditProfilePage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.settings, color: Colors.black),
-            onPressed: () {
-              // Settings functionality
-            },
-          ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const SizedBox(height: 10),
-              // Profile Avatar
-              Stack(
-                alignment: Alignment.bottomRight,
-                children: [
-                  CircleAvatar(
-                    radius: 65,
-                    backgroundColor: Colors.green,
-                    child: CircleAvatar(
-                      radius: 60,
-                      backgroundImage: AssetImage(
-                          "assets/images/image1.jpg"), // Replace with user image
-                    ),
-                  ),
-                  // Clickable edit icon
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => ProfileEditPage()),
-                      );
-                    },
-                    child: CircleAvatar(
-                      backgroundColor: Colors.white,
-                      radius: 16,
-                      child: Icon(Icons.edit, color: Colors.green, size: 18),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 15),
-              Text(
-                "Elvis Obi",
-                style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: const Color.fromARGB(255, 0, 0, 0)),
-              ),
-              const SizedBox(height: 70),
-              _buildInfoRow("USERNAME", "@obileonardo"),
-              _buildInfoRow("FULLNAME", "Elvis Uche Obi"),
-              _buildInfoRow("EMAIL ADDRESS", "contact@elvisobi.com"),
-              const SizedBox(height: 20),
-            ],
-          ),
-        ),
+        isDense: true,
+        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       ),
     );
   }
 
-  Widget _buildInfoRow(String label, String value) {
+  Widget _buildDetailItem({
+    required ThemeData theme,
+    required IconData icon,
+    required String label,
+    required TextEditingController controller,
+    bool isPassword = false, // Added isPassword parameter
+  }) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      padding: EdgeInsets.symmetric(vertical: 8),
+      child: Row(
         children: [
-          Text(
-            label,
-            style: TextStyle(
-                fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey),
+          Icon(icon, size: 24, color: Colors.grey[400]),
+          SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: Colors.grey[600],
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                SizedBox(height: 4),
+                if (isEditing)
+                  _buildEditableField(
+                    controller,
+                    isPassword: isPassword, // Pass isPassword to the field
+                  )
+                else
+                  Text(
+                    isPassword ? '********' : controller.text, // Mask password
+                    style: theme.textTheme.bodyLarge,
+                  ),
+              ],
+            ),
           ),
-          const SizedBox(height: 5),
-          Text(
-            value,
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-          ),
-          const Divider(thickness: 1, color: Colors.grey),
         ],
       ),
+    );
+  }
+
+  Widget _buildDivider() {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 8),
+      child: Divider(color: Colors.grey[200]),
     );
   }
 }
