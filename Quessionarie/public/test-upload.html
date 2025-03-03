@@ -228,15 +228,10 @@
     
     <!-- API Key Configuration Alert -->
     <div id="apiKeyAlert" class="alert alert-warning" style="display: none;">
-        <strong>API Key Not Configured!</strong> The Google Gemini API key is not set. Prompt generation will not work.
-        <br>
-        Please follow these steps to set up your API key:
-        <ol>
-            <li>Create a <code>.env</code> file in the project root directory</li>
-            <li>Add <code>GEMINI_API_KEY=your_api_key_here</code> to the file</li>
-            <li>Restart the server</li>
-        </ol>
-        <p>You can get an API key from <a href="https://ai.google.dev/" target="_blank">Google AI Studio</a></p>
+        <h4 class="alert-heading">DeepAI API Key Not Configured</h4>
+        <p>The DeepAI API key is not configured. Please add your DeepAI API key to the server configuration to enable image generation.</p>
+        <hr>
+        <p class="mb-0">You can get a DeepAI API key from <a href="https://deepai.org/dashboard/profile" target="_blank">https://deepai.org/dashboard/profile</a></p>
     </div>
     
     <form id="promptForm" enctype="multipart/form-data">
@@ -534,8 +529,16 @@
                     const response = await fetch('http://localhost:3000/api/prompts/check-api-config');
                     const data = await response.json();
                     
-                    if (data.apiKeyConfigured === false) {
+                    if (data.status === 'API key is not configured') {
                         apiKeyAlert.style.display = 'block';
+                        apiKeyAlert.querySelector('h4').textContent = `DeepAI API Key Not Configured`;
+                        apiKeyAlert.querySelector('p').textContent = `The DeepAI API key is not configured. Please add your DeepAI API key to the server configuration to enable image generation.`;
+                    } else {
+                        // API key is configured, show which provider is being used
+                        const providerInfo = document.createElement('div');
+                        providerInfo.className = 'alert alert-info';
+                        providerInfo.innerHTML = `<strong>AI Provider:</strong> DeepAI`;
+                        document.querySelector('form').before(providerInfo);
                     }
                 } catch (error) {
                     console.error('Error checking API configuration:', error);
