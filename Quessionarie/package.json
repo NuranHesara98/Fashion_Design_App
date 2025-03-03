@@ -13,12 +13,14 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@types/node-fetch": "^2.6.12",
     "axios": "^1.8.1",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
+    "form-data": "^4.0.2",
     "multer": "^1.4.5-lts.1",
-    "openai": "^4.86.1",
+    "node-fetch": "^2.7.0",
     "uuid": "^11.1.0"
   },
   "devDependencies": {

@@ -2,17 +2,17 @@ import { Request, Response } from 'express';
 import { PromptGenerationRequest, FileRequest, ImageProcessingResult } from '../types';
 import { generateComplementaryPalette } from '../utils/colorUtils';
 import { processSketchImage, getImageUrl, processImage } from '../utils/imageProcessingService';
-import { generateImageWithOpenAI, generateTextWithOpenAI } from '../services/openaiService';
+import { generateImage, generateText } from '../services/aiServiceFactory';
 import * as dotenv from 'dotenv';
 
 // Load environment variables
 dotenv.config();
 
-// Get API key - use the same approach as openaiService
-const API_KEY = process.env.OPENAI_API_KEY;
+// Get API keys from environment variables
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
-// Check for API key on startup
-if (!API_KEY) {
+// Check for API keys on startup
+if (!OPENAI_API_KEY) {
   console.error('WARNING: OpenAI API key is not properly configured.');
 } else {
   console.log('Controller: OpenAI API key is configured successfully.');
@@ -143,8 +143,8 @@ export const generateImagePromptWithSketch = async (req: FileRequest, res: Respo
     console.log('Generated prompt:', prompt);
 
     try {
-      // Generate the image using OpenAI API
-      const result = await generateImageWithOpenAI(prompt, sketchPath);
+      // Generate the image using AI service factory
+      const result = await generateImage(prompt, sketchPath);
 
       // Prepare the response
       const response: any = {
@@ -290,12 +290,12 @@ function getMaterialDescription(material: string): string {
 }
 
 /**
- * Check if the OpenAI API key is configured
+ * Check if the AI provider API key is configured
  * @param req - Express request object
  * @param res - Express response object
  */
 export const checkApiConfig = (req: Request, res: Response): void => {
-    const isConfigured = API_KEY;
+    const isConfigured = OPENAI_API_KEY;
     
     res.json({
         status: isConfigured ? 'API key is configured' : 'API key is not configured',

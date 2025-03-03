@@ -1,156 +1,197 @@
-import { OpenAI } from 'openai';
+import axios from 'axios';
 import * as fs from 'fs';
 import * as path from 'path';
 import { v4 as uuidv4 } from 'uuid';
-import * as dotenv from 'dotenv';
-
-// Define the interface locally to avoid import issues
-interface ImageGenerationResult {
-  imageUrl?: string;
-  textResponse?: string;
-}
-
-// Load environment variables
-dotenv.config();
-
-// Use a hardcoded API key for now - you should replace this with your actual OpenAI API key
-const API_KEY = process.env.OPENAI_API_KEY;
-
-// Validate API key on startup
-if (!API_KEY) {
-  console.error('ERROR: OpenAI API key is not properly configured.');
-} else {
-  console.log('OpenAI API key is configured successfully.');
-}
-
-// Initialize OpenAI client
-const openai = new OpenAI({
-  apiKey: API_KEY,
-});
+import { ImageGenerationResult } from '../types/imageTypes';
 
 /**
- * Generate an image using OpenAI DALL-E based on a prompt and optional sketch image
+ * Generates an image using OpenAI's DALL-E API
  * 
- * @param prompt Text prompt for image generation
- * @param sketchPath Optional path to a sketch image to use as reference
- * @returns Object containing the generated image URL or text response
+ * @param prompt The text prompt to generate an image from
+ * @param sketchPath Optional path to a sketch image to use as a reference
+ * @returns Promise with the result containing either an image URL or error
  */
-export async function generateImageWithOpenAI(
-  prompt: string, 
+export const generateImageWithOpenAI = async (
+  prompt: string,
   sketchPath?: string
-): Promise<ImageGenerationResult> {
+): Promise<ImageGenerationResult> => {
   try {
-    // Validate API key
-    if (!API_KEY) {
-      console.error('ERROR: OpenAI API key is not set');
-      throw new Error('API key is not configured. Please set the OpenAI API key.');
+    const apiKey = process.env.OPENAI_API_KEY;
+    
+    if (!apiKey) {
+      throw new Error('OPENAI_API_KEY is not set in environment variables');
     }
 
-    console.log('Starting image generation with OpenAI API');
-    console.log(`Prompt: ${prompt.substring(0, 100)}${prompt.length > 100 ? '...' : ''}`);
+    console.log(`Generating image with OpenAI DALL-E. Prompt: "${prompt}"`);
     
-    try {
-      let response;
-      
-      if (sketchPath && fs.existsSync(sketchPath)) {
-        console.log(`Adding sketch image from path: ${sketchPath}`);
-        
-        // For image variations or edits with DALL-E
-        // Note: This requires DALL-E 3 or newer for best results with sketches
-        response = await openai.images.generate({
-          model: "dall-e-3", // Use DALL-E 3 for better quality
-          prompt: prompt + " Generate a high-quality, photorealistic image based on the sketch description.",
-          n: 1,
-          size: "1024x1024",
-        });
-      } else {
-        // For text-to-image generation without a sketch
-        response = await openai.images.generate({
-          model: "dall-e-3", // Use DALL-E 3 for better quality
-          prompt: prompt + " Generate a high-quality, photorealistic image.",
-          n: 1,
-          size: "1024x1024",
-        });
-      }
-      
-      console.log('Received response from OpenAI API');
-      
-      if (response && response.data && response.data.length > 0) {
-        const imageUrl = response.data[0].url;
-        
-        if (imageUrl) {
-          // Download the image from the URL
-          const imageResponse = await fetch(imageUrl);
-          const imageBuffer = await imageResponse.arrayBuffer();
-          
-          // Create uploads directory if it doesn't exist
-          const uploadsDir = path.join(process.cwd(), 'uploads');
-          if (!fs.existsSync(uploadsDir)) {
-            fs.mkdirSync(uploadsDir, { recursive: true });
-          }
-          
-          // Generate a unique filename
-          const filename = `openai-generated-${uuidv4()}.png`;
-          const filePath = path.join(uploadsDir, filename);
-          
-          // Write the image data to a file
-          fs.writeFileSync(filePath, Buffer.from(imageBuffer));
-          
-          console.log(`Image saved to: ${filePath}`);
-          
-          // Return the relative URL to the image
-          return {
-            imageUrl: `/uploads/${filename}`
-          };
-        }
-      }
-      
-      console.log('No valid response found in OpenAI API response');
-      return {
-        textResponse: 'No valid response generated from the AI model.'
-      };
-    } catch (error: any) {
-      console.error('OpenAI API error details:', {
-        message: error.message,
-        type: error.type,
-        code: error.code,
-        param: error.param
-      });
-      
-      throw new Error(`API request failed: ${error.message}`);
+    // Prepare the request data
+    const requestData: any = {
+      model: "dall-e-3", // You can change to "dall-e-2" if needed
+      prompt: prompt,
+      n: 1,
+      size: "1024x1024", // Options: "256x256", "512x512", "1024x1024", "1792x1024", or "1024x1792"
+      quality: "standard", // Options: "standard" or "hd"
+      response_format: "url" // Options: "url" or "b64_json"
+    };
+
+    // If a sketch path is provided, we would need to implement image variation
+    // This would require a different API endpoint and approach
+    if (sketchPath && fs.existsSync(sketchPath)) {
+      console.log(`Sketch provided at path: ${sketchPath}`);
+      // Note: OpenAI's image variation API works differently and would need a separate implementation
     }
-  } catch (error) {
-    console.error('Error generating image:', error);
-    throw error;
+
+    // Make the API request
+    const response = await axios({
+      method: 'post',
+      url: 'https://api.openai.com/v1/images/generations',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json'
+      },
+      data: requestData,
+      timeout: 60000 // 60 second timeout
+    });
+
+    // Process the response
+    if (response.data && response.data.data && response.data.data.length > 0) {
+      const imageUrl = response.data.data[0].url;
+      
+      // Download the image
+      const imageResponse = await axios({
+        method: 'get',
+        url: imageUrl,
+        responseType: 'arraybuffer'
+      });
+
+      // Save the image locally
+      const outputDir = path.join(process.cwd(), 'public', 'generated-images');
+      if (!fs.existsSync(outputDir)) {
+        fs.mkdirSync(outputDir, { recursive: true });
+      }
+
+      const filename = `${uuidv4()}.png`;
+      const outputPath = path.join(outputDir, filename);
+      fs.writeFileSync(outputPath, imageResponse.data);
+
+      // Return success with the image path
+      const relativePath = `/generated-images/${filename}`;
+      console.log(`Image generated successfully: ${relativePath}`);
+      
+      return {
+        imageUrl: relativePath
+      };
+    } else {
+      throw new Error('No image data in the response');
+    }
+
+  } catch (error: any) {
+    console.error('Error generating image with OpenAI:', error);
+    
+    // Handle different types of errors
+    let errorMessage = 'Unknown error occurred';
+    
+    if (error.response) {
+      // The request was made and the server responded with a status code
+      // that falls out of the range of 2xx
+      if (error.response.status === 429) {
+        errorMessage = 'Rate limit exceeded. Please try again later.';
+      } else if (error.response.status === 401) {
+        errorMessage = 'Invalid API key or unauthorized access.';
+      } else if (error.response.data && error.response.data.error) {
+        errorMessage = error.response.data.error.message || `Server error: ${error.response.status}`;
+      } else {
+        errorMessage = `Server error: ${error.response.status}`;
+      }
+    } else if (error.request) {
+      // The request was made but no response was received
+      errorMessage = 'No response received from OpenAI API. Please check your internet connection.';
+    } else {
+      // Something happened in setting up the request that triggered an Error
+      errorMessage = error.message || 'Error setting up the request';
+    }
+
+    return {
+      textResponse: errorMessage
+    };
   }
-}
+};
 
 /**
- * Generate a text response from OpenAI based on a prompt
+ * Generates text using OpenAI's GPT API
  * 
- * @param prompt Text prompt for text generation
- * @returns Generated text response
+ * @param prompt The prompt to generate text from
+ * @returns Promise with the generated text
  */
-export async function generateTextWithOpenAI(prompt: string): Promise<string> {
+export const generateTextWithOpenAI = async (prompt: string): Promise<ImageGenerationResult> => {
   try {
-    console.log('Starting text generation with OpenAI API');
-    console.log(`Prompt: ${prompt.substring(0, 100)}${prompt.length > 100 ? '...' : ''}`);
+    const apiKey = process.env.OPENAI_API_KEY;
     
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: [
-        { role: "system", content: "You are a fashion design expert. Generate detailed, creative fashion descriptions." },
-        { role: "user", content: prompt }
-      ],
-      max_tokens: 500
+    if (!apiKey) {
+      throw new Error('OPENAI_API_KEY is not set in environment variables');
+    }
+
+    console.log(`Generating text with OpenAI GPT. Prompt: "${prompt}"`);
+    
+    // Make the API request
+    const response = await axios({
+      method: 'post',
+      url: 'https://api.openai.com/v1/chat/completions',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json'
+      },
+      data: {
+        model: "gpt-4o", // You can also use "gpt-3.5-turbo" for a more cost-effective option
+        messages: [
+          {
+            role: "user",
+            content: prompt
+          }
+        ],
+        temperature: 0.7,
+        max_tokens: 500
+      },
+      timeout: 30000 // 30 second timeout
     });
-    
-    const response = completion.choices[0]?.message?.content || 'No response generated';
-    console.log('Generated text response:', response);
-    
-    return response;
-  } catch (error) {
+
+    // Process the response
+    if (response.data && 
+        response.data.choices && 
+        response.data.choices.length > 0 && 
+        response.data.choices[0].message) {
+      const generatedText = response.data.choices[0].message.content.trim();
+      return {
+        textResponse: generatedText
+      };
+    } else {
+      throw new Error('No text data in the response');
+    }
+
+  } catch (error: any) {
     console.error('Error generating text with OpenAI:', error);
-    throw new Error(`Failed to generate text: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    
+    // Handle different types of errors
+    let errorMessage = 'Error generating text: ';
+    
+    if (error.response) {
+      // The request was made and the server responded with a status code
+      // that falls out of the range of 2xx
+      if (error.response.data && error.response.data.error) {
+        errorMessage += error.response.data.error.message;
+      } else {
+        errorMessage += `Server error: ${error.response.status}`;
+      }
+    } else if (error.request) {
+      // The request was made but no response was received
+      errorMessage += 'No response received from OpenAI API';
+    } else {
+      // Something happened in setting up the request that triggered an Error
+      errorMessage += error.message;
+    }
+
+    return {
+      textResponse: errorMessage
+    };
   }
-}
+};
