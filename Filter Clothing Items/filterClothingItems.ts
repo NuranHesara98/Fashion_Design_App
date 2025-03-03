@@ -1,5 +1,5 @@
 import express, { Request, Response } from 'express';
-import ClothingItem from '../models/ClothingItem';
+import ClothingItem from '../Filter Clothing Items/filterClothingItems'; // Ensure this path is correct
 
 const router = express.Router();
 
