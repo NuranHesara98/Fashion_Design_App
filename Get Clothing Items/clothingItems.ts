@@ -1,5 +1,5 @@
 import express, { Request, Response } from 'express';
-import ClothingItem from '../Get Clothing Items'; // Assuming Mongoose model
+import ClothingItem from '../Get Clothing Items/clothingItems'; // Corrected import path
 
 const router = express.Router();
 
