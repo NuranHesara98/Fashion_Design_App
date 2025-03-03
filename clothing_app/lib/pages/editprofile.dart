@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart'; // Import image_picker
+import 'dart:io'; // For File class
 
 class UserProfilePage extends StatefulWidget {
   @override
@@ -7,6 +9,8 @@ class UserProfilePage extends StatefulWidget {
 
 class _UserProfilePageState extends State<UserProfilePage> {
   bool isEditing = false;
+  File? _profileImage; // To store the selected image file
+  final ImagePicker _picker = ImagePicker(); // ImagePicker instance
 
   Map<String, String> userData = {
     'name': 'Anna Avetisyan',
@@ -43,6 +47,48 @@ class _UserProfilePageState extends State<UserProfilePage> {
     setState(() {
       isEditing = !isEditing;
     });
+  }
+
+  // Function to pick an image from the gallery or camera
+  Future<void> _pickImage(ImageSource source) async {
+    final XFile? image = await _picker.pickImage(source: source);
+    if (image != null) {
+      setState(() {
+        _profileImage = File(image.path); // Store the selected file
+      });
+    }
+  }
+
+  // Show a bottom sheet to choose image source (camera or gallery)
+  void _showImageSourceSelection(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.camera_alt),
+                title: const Text("Take Photo"),
+                onTap: () {
+                  Navigator.pop(context);
+                  _pickImage(ImageSource.camera);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo),
+                title: const Text("Choose from Gallery"),
+                onTap: () {
+                  Navigator.pop(context);
+                  _pickImage(ImageSource.gallery);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -125,25 +171,34 @@ class _UserProfilePageState extends State<UserProfilePage> {
         Stack(
           alignment: Alignment.bottomCenter,
           children: [
-            Container(
-              width: 120,
-              height: 120,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(color: Colors.white, width: 4),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    spreadRadius: 2,
-                    blurRadius: 10,
-                  ),
-                ],
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(60),
-                child: Image.asset(
-                  'assets/images/profile_placeholder.jpg',
-                  fit: BoxFit.cover,
+            GestureDetector(
+              onTap:
+                  isEditing ? () => _showImageSourceSelection(context) : null,
+              child: Container(
+                width: 120,
+                height: 120,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white, width: 4),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      spreadRadius: 2,
+                      blurRadius: 10,
+                    ),
+                  ],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(60),
+                  child: _profileImage != null
+                      ? Image.file(
+                          _profileImage!,
+                          fit: BoxFit.cover,
+                        )
+                      : Image.asset(
+                          'assets/images/profile_placeholder.jpg',
+                          fit: BoxFit.cover,
+                        ),
                 ),
               ),
             ),
@@ -204,116 +259,52 @@ class _UserProfilePageState extends State<UserProfilePage> {
 
   Widget _buildDetailsCard(ThemeData theme) {
     return Card(
+      margin: EdgeInsets.symmetric(vertical: 8),
       child: Padding(
-        padding: EdgeInsets.all(24),
+        padding: EdgeInsets.all(16),
         child: Column(
-          children: [
-            _buildDetailItem(
-              theme: theme,
-              icon: Icons.cake_rounded,
-              label: 'Birthday',
-              controller: controllers['birthday']!,
-            ),
-            _buildDivider(),
-            _buildDetailItem(
-              theme: theme,
-              icon: Icons.phone_rounded,
-              label: 'Phone',
-              controller: controllers['phoneNumber']!,
-            ),
-            _buildDivider(),
-            _buildDetailItem(
-              theme: theme,
-              icon: Icons.email_rounded,
-              label: 'Email',
-              controller: controllers['email']!,
-            ),
-            _buildDivider(),
-            _buildDetailItem(
-              theme: theme,
-              icon: Icons.location_on_rounded,
-              label: 'Address',
-              controller: controllers['address']!,
-            ),
-            _buildDivider(),
-            _buildDetailItem(
-              theme: theme,
-              icon: Icons.lock_rounded,
-              label: 'Password',
-              controller: controllers['password']!,
-              isPassword: true, // Added password field
-            ),
-          ],
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: userData.entries.map((entry) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    entry.key,
+                    style: theme.textTheme.bodyLarge,
+                  ),
+                  isEditing
+                      ? Expanded(
+                          child: _buildEditableField(
+                            controllers[entry.key]!,
+                            style: theme.textTheme.bodyLarge,
+                            textAlign: TextAlign.end,
+                          ),
+                        )
+                      : Text(
+                          entry.value,
+                          style: theme.textTheme.bodyLarge,
+                        ),
+                ],
+              ),
+            );
+          }).toList(),
         ),
       ),
     );
   }
 
-  Widget _buildDetailItem({
-    required ThemeData theme,
-    required IconData icon,
-    required String label,
-    required TextEditingController controller,
-    bool isPassword = false, // Added isPassword parameter
-  }) {
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        children: [
-          Icon(icon, size: 24, color: Colors.grey[400]),
-          SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: Colors.grey[600],
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                SizedBox(height: 4),
-                if (isEditing)
-                  _buildEditableField(
-                    controller,
-                    isPassword: isPassword, // Pass isPassword to the field
-                  )
-                else
-                  Text(
-                    isPassword ? '********' : controller.text, // Mask password
-                    style: theme.textTheme.bodyLarge,
-                  ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildEditableField(
-    TextEditingController controller, {
-    TextStyle? style,
-    TextAlign textAlign = TextAlign.start,
-    bool isPassword = false, // Added isPassword parameter
-  }) {
+  Widget _buildEditableField(TextEditingController controller,
+      {TextStyle? style, TextAlign? textAlign}) {
     return TextField(
       controller: controller,
       style: style,
-      textAlign: textAlign,
-      obscureText: isPassword, // Hide text for password field
+      textAlign: textAlign ?? TextAlign.start,
       decoration: InputDecoration(
-        isDense: true,
-        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        border: InputBorder.none,
+        contentPadding: EdgeInsets.zero,
       ),
-    );
-  }
-
-  Widget _buildDivider() {
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 8),
-      child: Divider(color: Colors.grey[200]),
     );
   }
 }
