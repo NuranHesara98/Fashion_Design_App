@@ -228,15 +228,8 @@
     
     <!-- API Key Configuration Alert -->
     <div id="apiKeyAlert" class="alert alert-warning" style="display: none;">
-        <strong>API Key Not Configured!</strong> The Google Gemini API key is not set. Prompt generation will not work.
-        <br>
-        Please follow these steps to set up your API key:
-        <ol>
-            <li>Create a <code>.env</code> file in the project root directory</li>
-            <li>Add <code>GEMINI_API_KEY=your_api_key_here</code> to the file</li>
-            <li>Restart the server</li>
-        </ol>
-        <p>You can get an API key from <a href="https://ai.google.dev/" target="_blank">Google AI Studio</a></p>
+        <h4>OpenAI API Key Not Configured</h4>
+        <p>The OpenAI API key is not configured. Please add your OpenAI API key to the server configuration to enable image generation.</p>
     </div>
     
     <form id="promptForm" enctype="multipart/form-data">
@@ -534,7 +527,7 @@
                     const response = await fetch('http://localhost:3000/api/prompts/check-api-config');
                     const data = await response.json();
                     
-                    if (data.apiKeyConfigured === false) {
+                    if (data.status === 'API key is not configured') {
                         apiKeyAlert.style.display = 'block';
                     }
                 } catch (error) {

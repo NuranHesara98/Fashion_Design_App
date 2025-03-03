@@ -2,20 +2,20 @@ import { Request, Response } from 'express';
 import { PromptGenerationRequest, FileRequest, ImageProcessingResult } from '../types';
 import { generateComplementaryPalette } from '../utils/colorUtils';
 import { processSketchImage, getImageUrl, processImage } from '../utils/imageProcessingService';
-import { generateImageWithGemini } from '../services/geminiService';
+import { generateImageWithOpenAI, generateTextWithOpenAI } from '../services/openaiService';
 import * as dotenv from 'dotenv';
 
 // Load environment variables
 dotenv.config();
 
-// Get API key - use the same approach as geminiService
-const API_KEY = 'AIzaSyCFa23ClOv6vBCrrLb8g3lzwB4m-KGmw5M';
+// Get API key - use the same approach as openaiService
+const API_KEY = process.env.OPENAI_API_KEY;
 
 // Check for API key on startup
 if (!API_KEY) {
-  console.error('WARNING: API key is not properly configured.');
+  console.error('WARNING: OpenAI API key is not properly configured.');
 } else {
-  console.log('Controller: API key is configured successfully.');
+  console.log('Controller: OpenAI API key is configured successfully.');
 }
 
 /**
@@ -93,7 +93,7 @@ export const generateImagePrompt = async (
 
     console.log('Generated prompt:', prompt);
 
-    // Return just the prompt without calling Gemini API
+    // Return just the prompt without calling OpenAI API
     res.json({ prompt });
   } catch (error) {
     console.error('Error generating prompt:', error);
@@ -143,8 +143,8 @@ export const generateImagePromptWithSketch = async (req: FileRequest, res: Respo
     console.log('Generated prompt:', prompt);
 
     try {
-      // Generate the image using Gemini API
-      const result = await generateImageWithGemini(prompt, sketchPath);
+      // Generate the image using OpenAI API
+      const result = await generateImageWithOpenAI(prompt, sketchPath);
 
       // Prepare the response
       const response: any = {
@@ -290,15 +290,15 @@ function getMaterialDescription(material: string): string {
 }
 
 /**
- * Check if the API key is configured
+ * Check if the OpenAI API key is configured
  * @param req - Express request object
  * @param res - Express response object
  */
 export const checkApiConfig = (req: Request, res: Response): void => {
-    const apiKey = API_KEY;
+    const isConfigured = API_KEY;
     
     res.json({
-        apiKeyConfigured: !!apiKey,
-        message: apiKey ? 'API key is configured' : 'API key is not configured'
+        status: isConfigured ? 'API key is configured' : 'API key is not configured',
+        provider: 'OpenAI'
     });
 };

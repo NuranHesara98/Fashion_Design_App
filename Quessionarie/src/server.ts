@@ -8,14 +8,14 @@ import promptRoutes from './routes/promptRoutes';
 // Load environment variables
 dotenv.config();
 
-// Check for required environment variables - use hardcoded API key
-const API_KEY = 'AIzaSyCFa23ClOv6vBCrrLb8g3lzwB4m-KGmw5M';
+// Check for required environment variables
+const API_KEY = process.env.OPENAI_API_KEY;
 
 // Log API key status
 if (!API_KEY) {
-  console.error('ERROR: API key is not properly configured.');
+  console.error('ERROR: OpenAI API key is not properly configured.');
 } else {
-  console.log('Server: API key is configured successfully.');
+  console.log('Server: OpenAI API key is configured successfully.');
 }
 
 // Create Express app
@@ -43,7 +43,7 @@ app.use('/api/prompts', promptRoutes);
 // Default route
 app.get('/', (req: Request, res: Response) => {
   res.json({ 
-    message: 'Welcome to Quessionarie API',
+    message: 'Welcome to API',
     apiStatus: API_KEY ? 'API key is configured' : 'API key is not configured'
   });
 });

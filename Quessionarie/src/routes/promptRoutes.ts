@@ -10,7 +10,7 @@ const router: express.Router = express.Router();
 /**
  * POST /api/prompts/generate
  * 
- * Generates an AI image prompt based on user input and predefined dress sketch
+ * Generates an AI image prompt based on user input
  * 
  * Request body:
  * - primaryPurpose: string (e.g., "casual wear", "formal event")
@@ -28,7 +28,7 @@ router.post('/generate', generateImagePrompt);
 /**
  * POST /api/prompts/generate-with-sketch
  * 
- * Generates an AI image prompt based on user input and an uploaded sketch image
+ * Generates an AI image using OpenAI DALL-E based on user input and an uploaded sketch image
  * 
  * Request body:
  * - sketch: File (The uploaded sketch image)
@@ -50,11 +50,10 @@ router.post('/generate-with-sketch', upload.single('sketch'), generateImagePromp
 /**
  * GET /api/prompts/check-api-config
  * 
- * Checks if the API key is properly configured
+ * Checks if the OpenAI API key is properly configured
  * 
  * Response:
- * - apiKeyConfigured: boolean (Whether the API key is configured)
- * - message: string (A message indicating the API key status)
+ * - status: string (Status of the API key configuration)
  */
 router.get('/check-api-config', checkApiConfig);
 
