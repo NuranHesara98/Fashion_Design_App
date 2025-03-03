@@ -1,5 +1,5 @@
 import express, { Request, Response } from 'express';
-import { analyzeImage } from '../Image Analysis and Design Generation';
+import { analyzeImage } from '../Image Analysis and Design Generation/designGeneration'; // Corrected import path
 
 const router = express.Router();
 
