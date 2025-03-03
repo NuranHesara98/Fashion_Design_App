@@ -1,4 +1,5 @@
 import 'package:clothing_app/pages/home2.dart';
+=======
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'uploadimage.dart'; // Import UploadPage
