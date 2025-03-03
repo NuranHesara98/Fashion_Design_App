@@ -1,6 +1,6 @@
 import express, { Request, Response } from 'express';
 import multer from 'multer';
-import { uploadToCloud } from '../Cloud Storage Helper'; // Cloud storage handler
+import { uploadToCloud } from '../utils/cloudStorage'; // Corrected import path
 
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
