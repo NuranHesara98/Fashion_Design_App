@@ -1,9 +1,10 @@
 import { generateImageWithOpenAI, generateTextWithOpenAI } from './openaiService';
 import { ImageGenerationResult } from '../types/imageTypes';
 import * as dotenv from 'dotenv';
+import * as path from 'path';
 
-// Load environment variables
-dotenv.config();
+// Load environment variables with explicit path
+dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
 /**
  * Factory function to generate an image using OpenAI

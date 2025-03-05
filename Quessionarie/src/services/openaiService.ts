@@ -1,4 +1,4 @@
-import axios from 'axios';
+import { OpenAI } from 'openai';
 import * as fs from 'fs';
 import * as path from 'path';
 import { v4 as uuidv4 } from 'uuid';
@@ -24,13 +24,17 @@ export const generateImageWithOpenAI = async (
 
     console.log(`Generating image with OpenAI DALL-E. Prompt: "${prompt}"`);
     
-    // Prepare the request data
-    const requestData: any = {
-      model: "dall-e-3", // You can change to "dall-e-2" if needed
+    // Create OpenAI client
+    const openai = new OpenAI({
+      apiKey: apiKey
+    });
+    
+    // Prepare the request options
+    const requestOptions: any = {
+      model: "dall-e-2", // Using dall-e-2 for cost-effectiveness
       prompt: prompt,
       n: 1,
-      size: "1024x1024", // Options: "256x256", "512x512", "1024x1024", "1792x1024", or "1024x1792"
-      quality: "standard", // Options: "standard" or "hd"
+      size: "1024x1024", // Using 1024x1024 size
       response_format: "url" // Options: "url" or "b64_json"
     };
 
@@ -41,78 +45,39 @@ export const generateImageWithOpenAI = async (
       // Note: OpenAI's image variation API works differently and would need a separate implementation
     }
 
-    // Make the API request
-    const response = await axios({
-      method: 'post',
-      url: 'https://api.openai.com/v1/images/generations',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json'
-      },
-      data: requestData,
-      timeout: 60000 // 60 second timeout
-    });
-
-    // Process the response
-    if (response.data && response.data.data && response.data.data.length > 0) {
-      const imageUrl = response.data.data[0].url;
-      
-      // Download the image
-      const imageResponse = await axios({
-        method: 'get',
-        url: imageUrl,
-        responseType: 'arraybuffer'
-      });
-
-      // Save the image locally
-      const outputDir = path.join(process.cwd(), 'public', 'generated-images');
-      if (!fs.existsSync(outputDir)) {
-        fs.mkdirSync(outputDir, { recursive: true });
-      }
-
-      const filename = `${uuidv4()}.png`;
-      const outputPath = path.join(outputDir, filename);
-      fs.writeFileSync(outputPath, imageResponse.data);
-
-      // Return success with the image path
-      const relativePath = `/generated-images/${filename}`;
-      console.log(`Image generated successfully: ${relativePath}`);
-      
-      return {
-        imageUrl: relativePath
-      };
-    } else {
-      throw new Error('No image data in the response');
+    // Make the API request using the OpenAI SDK
+    const response = await openai.images.generate(requestOptions);
+    
+    // Extract the image URL from the response
+    const imageUrl = response.data[0].url;
+    
+    if (!imageUrl) {
+      throw new Error('No image URL returned from OpenAI API');
     }
 
-  } catch (error: any) {
-    console.error('Error generating image with OpenAI:', error);
+    console.log('Image generated successfully with OpenAI DALL-E');
     
-    // Handle different types of errors
-    let errorMessage = 'Unknown error occurred';
+    return {
+      success: true,
+      imageUrl: imageUrl,
+      provider: 'openai'
+    };
+  } catch (error: any) {
+    console.error('Error generating image with OpenAI DALL-E:', error);
+    
+    let errorMessage = 'Failed to generate image with OpenAI';
     
     if (error.response) {
-      // The request was made and the server responded with a status code
-      // that falls out of the range of 2xx
-      if (error.response.status === 429) {
-        errorMessage = 'Rate limit exceeded. Please try again later.';
-      } else if (error.response.status === 401) {
-        errorMessage = 'Invalid API key or unauthorized access.';
-      } else if (error.response.data && error.response.data.error) {
-        errorMessage = error.response.data.error.message || `Server error: ${error.response.status}`;
-      } else {
-        errorMessage = `Server error: ${error.response.status}`;
-      }
-    } else if (error.request) {
-      // The request was made but no response was received
-      errorMessage = 'No response received from OpenAI API. Please check your internet connection.';
-    } else {
-      // Something happened in setting up the request that triggered an Error
-      errorMessage = error.message || 'Error setting up the request';
+      console.error('OpenAI API error response:', error.response.data);
+      errorMessage = `OpenAI API error: ${error.response.status} - ${JSON.stringify(error.response.data)}`;
+    } else if (error.message) {
+      errorMessage = `Error: ${error.message}`;
     }
-
+    
     return {
-      textResponse: errorMessage
+      success: false,
+      error: errorMessage,
+      provider: 'openai'
     };
   }
 };
@@ -133,65 +98,57 @@ export const generateTextWithOpenAI = async (prompt: string): Promise<ImageGener
 
     console.log(`Generating text with OpenAI GPT. Prompt: "${prompt}"`);
     
-    // Make the API request
-    const response = await axios({
-      method: 'post',
-      url: 'https://api.openai.com/v1/chat/completions',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json'
-      },
-      data: {
-        model: "gpt-4o", // You can also use "gpt-3.5-turbo" for a more cost-effective option
-        messages: [
-          {
-            role: "user",
-            content: prompt
-          }
-        ],
-        temperature: 0.7,
-        max_tokens: 500
-      },
-      timeout: 30000 // 30 second timeout
+    // Create OpenAI client
+    const openai = new OpenAI({
+      apiKey: apiKey
     });
+    
+    // Prepare the request options
+    const requestOptions: any = {
+      model: "gpt-4o", // You can also use "gpt-3.5-turbo" for a more cost-effective option
+      messages: [
+        {
+          role: "user",
+          content: prompt
+        }
+      ],
+      temperature: 0.7,
+      max_tokens: 500
+    };
 
-    // Process the response
-    if (response.data && 
-        response.data.choices && 
-        response.data.choices.length > 0 && 
-        response.data.choices[0].message) {
-      const generatedText = response.data.choices[0].message.content.trim();
-      return {
-        textResponse: generatedText
-      };
-    } else {
-      throw new Error('No text data in the response');
+    // Make the API request using the OpenAI SDK
+    const response = await openai.chat.completions.create(requestOptions);
+    
+    // Extract the generated text from the response
+    const generatedText = response.choices[0]?.message?.content?.trim() || '';
+    
+    if (!generatedText) {
+      throw new Error('No text generated by OpenAI API');
     }
 
-  } catch (error: any) {
-    console.error('Error generating text with OpenAI:', error);
+    console.log('Text generated successfully with OpenAI GPT');
     
-    // Handle different types of errors
-    let errorMessage = 'Error generating text: ';
+    return {
+      success: true,
+      textResponse: generatedText,
+      provider: 'openai'
+    };
+  } catch (error: any) {
+    console.error('Error generating text with OpenAI GPT:', error);
+    
+    let errorMessage = 'Failed to generate text with OpenAI';
     
     if (error.response) {
-      // The request was made and the server responded with a status code
-      // that falls out of the range of 2xx
-      if (error.response.data && error.response.data.error) {
-        errorMessage += error.response.data.error.message;
-      } else {
-        errorMessage += `Server error: ${error.response.status}`;
-      }
-    } else if (error.request) {
-      // The request was made but no response was received
-      errorMessage += 'No response received from OpenAI API';
-    } else {
-      // Something happened in setting up the request that triggered an Error
-      errorMessage += error.message;
+      console.error('OpenAI API error response:', error.response.data);
+      errorMessage = `OpenAI API error: ${error.response.status} - ${JSON.stringify(error.response.data)}`;
+    } else if (error.message) {
+      errorMessage = `Error: ${error.message}`;
     }
-
+    
     return {
-      textResponse: errorMessage
+      success: false,
+      error: errorMessage,
+      provider: 'openai'
     };
   }
 };

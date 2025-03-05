@@ -6,11 +6,18 @@ import indexRoutes from './routes/index';
 import promptRoutes from './routes/promptRoutes';
 import fs from 'fs';
 
-// Load environment variables
-dotenv.config();
+// Load environment variables with explicit path
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
 // Get API configuration
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+
+// Log environment variables for debugging
+console.log('Environment variables:');
+console.log('PORT:', process.env.PORT);
+console.log('NODE_ENV:', process.env.NODE_ENV);
+console.log('OPENAI_API_KEY exists:', !!OPENAI_API_KEY);
+console.log('OPENAI_API_KEY length:', OPENAI_API_KEY ? OPENAI_API_KEY.length : 0);
 
 // Log API key status
 if (!OPENAI_API_KEY) {
@@ -21,7 +28,7 @@ if (!OPENAI_API_KEY) {
 
 // Create Express app
 const app: Express = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3003;
 
 // Middleware
 app.use(cors({
