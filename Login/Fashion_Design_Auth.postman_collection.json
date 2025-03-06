@@ -1,0 +1,125 @@
+{
+	"info": {
+		"_postman_id": "random-uuid",
+		"name": "Fashion Design Auth",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Register",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"test@example.com\",\n    \"password\": \"test123\",\n    \"confirmPassword\": \"test123\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5004/api/auth/register",
+							"protocol": "http",
+							"host": ["localhost"],
+							"port": "5004",
+							"path": ["api", "auth", "register"]
+						}
+					}
+				},
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"test@example.com\",\n    \"password\": \"test123\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5004/api/auth/login",
+							"protocol": "http",
+							"host": ["localhost"],
+							"port": "5004",
+							"path": ["api", "auth", "login"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Profile",
+			"item": [
+				{
+					"name": "Get Profile",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5004/api/users/profile",
+							"protocol": "http",
+							"host": ["localhost"],
+							"port": "5004",
+							"path": ["api", "users", "profile"]
+						}
+					}
+				},
+				{
+					"name": "Update Profile",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Test User\",\n    \"bio\": \"I love fashion design!\",\n    \"profilePictureUrl\": \"https://example.com/profile.jpg\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5004/api/users/profile",
+							"protocol": "http",
+							"host": ["localhost"],
+							"port": "5004",
+							"path": ["api", "users", "profile"]
+						}
+					}
+				},
+				{
+					"name": "Add Design to History",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"designId\": \"design123\",\n    \"title\": \"Summer Collection 2025\",\n    \"imageUrl\": \"https://example.com/designs/summer2025.jpg\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5004/api/users/profile/designs",
+							"protocol": "http",
+							"host": ["localhost"],
+							"port": "5004",
+							"path": ["api", "users", "profile", "designs"]
+						}
+					}
+				}
+			]
+		}
+	]
+}
