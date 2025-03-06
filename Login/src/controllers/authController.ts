@@ -1,77 +1,49 @@
 import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import User from '../models/userModel';
-import rateLimit from 'express-rate-limit';
+import { rateLimit } from 'express-rate-limit';
 
-// Types
-interface RegisterRequest extends Request {
-  body: {
-    email: string;
-    password: string;
-    confirmPassword: string;
-  }
+interface RegisterRequest {
+  email: string;
+  password: string;
+  confirmPassword: string;
 }
 
-interface LoginRequest extends Request {
-  body: {
-    email: string;
-    password: string;
-  }
+interface LoginRequest {
+  email: string;
+  password: string;
 }
 
-// Rate limiter for login attempts
+interface AuthResponse {
+  success: boolean;
+  message?: string;
+  user?: {
+    id: string;
+    email: string;
+  };
+  error?: string;
+}
+
+// Rate limiting middleware
 export const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // limit each IP to 5 login attempts per windowMs
-  message: { success: false, message: 'Too many login attempts, please try again after 15 minutes' }
+  max: 5, // Limit each IP to 5 requests per windowMs
+  message: { success: false, message: 'Too many login attempts. Please try again later.' }
 });
 
-// Password validation
-const isPasswordStrong = (password: string): boolean => {
-  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-  return passwordRegex.test(password);
-};
-
-// Helper function for token generation
-const generateToken = (userId: string): string => {
-  const secret = process.env.JWT_SECRET;
-  if (!secret) {
-    throw new Error('JWT_SECRET environment variable is not set');
-  }
-  return jwt.sign({ userId }, secret, { expiresIn: '30d' });
-};
-
-// Register controller
-export const registerUser = async (req: RegisterRequest, res: Response): Promise<Response> => {
+// Register new user
+export const register = async (req: Request, res: Response): Promise<Response> => {
   try {
-    const { email, password, confirmPassword } = req.body;
+    const { email, password, confirmPassword }: RegisterRequest = req.body;
 
-    // Validation checks
+    // Validate input
     if (!email || !password || !confirmPassword) {
       return res.status(400).json({
         success: false,
-        message: 'All fields are required'
+        message: 'Please provide all required fields'
       });
     }
 
-    // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Please provide a valid email address'
-      });
-    }
-
-    // Validate password strength
-    if (password.length < 6) {
-      return res.status(400).json({
-        success: false,
-        message: 'Password must be at least 6 characters long'
-      });
-    }
-
-    // Validate passwords match
     if (password !== confirmPassword) {
       return res.status(400).json({
         success: false,
@@ -79,7 +51,7 @@ export const registerUser = async (req: RegisterRequest, res: Response): Promise
       });
     }
 
-    // Check existing user
+    // Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({
@@ -89,15 +61,15 @@ export const registerUser = async (req: RegisterRequest, res: Response): Promise
     }
 
     // Create new user
-    const newUser = await User.create({
+    const user = await User.create({
       email,
       password
     });
 
-    // Generate token
-    const token = generateToken(newUser._id.toString());
+    // Generate JWT token
+    const token = generateToken(user._id.toString());
 
-    // Set token in HTTP-only cookie
+    // Set cookie
     res.cookie('token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -109,11 +81,10 @@ export const registerUser = async (req: RegisterRequest, res: Response): Promise
       success: true,
       message: 'Registration successful',
       user: {
-        id: newUser._id,
-        email: newUser.email
+        id: user._id,
+        email: user.email
       }
     });
-
   } catch (error: any) {
     console.error('Registration error:', error);
     return res.status(500).json({
@@ -124,16 +95,16 @@ export const registerUser = async (req: RegisterRequest, res: Response): Promise
   }
 };
 
-// Login controller
-export const loginUser = async (req: LoginRequest, res: Response): Promise<Response> => {
+// Login user
+export const login = async (req: Request, res: Response): Promise<Response> => {
   try {
-    const { email, password } = req.body;
+    const { email, password }: LoginRequest = req.body;
 
-    // Validation
+    // Validate input
     if (!email || !password) {
       return res.status(400).json({
         success: false,
-        message: 'Email and password are required'
+        message: 'Please provide email and password'
       });
     }
 
@@ -146,7 +117,7 @@ export const loginUser = async (req: LoginRequest, res: Response): Promise<Respo
       });
     }
 
-    // Verify password
+    // Check password
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
       return res.status(401).json({
@@ -155,10 +126,10 @@ export const loginUser = async (req: LoginRequest, res: Response): Promise<Respo
       });
     }
 
-    // Generate token
+    // Generate JWT token
     const token = generateToken(user._id.toString());
 
-    // Set token in HTTP-only cookie
+    // Set cookie
     res.cookie('token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -174,7 +145,6 @@ export const loginUser = async (req: LoginRequest, res: Response): Promise<Respo
         email: user.email
       }
     });
-
   } catch (error: any) {
     console.error('Login error:', error);
     return res.status(500).json({
@@ -183,4 +153,29 @@ export const loginUser = async (req: LoginRequest, res: Response): Promise<Respo
       error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
     });
   }
-};                              
+};
+
+// Logout user
+export const logout = async (_req: Request, res: Response): Promise<Response> => {
+  res.cookie('token', '', {
+    httpOnly: true,
+    expires: new Date(0)
+  });
+
+  return res.status(200).json({
+    success: true,
+    message: 'Logged out successfully'
+  });
+};
+
+// Generate JWT Token
+const generateToken = (userId: string): string => {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    throw new Error('JWT_SECRET is not defined');
+  }
+  
+  return jwt.sign({ userId }, secret, {
+    expiresIn: '30d'
+  });
+};

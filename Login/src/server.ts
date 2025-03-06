@@ -1,77 +1,44 @@
-import express, { Application, Request, Response, NextFunction } from 'express';
+import express from 'express';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import authRoutes from './routes/authRoutes';
-import { loginLimiter } from './controllers/authController';
+import profileRoutes from './routes/profileRoutes';
+import { errorHandler } from './middleware/errorMiddleware';
 
+// Load environment variables
 dotenv.config();
 
-const app: Application = express();
+const app = express();
 
 // Middleware
-app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:3000',
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
 app.use(express.json());
 app.use(cookieParser());
-
-// Security headers
-app.use((req: Request, res: Response, next: NextFunction) => {
-  res.setHeader('X-Content-Type-Options', 'nosniff');
-  res.setHeader('X-Frame-Options', 'DENY');
-  res.setHeader('X-XSS-Protection', '1; mode=block');
-  next();
-});
+app.use(cors({
+  origin: process.env.CLIENT_URL || 'http://localhost:3000',
+  credentials: true
+}));
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/users', profileRoutes);
 
-// Health check route
-app.get('/health', (req: Request, res: Response) => {
-  res.status(200).json({ status: 'ok' });
-});
+// Error handling
+app.use(errorHandler);
 
-// Connect to MongoDB
-const connectDB = async () => {
-  try {
-    if (!process.env.MONGO_URI) {
-      throw new Error('MONGO_URI environment variable is not defined');
-    }
-    await mongoose.connect(process.env.MONGO_URI);
-    console.log('MongoDB connected successfully!');
-  } catch (error) {
-    console.error('MongoDB connection error:', error);
-    process.exit(1);
-  }
-};
+// MongoDB connection
+const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/fashion_design_app';
+const PORT = process.env.PORT || 5004;
 
-// Error handling middleware
-app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
-  console.error(err.stack);
-  res.status(500).json({
-    success: false,
-    message: process.env.NODE_ENV === 'development' ? err.message : 'Something went wrong!'
-  });
-});
-
-// Start Server
-const PORT = process.env.PORT || 5005;
-
-const startServer = async () => {
-  try {
-    await connectDB();
+mongoose.connect(MONGO_URI)
+  .then(() => {
+    console.log('Connected to MongoDB');
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
     });
-  } catch (error) {
-    console.error('Failed to start server:', error);
+  })
+  .catch((error) => {
+    console.error('MongoDB connection error:', error);
     process.exit(1);
-  }
-};
-
-startServer();
+  });
