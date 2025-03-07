@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:clothing_app/pages/uploadimage.dart';
-=======
 import 'package:clothing_app/pages/customizing.dart';
 
 class HomePage extends StatefulWidget {
