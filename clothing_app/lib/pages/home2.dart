@@ -16,15 +16,15 @@ class _Home2State extends State<Home2> {
     super.initState();
     _controller = VideoPlayerController.asset('assets/video1.mp4')
       ..initialize().then((_) {
-        setState(() {}); // Refresh UI when the video is loaded
+        setState(() {});
       })
-      ..setLooping(true) // Make the video loop
-      ..play(); // Auto-play the video
+      ..setLooping(true)
+      ..play();
   }
 
   @override
   void dispose() {
-    _controller.dispose(); // Clean up the controller
+    _controller.dispose();
     super.dispose();
   }
 
@@ -34,7 +34,7 @@ class _Home2State extends State<Home2> {
       body: Stack(
         children: [
           // Background Video
-          SizedBox.expand(
+          Positioned.fill(
             child: _controller.value.isInitialized
                 ? FittedBox(
                     fit: BoxFit.cover,
@@ -48,29 +48,55 @@ class _Home2State extends State<Home2> {
           ),
 
           // Overlay Content
-          Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text(
-                  'Welcome to Home2',
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
+          Positioned.fill(
+            child: Container(
+              color: Colors.black.withOpacity(0.3),
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.5),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Column(
+                        children: [
+                          const Text(
+                            'Welcome to Home2',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 28,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          ElevatedButton(
+                            onPressed: () {
+                              // Action button
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.blueAccent,
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 24, vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            child: const Text(
+                              'Get Started',
+                              style: TextStyle(
+                                  fontSize: 18, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: () {
-                    // Action button
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blueAccent.withOpacity(0.7),
-                  ),
-                  child: const Text('Get Started'),
-                ),
-              ],
+              ),
             ),
           ),
         ],

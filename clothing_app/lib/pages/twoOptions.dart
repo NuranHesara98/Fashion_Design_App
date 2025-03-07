@@ -1,16 +1,18 @@
-import 'package:clothing_app/pages/home2.dart';
-=======
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'uploadimage.dart'; // Import UploadPage
 import 'home.dart';
 import 'menu.dart';
+import 'favorite.dart'; // Import the file where ProductCardData is defined
 
 class TwoOptionsPage extends StatelessWidget {
   const TwoOptionsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // Define an empty favorites set (or pass it from the parent widget if available)
+    final Set<ProductCardData> favorites = {};
+
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -19,7 +21,10 @@ class TwoOptionsPage extends StatelessWidget {
             // Navigate to ProfilePage when the menu icon is clicked
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => const ProfilePage()),
+              MaterialPageRoute(
+                builder: (context) =>
+                    ProfilePage(favorites: favorites), // Pass favorites
+              ),
             );
           },
         ),
