@@ -32,7 +32,6 @@ flutter:
 
   # Add image assets
   assets:
-    
     - assets/images/logo.png
     - assets/images/image1.jpg
     - assets/images/image2.jpeg
@@ -69,11 +68,11 @@ flutter:
     - assets/images/jaquard.jpg
 
     - assets/images/woolknitted.jpg
-    - assets/images/Sketch1.png
-    - assets/images/Sketch2.png
-    - assets/images/Sketch3.png
-    - assets/images/Sketch4.png
-    - assets/images/Sketch5.png
+    - assets/images/Sketch1.jpeg
+    - assets/images/Sketch2.jpeg
+    - assets/images/Sketch3.jpeg
+    - assets/images/Sketch4.jpeg
+    - assets/images/Sketch5.jpeg
     - assets/images/image11.png
 
     - assets/images/google_icon.png
@@ -90,6 +89,7 @@ flutter:
     - assets/animations/Animation15.json
 
   # Add font assets
+
   fonts:
     - family: Quicksand
       fonts:
