@@ -38,8 +38,10 @@ class MyApp extends StatelessWidget {
         '/signup': (context) => const SignUpPage(),
         '/login': (context) => const LoginPage(),
         '/onboarding': (context) => const OnboardingView(),
-        '/home': (context) => HomePage(),
-        '/customize': (context) => const CustomizePage(),
+        '/home': (context) => const HomePage(),
+        '/customize': (context) => const CustomizePage(
+              selectedProductImage: '',
+            ),
         '/suggestion': (context) => const SuggestionPage(),
         '/welcome': (context) => const WelcomeScreen(),
         '/store': (context) => const StorePage(),
@@ -88,7 +90,8 @@ class _SplashScreenState extends State<SplashScreen>
     // Start animation and timer
     _controller.forward();
     Timer(const Duration(seconds: 3), () {
-      Navigator.pushReplacementNamed(context, '/onboarding');
+      // Change this line to navigate to WelcomeScreen after splash
+      Navigator.pushReplacementNamed(context, '/welcome');
     });
   }
 
@@ -108,8 +111,8 @@ class _SplashScreenState extends State<SplashScreen>
           child: Image.asset(
             'assets/images/logo.png',
             //Ensure this path is correct
-            width: 250,
-            height: 250,
+            width: 200,
+            height: 200,
           ),
         ),
       ),

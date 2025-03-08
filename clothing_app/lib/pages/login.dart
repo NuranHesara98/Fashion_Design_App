@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
+import 'home.dart'; // Import HomePage
 
 class LoginPage extends StatelessWidget {
   const LoginPage({super.key});
@@ -92,7 +93,11 @@ class LoginPage extends StatelessWidget {
                 const SizedBox(height: 5),
                 ElevatedButton(
                   onPressed: () {
-                    // Add your sign-in action here
+                    // When sign-in is pressed, navigate to HomePage
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => HomePage()),
+                    );
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.black,
@@ -345,23 +350,6 @@ class LoginPage extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
-              TextField(
-                obscureText: true,
-                decoration: InputDecoration(
-                  labelText: 'Confirm Password',
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8.0)),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.0),
-                    borderSide: const BorderSide(color: Colors.black),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.0),
-                    borderSide: const BorderSide(color: Colors.grey),
-                  ),
-                ),
-              ),
               const SizedBox(height: 20),
               Center(
                 child: SizedBox(
@@ -369,10 +357,7 @@ class LoginPage extends StatelessWidget {
                   child: ElevatedButton(
                     onPressed: () {
                       Navigator.pop(context);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                            content: Text('Password Reset Successfully!')),
-                      );
+                      // Optionally, navigate back to login or home page
                     },
                     style: ElevatedButton.styleFrom(
                         backgroundColor: const Color.fromARGB(255, 0, 0, 0)),

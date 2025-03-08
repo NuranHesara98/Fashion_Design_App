@@ -1,16 +1,35 @@
 import 'package:flutter/material.dart';
-import 'editprofile.dart';
-import 'helpcenter.dart'; // Ensure this file exists
+import 'userprofilepage.dart';
+import 'helpcenter.dart';
+import 'favorite.dart';
 
-class ProfilePage extends StatelessWidget {
-  const ProfilePage({super.key});
+class ProfilePage extends StatefulWidget {
+  final Set<ProductCardData> favorites;
+
+  const ProfilePage({super.key, required this.favorites});
 
   @override
+  _ProfilePageState createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
+  @override
   Widget build(BuildContext context) {
+    Map<String, String> userData = {
+      'name': 'Jack William',
+      'email': 'jackwilliam1704@gmail.com',
+      'role': 'Fashion Enthusiast',
+      'birthday': 'January 1, 1990',
+      'phoneNumber': '+1 818 123 4567',
+      'address': '123 Fashion Street, Style City',
+      'password': '********',
+    };
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        title: Text("Profile", style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text("Profile",
+            style: TextStyle(fontWeight: FontWeight.bold)),
         elevation: 0,
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
@@ -18,54 +37,50 @@ class ProfilePage extends StatelessWidget {
       body: SingleChildScrollView(
         child: Column(
           children: [
+            const SizedBox(height: 30),
+            _buildProfileCard(userData),
             const SizedBox(height: 20),
-            Center(
-              child: Column(
-                children: [
-                  CircleAvatar(
-                    radius: 50,
-                    backgroundImage: AssetImage("assets/images/image1.jpg"),
-                    child: Align(
-                      alignment: Alignment.bottomRight,
-                      child: CircleAvatar(
-                        backgroundColor: Colors.green,
-                        radius: 12,
-                        child: Icon(Icons.check, color: Colors.white, size: 16),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    "Jack William",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 5),
-                  Text(
-                    "jackwilliam1704@gmail.com",
-                    style: TextStyle(color: Colors.grey),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 20),
-            _buildMenuItem(
-                context, Icons.person, "Edit Profile", const EditProfilePage()),
-            _buildMenuItem(context, Icons.payment, "Payment Method", null),
-            _buildMenuItem(context, Icons.language, "Language", null),
+            _buildMenuItem(context, Icons.person, "Edit Profile",
+                UserProfilePage(userData: userData)),
             _buildMenuItem(context, Icons.history, "Order History", null),
-            _buildMenuItem(context, Icons.favorite, "Favourites", null),
+            _buildMenuItem(context, Icons.favorite, "Favourites",
+                FavoritePage(favorites: widget.favorites)),
             _buildMenuItem(
                 context, Icons.help, "Help Center", const HelpPage()),
           ],
         ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        selectedItemColor: Colors.green,
-        unselectedItemColor: Colors.grey,
-        items: [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: ""),
-          BottomNavigationBarItem(icon: Icon(Icons.favorite), label: ""),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: ""),
+    );
+  }
+
+  Widget _buildProfileCard(Map<String, String> userData) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        children: [
+          CircleAvatar(
+            radius: 50,
+            backgroundImage: AssetImage("assets/images/image1.jpg"),
+            child: Align(
+              alignment: Alignment.bottomRight,
+              child: CircleAvatar(
+                backgroundColor: Colors.green,
+                radius: 12,
+                child: const Icon(Icons.check, color: Colors.white, size: 16),
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            userData['name']!,
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 5),
+          Text(
+            userData['email']!,
+            style: const TextStyle(fontSize: 14, color: Colors.grey),
+          ),
         ],
       ),
     );
@@ -73,16 +88,44 @@ class ProfilePage extends StatelessWidget {
 
   Widget _buildMenuItem(
       BuildContext context, IconData icon, String title, Widget? page) {
-    return ListTile(
-      leading: Icon(icon, color: Colors.black),
-      title: Text(title, style: TextStyle(fontSize: 16)),
-      trailing: Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
-      onTap: () {
-        if (page != null) {
-          Navigator.of(context)
-              .push(MaterialPageRoute(builder: (context) => page));
-        }
-      },
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+      child: InkWell(
+        onTap: () {
+          if (page != null) {
+            Navigator.of(context)
+                .push(MaterialPageRoute(builder: (context) => page));
+          }
+        },
+        borderRadius: BorderRadius.circular(10),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(10),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black12,
+                blurRadius: 6,
+                offset: Offset(0, 3),
+              ),
+            ],
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Icon(icon, color: Colors.black),
+                  const SizedBox(width: 15),
+                  Text(title, style: const TextStyle(fontSize: 16)),
+                ],
+              ),
+              const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

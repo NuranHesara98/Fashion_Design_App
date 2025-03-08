@@ -11,9 +11,9 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  image_picker: ^1.0.0
+  image_picker: ^0.8.7+4
   url_launcher: ^6.0.9
-  video_player: ^2.7.0
+  video_player: ^2.3.0
 
   cupertino_icons: ^1.0.8
   flutter_native_splash: ^2.4.4
@@ -32,7 +32,6 @@ flutter:
 
   # Add image assets
   assets:
-    
     - assets/images/logo.png
     - assets/images/image1.jpg
     - assets/images/image2.jpeg
@@ -64,16 +63,29 @@ flutter:
     - assets/images/image37.jpg
     - assets/images/image38.jpg
     - assets/images/image36.jpg
+    - assets/images/image44.jpeg
+    - assets/images/image45.jpeg
     - assets/images/cotton.jpg
     - assets/images/velvet.jpg
     - assets/images/jaquard.jpg
+    - assets/video1.mp4
 
     - assets/images/woolknitted.jpg
-    - assets/images/Sketch1.png
-    - assets/images/Sketch2.png
-    - assets/images/Sketch3.png
-    - assets/images/Sketch4.png
-    - assets/images/Sketch5.png
+    - assets/images/Sketch1.jpeg
+    - assets/images/Sketch2.jpeg
+    - assets/images/Sketch3.jpeg
+    - assets/images/Sketch4.jpeg
+    - assets/images/Sketch5.jpeg
+    - assets/images/Sketch6.jpeg
+    - assets/images/Sketch7.jpeg
+    - assets/images/Sketch8.jpeg
+    - assets/images/Sketch9.jpeg
+    - assets/images/Sketch10.jpeg
+    - assets/images/Sketch11.jpeg
+    - assets/images/Sketch12.jpeg
+    - assets/images/Sketch13.jpeg
+    - assets/images/Sketch14.jpeg
+    - assets/images/Sketch15.jpeg
     - assets/images/image11.png
 
     - assets/images/google_icon.png
@@ -87,6 +99,7 @@ flutter:
     - assets/animations/Animation9.json
     - assets/animations/Animation10.json
     - assets/animations/Animation11.json
+    - assets/animations/Animation12.json
     - assets/animations/Animation15.json
 
   # Add font assets
