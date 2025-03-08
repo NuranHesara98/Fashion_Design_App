@@ -1,17 +1,15 @@
 import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
-import User, { IUser } from '../models/userModel';
+import User, { IUser, IUserProfile } from '../models/userModel';
 import bcrypt from 'bcryptjs';
+import mongoose from 'mongoose';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key'; // In production, use environment variable
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
-interface RegisterBody {
+interface RegisterBody extends IUserProfile {
   email: string;
   password: string;
   confirmPassword: string;
-  name?: string;
-  bio?: string;
-  profilePictureUrl?: string;
 }
 
 interface LoginBody {
@@ -27,6 +25,14 @@ interface AuthResponse {
     email: string;
     name?: string;
     bio?: string;
+    phoneNumber?: string;
+    location?: string;
+    specialization?: string;
+    socialLinks?: {
+      instagram?: string;
+      linkedin?: string;
+      website?: string;
+    };
   };
   token?: string;
 }
@@ -37,9 +43,20 @@ export const register = async (
   res: Response<AuthResponse>
 ): Promise<Response<AuthResponse>> => {
   try {
-    const { email, password, confirmPassword, name, bio, profilePictureUrl } = req.body;
+    const {
+      email,
+      password,
+      confirmPassword,
+      name,
+      bio,
+      profilePictureUrl,
+      phoneNumber,
+      location,
+      specialization,
+      socialLinks
+    } = req.body;
 
-    // Validate input
+    // Validate required fields
     if (!email || !password || !confirmPassword) {
       return res.status(400).json({
         success: false,
@@ -63,14 +80,42 @@ export const register = async (
       });
     }
 
-    // Create user with optional fields
+    // Validate optional fields
+    if (bio && bio.length > 500) {
+      return res.status(400).json({
+        success: false,
+        message: 'Bio cannot exceed 500 characters'
+      });
+    }
+
+    if (phoneNumber && !/^\+?[\d\s-]{10,}$/.test(phoneNumber)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please enter a valid phone number'
+      });
+    }
+
+    if (profilePictureUrl && !/^https?:\/\/.+/.test(profilePictureUrl)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Profile picture URL must be a valid URL'
+      });
+    }
+
+    // Create user with all fields
     const user = await User.create({
       email,
       password,
       name,
       bio,
       profilePictureUrl,
-      designs: [] // Initialize empty designs array
+      phoneNumber,
+      location,
+      specialization,
+      socialLinks,
+      designs: [],
+      isActive: true,
+      lastLogin: new Date()
     });
 
     // Generate token
@@ -87,12 +132,26 @@ export const register = async (
         id: user._id.toString(),
         email: user.email,
         name: user.name,
-        bio: user.bio
+        bio: user.bio,
+        phoneNumber: user.phoneNumber,
+        location: user.location,
+        specialization: user.specialization,
+        socialLinks: user.socialLinks
       },
       token
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Registration error:', error);
+    
+    // Handle mongoose validation errors
+    if (error instanceof mongoose.Error.ValidationError) {
+      const firstError = Object.values(error.errors)[0];
+      return res.status(400).json({
+        success: false,
+        message: firstError.message
+      });
+    }
+    
     return res.status(500).json({
       success: false,
       message: 'Error registering user'
@@ -134,6 +193,10 @@ export const login = async (
       });
     }
 
+    // Update last login time
+    user.lastLogin = new Date();
+    await user.save();
+
     // Generate token
     const token = jwt.sign(
       { id: user._id },
@@ -148,11 +211,15 @@ export const login = async (
         id: user._id.toString(),
         email: user.email,
         name: user.name,
-        bio: user.bio
+        bio: user.bio,
+        phoneNumber: user.phoneNumber,
+        location: user.location,
+        specialization: user.specialization,
+        socialLinks: user.socialLinks
       },
       token
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Login error:', error);
     return res.status(500).json({
       success: false,
