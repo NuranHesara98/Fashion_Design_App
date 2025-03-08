@@ -1,15 +1,20 @@
 import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
-import User from '../models/userModel';
-import { rateLimit } from 'express-rate-limit';
+import User, { IUser } from '../models/userModel';
+import bcrypt from 'bcryptjs';
 
-interface RegisterRequest {
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key'; // In production, use environment variable
+
+interface RegisterBody {
   email: string;
   password: string;
   confirmPassword: string;
+  name?: string;
+  bio?: string;
+  profilePictureUrl?: string;
 }
 
-interface LoginRequest {
+interface LoginBody {
   email: string;
   password: string;
 }
@@ -20,21 +25,19 @@ interface AuthResponse {
   user?: {
     id: string;
     email: string;
+    name?: string;
+    bio?: string;
   };
-  error?: string;
+  token?: string;
 }
 
-// Rate limiting middleware
-export const loginLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // Limit each IP to 5 requests per windowMs
-  message: { success: false, message: 'Too many login attempts. Please try again later.' }
-});
-
 // Register new user
-export const register = async (req: Request, res: Response): Promise<Response> => {
+export const register = async (
+  req: Request<{}, {}, RegisterBody>,
+  res: Response<AuthResponse>
+): Promise<Response<AuthResponse>> => {
   try {
-    const { email, password, confirmPassword }: RegisterRequest = req.body;
+    const { email, password, confirmPassword, name, bio, profilePictureUrl } = req.body;
 
     // Validate input
     if (!email || !password || !confirmPassword) {
@@ -51,54 +54,59 @@ export const register = async (req: Request, res: Response): Promise<Response> =
       });
     }
 
-    // Check if user already exists
+    // Check if user exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({
         success: false,
-        message: 'Email is already registered'
+        message: 'User already exists'
       });
     }
 
-    // Create new user
+    // Create user with optional fields
     const user = await User.create({
       email,
-      password
+      password,
+      name,
+      bio,
+      profilePictureUrl,
+      designs: [] // Initialize empty designs array
     });
 
-    // Generate JWT token
-    const token = generateToken(user._id.toString());
-
-    // Set cookie
-    res.cookie('token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
-    });
+    // Generate token
+    const token = jwt.sign(
+      { id: user._id },
+      JWT_SECRET,
+      { expiresIn: '30d' }
+    );
 
     return res.status(201).json({
       success: true,
-      message: 'Registration successful',
+      message: 'User registered successfully',
       user: {
-        id: user._id,
-        email: user.email
-      }
+        id: user._id.toString(),
+        email: user.email,
+        name: user.name,
+        bio: user.bio
+      },
+      token
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Registration error:', error);
     return res.status(500).json({
       success: false,
-      message: 'Error registering user',
-      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+      message: 'Error registering user'
     });
   }
 };
 
 // Login user
-export const login = async (req: Request, res: Response): Promise<Response> => {
+export const login = async (
+  req: Request<{}, {}, LoginBody>,
+  res: Response<AuthResponse>
+): Promise<Response<AuthResponse>> => {
   try {
-    const { email, password }: LoginRequest = req.body;
+    const { email, password } = req.body;
 
     // Validate input
     if (!email || !password) {
@@ -108,8 +116,8 @@ export const login = async (req: Request, res: Response): Promise<Response> => {
       });
     }
 
-    // Find user
-    const user = await User.findOne({ email });
+    // Find user with password
+    const user = await User.findOne({ email }).select('+password');
     if (!user) {
       return res.status(401).json({
         success: false,
@@ -118,7 +126,7 @@ export const login = async (req: Request, res: Response): Promise<Response> => {
     }
 
     // Check password
-    const isMatch = await user.comparePassword(password);
+    const isMatch = await user.matchPassword(password);
     if (!isMatch) {
       return res.status(401).json({
         success: false,
@@ -126,56 +134,29 @@ export const login = async (req: Request, res: Response): Promise<Response> => {
       });
     }
 
-    // Generate JWT token
-    const token = generateToken(user._id.toString());
-
-    // Set cookie
-    res.cookie('token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
-    });
+    // Generate token
+    const token = jwt.sign(
+      { id: user._id },
+      JWT_SECRET,
+      { expiresIn: '30d' }
+    );
 
     return res.status(200).json({
       success: true,
-      message: 'Login successful',
+      message: 'Logged in successfully',
       user: {
-        id: user._id,
-        email: user.email
-      }
+        id: user._id.toString(),
+        email: user.email,
+        name: user.name,
+        bio: user.bio
+      },
+      token
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Login error:', error);
     return res.status(500).json({
       success: false,
-      message: 'Error logging in',
-      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+      message: 'Error logging in'
     });
   }
-};
-
-// Logout user
-export const logout = async (_req: Request, res: Response): Promise<Response> => {
-  res.cookie('token', '', {
-    httpOnly: true,
-    expires: new Date(0)
-  });
-
-  return res.status(200).json({
-    success: true,
-    message: 'Logged out successfully'
-  });
-};
-
-// Generate JWT Token
-const generateToken = (userId: string): string => {
-  const secret = process.env.JWT_SECRET;
-  if (!secret) {
-    throw new Error('JWT_SECRET is not defined');
-  }
-  
-  return jwt.sign({ userId }, secret, {
-    expiresIn: '30d'
-  });
 };

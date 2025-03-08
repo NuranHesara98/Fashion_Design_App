@@ -1,0 +1,74 @@
+{
+  "client": "Thunder Client",
+  "collectionName": "Fashion Design App API",
+  "dateExported": "2025-03-07T15:42:35.123Z",
+  "version": "1.1",
+  "folders": [
+    {
+      "name": "Auth",
+      "items": [
+        {
+          "name": "Register User",
+          "request": {
+            "method": "POST",
+            "url": "http://localhost:5004/api/auth/register",
+            "headers": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "raw": {
+                "email": "designer@example.com",
+                "password": "Design123!",
+                "confirmPassword": "Design123!",
+                "name": "Fashion Designer",
+                "bio": "Creative fashion designer with passion for sustainable fashion"
+              }
+            }
+          }
+        },
+        {
+          "name": "Login User",
+          "request": {
+            "method": "POST",
+            "url": "http://localhost:5004/api/auth/login",
+            "headers": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "type": "json",
+              "raw": {
+                "email": "designer@example.com",
+                "password": "Design123!"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "User",
+      "items": [
+        {
+          "name": "Get User Profile",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:5004/api/users/profile",
+            "headers": [
+              {
+                "name": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
