@@ -3,6 +3,7 @@ import cors from 'cors';
 import path from 'path';
 import userRoutes from './routes/userRoutes';
 import authRoutes from './routes/authRoutes';
+import designRoutes from './routes/designRoutes';
 import { errorHandler } from './middleware/errorMiddleware';
 import { NotFoundError } from './utils/errors';
 import fs from 'fs/promises';
@@ -31,6 +32,7 @@ app.use(express.static(path.join(process.cwd(), 'public')));
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/designs', designRoutes);
 
 // Handle 404
 app.use((req, res, next) => {
