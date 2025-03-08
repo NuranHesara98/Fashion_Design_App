@@ -39,7 +39,7 @@ class MyApp extends StatelessWidget {
         '/login': (context) => const LoginPage(),
         '/onboarding': (context) => const OnboardingView(),
         '/home': (context) => HomePage(),
-        '/customize': (context) => const CustomizePage(),
+        '/customize': (context) => const CustomizePage(selectedProductImage: '',),
         '/suggestion': (context) => const SuggestionPage(),
         '/welcome': (context) => const WelcomeScreen(),
         '/store': (context) => const StorePage(),

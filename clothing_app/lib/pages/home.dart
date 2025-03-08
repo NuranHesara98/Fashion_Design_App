@@ -234,7 +234,9 @@ class _HomePageState extends State<HomePage> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => CustomizePage(),
+                            builder: (context) => CustomizePage(
+                              selectedProductImage: product['image']!,
+                            ),
                           ),
                         );
                       },
@@ -255,7 +257,9 @@ class _HomePageState extends State<HomePage> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => CustomizePage(),
+                          builder: (context) => CustomizePage(
+                            selectedProductImage: '',
+                          ),
                         ),
                       );
                     },

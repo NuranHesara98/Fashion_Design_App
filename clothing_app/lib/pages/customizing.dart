@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 class CustomizePage extends StatefulWidget {
-  const CustomizePage({super.key});
+  final String selectedProductImage;
+
+  const CustomizePage({super.key, required this.selectedProductImage});
 
   @override
   State<CustomizePage> createState() => _CustomizePageState();
@@ -15,7 +17,7 @@ class _CustomizePageState extends State<CustomizePage> {
   String? occasion;
   String? selectedClothingType;
   Color? selectedTone;
-  bool isLoading = false; // Added missing variable
+  bool isLoading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -47,21 +49,12 @@ class _CustomizePageState extends State<CustomizePage> {
               const SizedBox(height: 16),
               _buildDropdown(
                 'What is your budget range?',
-                ['Budget', 'mid-level', 'Premium'],
+                ['Budget', 'Mid-level', 'Premium'],
                 selectedClothingType,
                 (value) => setState(() => selectedClothingType = value),
               ),
               const SizedBox(height: 16),
-              _buildRadioGroup(
-                'When will you be wearing this outfit?',
-                ['Day', 'Night'],
-                isDaySelected,
-                isNightSelected,
-                (isDay) => setState(() {
-                  isDaySelected = isDay;
-                  isNightSelected = !isDay;
-                }),
-              ),
+              _buildRadioGroup(),
               const SizedBox(height: 16),
               _buildSkinToneSelector(),
               const SizedBox(height: 32),
@@ -79,9 +72,7 @@ class _CustomizePageState extends State<CustomizePage> {
       elevation: 0,
       leading: IconButton(
         icon: const Icon(Icons.menu, color: Colors.black),
-        onPressed: () {
-          // Handle menu button press
-        },
+        onPressed: () {},
       ),
     );
   }
@@ -89,19 +80,16 @@ class _CustomizePageState extends State<CustomizePage> {
   Widget _buildImageSection() {
     return Center(
       child: Container(
-        height: 250,
+        height: 180, // Reduced height for better fit
         width: double.infinity,
         decoration: BoxDecoration(
-          color: Colors.grey[200],
           borderRadius: BorderRadius.circular(16),
         ),
-        child: const Center(
-          child: Text(
-            'SWEETHEART NECKLINE',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: Image.asset(
+            widget.selectedProductImage,
+            fit: BoxFit.contain, // Ensures the image fits within the container
           ),
         ),
       ),
@@ -111,19 +99,12 @@ class _CustomizePageState extends State<CustomizePage> {
   Widget _buildTitle(String title) {
     return Text(
       title,
-      style: const TextStyle(
-        fontSize: 18,
-        fontWeight: FontWeight.bold,
-      ),
+      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
     );
   }
 
-  Widget _buildDropdown(
-    String title,
-    List<String> options,
-    String? currentValue,
-    ValueChanged<String?> onChanged,
-  ) {
+  Widget _buildDropdown(String title, List<String> options,
+      String? currentValue, ValueChanged<String?> onChanged) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -132,13 +113,12 @@ class _CustomizePageState extends State<CustomizePage> {
         DropdownButtonFormField<String>(
           value: currentValue,
           decoration: InputDecoration(
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
           ),
-          items: options.map((option) {
-            return DropdownMenuItem(value: option, child: Text(option));
-          }).toList(),
+          items: options
+              .map((option) =>
+                  DropdownMenuItem(value: option, child: Text(option)))
+              .toList(),
           onChanged: onChanged,
         ),
       ],
@@ -146,10 +126,7 @@ class _CustomizePageState extends State<CustomizePage> {
   }
 
   Widget _buildTextInput(
-    String title,
-    String hintText,
-    ValueChanged<String> onChanged,
-  ) {
+      String title, String hintText, ValueChanged<String> onChanged) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -158,9 +135,7 @@ class _CustomizePageState extends State<CustomizePage> {
         TextField(
           decoration: InputDecoration(
             hintText: hintText,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
           ),
           onChanged: onChanged,
         ),
@@ -168,37 +143,37 @@ class _CustomizePageState extends State<CustomizePage> {
     );
   }
 
-  Widget _buildRadioGroup(
-    String title,
-    List<String> options,
-    bool isDay,
-    bool isNight,
-    ValueChanged<bool> onSelected,
-  ) {
+  Widget _buildRadioGroup() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(title, style: const TextStyle(fontSize: 16)),
+        const Text('When will you be wearing this outfit?',
+            style: TextStyle(fontSize: 16)),
         const SizedBox(height: 8),
         Row(
-          children: options.map((option) {
-            final bool isSelected = option == 'Day' ? isDay : isNight;
-            return _buildRadioButton(
-              option,
-              isSelected,
-              (value) => onSelected(option == 'Day'),
-            );
-          }).toList(),
+          children: [
+            _buildRadioButton(
+                'Day',
+                isDaySelected,
+                (value) => setState(() {
+                      isDaySelected = true;
+                      isNightSelected = false;
+                    })),
+            _buildRadioButton(
+                'Night',
+                isNightSelected,
+                (value) => setState(() {
+                      isDaySelected = false;
+                      isNightSelected = true;
+                    })),
+          ],
         ),
       ],
     );
   }
 
   Widget _buildRadioButton(
-    String title,
-    bool value,
-    ValueChanged<bool?> onChanged,
-  ) {
+      String title, bool value, ValueChanged<bool?> onChanged) {
     return Row(
       children: [
         Radio<bool>(
@@ -225,36 +200,16 @@ class _CustomizePageState extends State<CustomizePage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Select Your Skin Tone',
-          style: TextStyle(fontSize: 16),
-        ),
+        const Text('Select Your Skin Tone', style: TextStyle(fontSize: 16)),
         const SizedBox(height: 8),
         Row(
           children: tones
               .map((color) => GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        selectedTone = (selectedTone == color) ? null : color;
-                      });
-                    },
+                    onTap: () => setState(() =>
+                        selectedTone = (selectedTone == color) ? null : color),
                     child: Padding(
                       padding: const EdgeInsets.only(right: 10),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: selectedTone == color
-                                ? Colors.black
-                                : Colors.transparent,
-                            width: 2,
-                          ),
-                        ),
-                        child: CircleAvatar(
-                          radius: 20,
-                          backgroundColor: color,
-                        ),
-                      ),
+                      child: CircleAvatar(radius: 20, backgroundColor: color),
                     ),
                   ))
               .toList(),
@@ -266,18 +221,13 @@ class _CustomizePageState extends State<CustomizePage> {
   Widget _buildNextButton() {
     return Center(
       child: isLoading
-          ? const CircularProgressIndicator() // Show loading icon
+          ? const CircularProgressIndicator()
           : ElevatedButton(
               onPressed: () {
-                setState(() {
-                  isLoading = true; // Start loading
-                });
-
+                setState(() => isLoading = true);
                 Future.delayed(const Duration(seconds: 2), () {
-                  setState(() {
-                    isLoading = false; // Stop loading
-                  });
-                  Navigator.pushNamed(context, '/suggestion'); // Navigate
+                  setState(() => isLoading = false);
+                  Navigator.pushNamed(context, '/suggestion');
                 });
               },
               style: ElevatedButton.styleFrom(
@@ -285,8 +235,7 @@ class _CustomizePageState extends State<CustomizePage> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 130, vertical: 5),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30),
-                ),
+                    borderRadius: BorderRadius.circular(30)),
               ),
               child: const Text('NEXT',
                   style: TextStyle(fontSize: 16, color: Colors.white)),
