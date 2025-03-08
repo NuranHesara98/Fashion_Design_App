@@ -1,33 +1,43 @@
 import mongoose from 'mongoose';
 
-const designSchema = new mongoose.Schema({
+export interface IDesign {
+  userId: mongoose.Types.ObjectId;
+  title: string;
+  description: string;
+  imageUrl: string;
+  category: string;
+  tags: string[];
+  likes: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const designSchema = new mongoose.Schema<IDesign>({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true
+    required: [true, 'User ID is required']
   },
   title: {
     type: String,
-    required: [true, 'Design title is required'],
-    trim: true
+    required: [true, 'Title is required']
   },
   description: {
     type: String,
-    trim: true
+    default: ''
   },
   imageUrl: {
     type: String,
-    required: [true, 'Design image is required']
+    required: [true, 'Image URL is required']
   },
   category: {
     type: String,
-    required: [true, 'Design category is required'],
-    enum: ['Casual', 'Formal', 'Traditional', 'Sports', 'Other']
+    required: [true, 'Category is required']
   },
-  tags: [{
-    type: String,
-    trim: true
-  }],
+  tags: {
+    type: [String],
+    default: []
+  },
   likes: {
     type: Number,
     default: 0
@@ -48,6 +58,6 @@ designSchema.pre('save', function(next) {
   next();
 });
 
-const Design = mongoose.model('Design', designSchema);
+const Design = mongoose.model<IDesign>('Design', designSchema);
 
-export default Design; 
+export default Design;

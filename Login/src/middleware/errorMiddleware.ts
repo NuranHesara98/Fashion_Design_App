@@ -118,27 +118,16 @@ const sendErrorProd = (err: AppError, res: Response<ErrorResponse>) => {
 };
 
 export const errorHandler = (
-  err: Error,
+  err: any,
   req: Request,
-  res: Response<ErrorResponse>,
+  res: Response,
   next: NextFunction
 ) => {
-  let error = err instanceof AppError ? err : handleCustomError(err);
-  error.statusCode = error.statusCode || 500;
-  error.status = error.status || 'error';
-
-  if (process.env.NODE_ENV === 'development') {
-    sendErrorDev(error, res);
-  } else {
-    let processedError = error;
-    
-    if (err instanceof mongoose.Error.CastError) processedError = handleCastErrorDB(err);
-    if (err instanceof mongoose.Error.ValidationError) processedError = handleValidationErrorDB(err);
-    if (err instanceof multer.MulterError) processedError = handleMulterError(err);
-    if (err instanceof JsonWebTokenError) processedError = handleJWTError();
-    if (err instanceof TokenExpiredError) processedError = handleJWTExpiredError();
-    if ((err as MongoError).code === 11000) processedError = handleDuplicateFieldsDB(err as MongoError);
-    
-    sendErrorProd(processedError, res);
-  }
+  const statusCode = err.statusCode || 500;
+  
+  res.status(statusCode).json({
+    success: false,
+    message: err.message || 'Internal server error',
+    stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
+  });
 };

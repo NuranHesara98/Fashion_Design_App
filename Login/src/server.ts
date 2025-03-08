@@ -1,28 +1,11 @@
-import express from 'express';
 import dotenv from 'dotenv';
 import connectDB from './config/db';
-import cors from 'cors';
-import { errorHandler } from './middleware/errorMiddleware';
-import authRoutes from './routes/authRoutes';
-import userRoutes from './routes/userRoutes';
 import app from './app';
 
 // Load environment variables
 dotenv.config();
 
-const PORT = process.env.PORT || 5004;
-
-// Middleware
-app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-// Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/users', userRoutes);
-
-// Error handling
-app.use(errorHandler);
+let PORT = parseInt(process.env.PORT || '5004');
 
 // Function to start server
 const startServer = async () => {
@@ -30,31 +13,34 @@ const startServer = async () => {
     // Connect to MongoDB
     await connectDB();
 
-    // Start server
-    const server = app.listen(PORT, () => {
-      console.log(`Server is running on port ${PORT}`);
-    });
+    // Function to try starting server on a port
+    const tryPort = (port: number): Promise<void> => {
+      return new Promise((resolve, reject) => {
+        const server = app.listen(port)
+          .on('listening', () => {
+            console.log(`Server is running on port ${port}`);
+            resolve();
+          })
+          .on('error', (err: NodeJS.ErrnoException) => {
+            if (err.code === 'EADDRINUSE') {
+              console.log(`Port ${port} is in use, trying ${port + 1}`);
+              server.close();
+              // Try next port
+              tryPort(port + 1).then(resolve).catch(reject);
+            } else {
+              reject(err);
+            }
+          });
+      });
+    };
 
-    // Handle server errors
-    server.on('error', (error: NodeJS.ErrnoException) => {
-      if (error.code === 'EADDRINUSE') {
-        console.error(`Port ${PORT} is already in use. Trying again...`);
-        setTimeout(() => {
-          server.close();
-          server.listen(PORT);
-        }, 1000);
-      } else {
-        console.error('Server error:', error);
-      }
-    });
+    // Start trying ports
+    await tryPort(PORT);
 
     // Handle process termination
     process.on('SIGTERM', () => {
       console.log('SIGTERM received. Shutting down gracefully...');
-      server.close(() => {
-        console.log('Server closed.');
-        process.exit(0);
-      });
+      process.exit(0);
     });
 
   } catch (error) {
