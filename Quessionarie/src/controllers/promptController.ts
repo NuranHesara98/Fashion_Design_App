@@ -4,9 +4,10 @@ import { generateComplementaryPalette } from '../utils/colorUtils';
 import { processSketchImage, getImageUrl, processImage } from '../utils/imageProcessingService';
 import { generateImage, generateText } from '../services/aiServiceFactory';
 import * as dotenv from 'dotenv';
+import * as path from 'path';
 
-// Load environment variables
-dotenv.config();
+// Load environment variables with explicit path
+dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
 // Get API keys from environment variables
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;

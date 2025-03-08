@@ -228,10 +228,10 @@
     
     <!-- API Key Configuration Alert -->
     <div id="apiKeyAlert" class="alert alert-warning" style="display: none;">
-        <h4 class="alert-heading">DeepAI API Key Not Configured</h4>
-        <p>The DeepAI API key is not configured. Please add your DeepAI API key to the server configuration to enable image generation.</p>
+        <h4 class="alert-heading">OpenAI API Key Not Configured</h4>
+        <p>The OpenAI API key is not configured. Please add your OpenAI API key to the server configuration to enable image generation.</p>
         <hr>
-        <p class="mb-0">You can get a DeepAI API key from <a href="https://deepai.org/dashboard/profile" target="_blank">https://deepai.org/dashboard/profile</a></p>
+        <p class="mb-0">You can get an OpenAI API key from <a href="https://platform.openai.com/api-keys" target="_blank">https://platform.openai.com/api-keys</a></p>
     </div>
     
     <form id="promptForm" enctype="multipart/form-data">
@@ -412,7 +412,7 @@
                     
                     console.log('Sending prompt request with data:', formDataObj);
                     
-                    const response = await fetch('http://localhost:3000/api/prompts/generate', {
+                    const response = await fetch('http://localhost:3003/api/prompts/generate', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -472,7 +472,7 @@
                 try {
                     const formData = new FormData(form);
                     
-                    const response = await fetch('http://localhost:3000/api/prompts/generate-with-sketch', {
+                    const response = await fetch('http://localhost:3003/api/prompts/generate-with-sketch', {
                         method: 'POST',
                         body: formData
                     });
@@ -526,18 +526,18 @@
             // Check API configuration on page load
             async function checkApiConfiguration() {
                 try {
-                    const response = await fetch('http://localhost:3000/api/prompts/check-api-config');
+                    const response = await fetch('http://localhost:3003/api/prompts/check-api-config');
                     const data = await response.json();
                     
                     if (data.status === 'API key is not configured') {
                         apiKeyAlert.style.display = 'block';
-                        apiKeyAlert.querySelector('h4').textContent = `DeepAI API Key Not Configured`;
-                        apiKeyAlert.querySelector('p').textContent = `The DeepAI API key is not configured. Please add your DeepAI API key to the server configuration to enable image generation.`;
+                        apiKeyAlert.querySelector('h4').textContent = `OpenAI API Key Not Configured`;
+                        apiKeyAlert.querySelector('p').textContent = `The OpenAI API key is not configured. Please add your OpenAI API key to the server configuration to enable image generation.`;
                     } else {
                         // API key is configured, show which provider is being used
                         const providerInfo = document.createElement('div');
                         providerInfo.className = 'alert alert-info';
-                        providerInfo.innerHTML = `<strong>AI Provider:</strong> DeepAI`;
+                        providerInfo.innerHTML = `<strong>AI Provider:</strong> ${data.provider}`;
                         document.querySelector('form').before(providerInfo);
                     }
                 } catch (error) {
