@@ -45,8 +45,17 @@ export const getProfile = async (
   res: Response<ProfileResponse>
 ): Promise<Response<ProfileResponse>> => {
   try {
+    // Explicitly verify token and extract user_id
+    const userId = req.user._id;
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid or missing authentication token'
+      });
+    }
+
     // Query user profile with specific field selection
-    const user = await User.findById(req.user._id)
+    const user = await User.findById(userId)
       .select('-password')
       .select('email name bio profilePictureUrl phoneNumber location specialization socialLinks designs lastLogin createdAt updatedAt')
       .lean();
@@ -59,7 +68,7 @@ export const getProfile = async (
     }
 
     // Update last login time
-    await User.findByIdAndUpdate(req.user._id, { lastLogin: new Date() });
+    await User.findByIdAndUpdate(userId, { lastLogin: new Date() });
 
     // Format the response
     return res.status(200).json({
@@ -95,6 +104,15 @@ export const updateProfile = async (
   res: Response<ProfileResponse>
 ): Promise<Response<ProfileResponse>> => {
   try {
+    // Explicitly verify token and extract user_id
+    const userId = req.user._id;
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid or missing authentication token'
+      });
+    }
+
     const {
       name,
       bio,
@@ -152,7 +170,7 @@ export const updateProfile = async (
 
     // Find and update user profile
     const user = await User.findByIdAndUpdate(
-      req.user._id,
+      userId,
       {
         $set: {
           ...(name && { name }),
@@ -178,6 +196,9 @@ export const updateProfile = async (
       });
     }
 
+    // Log successful profile update
+    console.log(`Profile updated successfully for user: ${userId}`);
+
     return res.status(200).json({
       success: true,
       message: 'Profile updated successfully',
@@ -199,16 +220,6 @@ export const updateProfile = async (
     });
   } catch (error: unknown) {
     console.error('Update profile error:', error);
-    
-    // Handle mongoose validation errors
-    if (error instanceof mongoose.Error.ValidationError) {
-      const firstError = Object.values(error.errors)[0];
-      return res.status(400).json({
-        success: false,
-        message: firstError.message
-      });
-    }
-    
     return res.status(500).json({
       success: false,
       message: 'Error updating user profile'
@@ -222,6 +233,15 @@ export const addDesign = async (
   res: Response<DesignResponse>
 ): Promise<Response<DesignResponse>> => {
   try {
+    // Explicitly verify token and extract user_id
+    const userId = req.user._id;
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid or missing authentication token'
+      });
+    }
+
     const { title, imageUrl } = req.body;
 
     // Validate required fields
@@ -249,7 +269,7 @@ export const addDesign = async (
 
     // Add design to user's designs array
     const user = await User.findByIdAndUpdate(
-      req.user._id,
+      userId,
       {
         $push: { designs: newDesign }
       },
@@ -286,7 +306,16 @@ export const getDesigns = async (
   res: Response<DesignResponse>
 ): Promise<Response<DesignResponse>> => {
   try {
-    const user = await User.findById(req.user._id)
+    // Explicitly verify token and extract user_id
+    const userId = req.user._id;
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid or missing authentication token'
+      });
+    }
+
+    const user = await User.findById(userId)
       .select('designs')
       .lean();
 
