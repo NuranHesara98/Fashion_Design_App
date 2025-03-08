@@ -1,10 +1,12 @@
 import { connectDB } from '../config/db';
 import { StoreModel, IStore } from '../models/Store';
 
-const storeData = [
+const storeData: IStore[] = [
   {
     name: 'House of Tailors',
     address: '195 High Level Rd, Nugegoda 10250',
+    phone: '0741858790',
+    website: 'http://cibweb.lk/',
     openingHours: {
       monday: '9 AM–7 PM',
       tuesday: '9 AM–7 PM',
@@ -26,6 +28,20 @@ const storeData = [
       friday: '10:30 AM–7:30 PM',
       saturday: '10:30 AM–7:30 PM',
       sunday: 'Closed'
+    }
+  },
+  {
+    name: 'Maas Luxury | Maas Designs',
+    address: '17 Thimbirigasyaya Rd, Colombo 00500',
+    phone: '0776637777',
+    openingHours: {
+      monday: '9:30 AM–7 PM',
+      tuesday: '9:30 AM–7 PM',
+      wednesday: '9:30 AM–7 PM',
+      thursday: '9:30 AM–7 PM',
+      friday: '9:30 AM–7 PM',
+      saturday: '9:30 AM–7 PM',
+      sunday: '9:30 AM–2 PM'
     }
   }
 ];
