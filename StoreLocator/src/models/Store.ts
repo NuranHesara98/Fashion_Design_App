@@ -2,6 +2,20 @@ import mongoose from 'mongoose';
 import fs from 'fs/promises';
 import path from 'path';
 
+// MongoDB Atlas connection string - replace with your actual connection string
+const MONGODB_URI = process.env.MONGODB_URI || 'your_mongodb_atlas_connection_string';
+
+// Connect to MongoDB Atlas
+export const connectDB = async () => {
+  try {
+    await mongoose.connect(MONGODB_URI);
+    console.log('Connected to MongoDB Atlas');
+  } catch (error) {
+    console.error('MongoDB connection error:', error);
+    process.exit(1);
+  }
+};
+
 export interface OpeningHours {
   monday: string;
   tuesday: string;
@@ -15,6 +29,8 @@ export interface OpeningHours {
 export interface IStore {
   name: string;
   address: string;
+  phone?: string;
+  website?: string;
   openingHours: OpeningHours;
 }
 
@@ -27,6 +43,14 @@ const storeSchema = new mongoose.Schema<IStore>({
   address: {
     type: String,
     required: true,
+  },
+  phone: {
+    type: String,
+    required: false,
+  },
+  website: {
+    type: String,
+    required: false,
   },
   openingHours: {
     monday: String,
