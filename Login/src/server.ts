@@ -2,57 +2,65 @@ import express from 'express';
 import dotenv from 'dotenv';
 import connectDB from './config/db';
 import cors from 'cors';
-import { errorHandler, notFound } from './middleware/errorMiddleware';
+import { errorHandler } from './middleware/errorMiddleware';
 import authRoutes from './routes/authRoutes';
 import userRoutes from './routes/userRoutes';
+import app from './app';
 
 // Load environment variables
 dotenv.config();
 
-const app = express();
+const PORT = process.env.PORT || 5004;
 
 // Middleware
-app.use(express.json());
 app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 
-// Basic route for testing
-app.get('/', (req, res) => {
-  res.json({ message: 'Server is running' });
-});
-
-// Error Handling
-app.use(notFound);
+// Error handling
 app.use(errorHandler);
 
-const PORT = process.env.PORT || 5005;
-
+// Function to start server
 const startServer = async () => {
   try {
     // Connect to MongoDB
     await connectDB();
-    
-    app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
-      console.log(`Test the server at http://localhost:${PORT}`);
-      console.log('Available endpoints:');
-      console.log('- POST /api/auth/register (email, password, confirmPassword)');
-      console.log('- POST /api/auth/login (email, password)');
-      console.log('- GET /api/users/profile (Protected - Requires Bearer Token)');
+
+    // Start server
+    const server = app.listen(PORT, () => {
+      console.log(`Server is running on port ${PORT}`);
     });
+
+    // Handle server errors
+    server.on('error', (error: NodeJS.ErrnoException) => {
+      if (error.code === 'EADDRINUSE') {
+        console.error(`Port ${PORT} is already in use. Trying again...`);
+        setTimeout(() => {
+          server.close();
+          server.listen(PORT);
+        }, 1000);
+      } else {
+        console.error('Server error:', error);
+      }
+    });
+
+    // Handle process termination
+    process.on('SIGTERM', () => {
+      console.log('SIGTERM received. Shutting down gracefully...');
+      server.close(() => {
+        console.log('Server closed.');
+        process.exit(0);
+      });
+    });
+
   } catch (error) {
     console.error('Failed to start server:', error);
     process.exit(1);
   }
 };
-
-// Handle server errors
-process.on('unhandledRejection', (error) => {
-  console.error('Unhandled Rejection:', error);
-  process.exit(1);
-});
 
 startServer();

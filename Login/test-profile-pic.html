@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Generate Test Profile Picture</title>
+</head>
+<body>
+    <canvas id="canvas" width="200" height="200"></canvas>
+    <br>
+    <button onclick="downloadImage()">Download Test Profile Picture</button>
+
+    <script>
+        // Create a simple profile picture
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        // Draw background
+        ctx.fillStyle = '#3498db';
+        ctx.fillRect(0, 0, 200, 200);
+
+        // Draw circle
+        ctx.beginPath();
+        ctx.arc(100, 80, 40, 0, Math.PI * 2);
+        ctx.fillStyle = '#ecf0f1';
+        ctx.fill();
+
+        // Draw body
+        ctx.beginPath();
+        ctx.moveTo(100, 120);
+        ctx.quadraticCurveTo(100, 200, 100, 180);
+        ctx.strokeStyle = '#ecf0f1';
+        ctx.lineWidth = 40;
+        ctx.stroke();
+
+        function downloadImage() {
+            const link = document.createElement('a');
+            link.download = 'test-profile-picture.png';
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+    </script>
+</body>
+</html> 
