@@ -5,8 +5,8 @@ class OnboardingItems {
     OnboardingInfo(
       title: "Welcome to Dress Me",
       description:
-          "Our app is designed to help you create clothing that matches your unique style and preferences. Simply answer a few quick questions about your occasion, fabric choice, and design ideas, and let us guide you through the process.",
-      image: "assets/images/image1.jpg",
+          "Our app is designed to help you create clothing that matches your unique style and preferences. Simply answer a few quick questions and design ideas. ",
+      image: "assets/images/image45.jpeg",
     ),
     OnboardingInfo(
       title: "Personalized Designs",

@@ -46,8 +46,8 @@ class _CustomizePageState extends State<CustomizePage> {
               ),
               const SizedBox(height: 16),
               _buildDropdown(
-                'What type of clothing are you looking for?',
-                ['Dress', 'Shirt/T-shirt', 'Pants/Jeans', 'Suit/Blazer'],
+                'What is your budget range?',
+                ['Budget', 'mid-level', 'Premium'],
                 selectedClothingType,
                 (value) => setState(() => selectedClothingType = value),
               ),
@@ -239,7 +239,7 @@ class _CustomizePageState extends State<CustomizePage> {
                       });
                     },
                     child: Padding(
-                      padding: const EdgeInsets.only(right: 15),
+                      padding: const EdgeInsets.only(right: 10),
                       child: Container(
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,

@@ -50,7 +50,7 @@ class _OnboardingViewState extends State<OnboardingView> {
                           child: Text(
                             item.title,
                             style: const TextStyle(
-                              fontSize: 24.0,
+                              fontSize: 23.0,
                               fontWeight: FontWeight.bold,
                               color: Colors.black, // Title color
                             ),
@@ -87,7 +87,7 @@ class _OnboardingViewState extends State<OnboardingView> {
                   controller.items.length,
                   (index) => AnimatedContainer(
                     duration: const Duration(milliseconds: 300),
-                    margin: const EdgeInsets.symmetric(horizontal: 4.0),
+                    margin: const EdgeInsets.symmetric(horizontal: 5.0),
                     height: 8.0,
                     width: currentPage == index ? 16.0 : 8.0,
                     decoration: BoxDecoration(
