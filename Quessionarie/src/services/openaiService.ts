@@ -5,41 +5,6 @@ import { v4 as uuidv4 } from 'uuid';
 import { ImageGenerationResult } from '../types/imageTypes';
 import axios from 'axios';
 
-// Add a function to ensure the generated-images directory exists
-const ensureDirectoryExists = (dirPath: string): void => {
-  if (!fs.existsSync(dirPath)) {
-    fs.mkdirSync(dirPath, { recursive: true });
-    console.log(`Created directory: ${dirPath}`);
-  }
-};
-
-// Add a function to download and save an image from a URL
-const downloadAndSaveImage = async (imageUrl: string): Promise<string> => {
-  try {
-    // Generate a unique filename with UUID
-    const fileName = `${uuidv4()}.png`;
-    
-    // Ensure the generated-images directory exists
-    const outputDir = path.resolve(process.cwd(), 'generated-images');
-    ensureDirectoryExists(outputDir);
-    
-    // Full path for the saved image
-    const outputPath = path.join(outputDir, fileName);
-    
-    // Download the image
-    const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
-    
-    // Save the image to the file system
-    fs.writeFileSync(outputPath, response.data);
-    
-    console.log(`Image saved to: ${outputPath}`);
-    return outputPath;
-  } catch (error) {
-    console.error('Error downloading and saving image:', error);
-    throw error;
-  }
-};
-
 /**
  * Generates an image using OpenAI's DALL-E API
  * 
@@ -108,13 +73,14 @@ export const generateImageWithOpenAI = async (
 
     console.log('Image generated successfully with OpenAI DALL-E');
     
-    // Download and save the image to the local file system
-    const savedImagePath = await downloadAndSaveImage(imageUrl);
+    // Download and save the image locally
+    const localImagePath = await downloadAndSaveImage(imageUrl);
     
     return {
       success: true,
       imageUrl: imageUrl,
-      localImagePath: savedImagePath,
+      localImagePath: localImagePath, // Add the local path to the result
+      enhancedPrompt: enhancedPrompt, // Include the enhanced prompt in the result
       provider: 'openai'
     };
   } catch (error: any) {
@@ -136,6 +102,61 @@ export const generateImageWithOpenAI = async (
     };
   }
 };
+
+/**
+ * Downloads an image from a URL and saves it to the local filesystem
+ * 
+ * @param imageUrl URL of the image to download
+ * @returns Path to the saved image file
+ */
+async function downloadAndSaveImage(imageUrl: string): Promise<string> {
+  try {
+    // Create a unique filename with timestamp
+    const filename = `image_${Date.now()}_${uuidv4().substring(0, 8)}.png`;
+    
+    // Define the path to save the image
+    const savePath = path.resolve(__dirname, '../../public/generated-images', filename);
+    const saveDir = path.dirname(savePath);
+    
+    // Ensure the directory exists
+    if (!fs.existsSync(saveDir)) {
+      fs.mkdirSync(saveDir, { recursive: true });
+      console.log(`Created directory: ${saveDir}`);
+    }
+    
+    console.log(`Downloading image from ${imageUrl} to ${savePath}`);
+    
+    // Download the image
+    const response = await axios({
+      method: 'GET',
+      url: imageUrl,
+      responseType: 'stream'
+    });
+    
+    // Create a write stream to save the image
+    const writer = fs.createWriteStream(savePath);
+    
+    // Pipe the image data to the file
+    response.data.pipe(writer);
+    
+    // Return a promise that resolves when the file is saved
+    return new Promise((resolve, reject) => {
+      writer.on('finish', () => {
+        console.log(`Image saved successfully to ${savePath}`);
+        // Return the relative path from the public folder for use in URLs
+        const relativePath = `/generated-images/${filename}`;
+        resolve(relativePath);
+      });
+      writer.on('error', (err) => {
+        console.error(`Error saving image: ${err.message}`);
+        reject(err);
+      });
+    });
+  } catch (error) {
+    console.error('Error downloading and saving image:', error);
+    throw error;
+  }
+}
 
 /**
  * Analyzes a sketch image using OpenAI's GPT-4 Vision API

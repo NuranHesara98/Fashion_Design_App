@@ -158,6 +158,7 @@ const generateImagePromptWithSketch = (req, res) => __awaiter(void 0, void 0, vo
             // Prepare the response
             const response = {
                 prompt,
+                enhancedPrompt: result.enhancedPrompt || prompt, // Include the enhanced prompt
                 sketchImage: Object.assign({ url: (0, imageProcessingService_1.getImageUrl)(req, sketchPath) }, processedSketch)
             };
             // Add the generated image URL if available
@@ -165,6 +166,10 @@ const generateImagePromptWithSketch = (req, res) => __awaiter(void 0, void 0, vo
                 response.generatedImage = {
                     url: result.imageUrl
                 };
+                // Add the local image path if available
+                if (result.localImagePath) {
+                    response.generatedImage.localPath = result.localImagePath;
+                }
             }
             // Add the text response if no image was generated
             if (result.textResponse) {

@@ -150,6 +150,7 @@ export const generateImagePromptWithSketch = async (req: FileRequest, res: Respo
       // Prepare the response
       const response: any = {
         prompt,
+        enhancedPrompt: result.enhancedPrompt || prompt, // Include the enhanced prompt
         sketchImage: {
           url: getImageUrl(req, sketchPath),
           ...processedSketch
@@ -161,6 +162,11 @@ export const generateImagePromptWithSketch = async (req: FileRequest, res: Respo
         response.generatedImage = {
           url: result.imageUrl
         };
+        
+        // Add the local image path if available
+        if (result.localImagePath) {
+          response.generatedImage.localPath = result.localImagePath;
+        }
       }
 
       // Add the text response if no image was generated
