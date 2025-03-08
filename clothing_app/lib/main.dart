@@ -108,8 +108,8 @@ class _SplashScreenState extends State<SplashScreen>
           child: Image.asset(
             'assets/images/logo.png',
             //Ensure this path is correct
-            width: 250,
-            height: 250,
+            width: 200,
+            height: 200,
           ),
         ),
       ),

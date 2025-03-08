@@ -1,20 +1,19 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'suggestions.dart'; // Import SuggestionPage
+import 'package:lottie/lottie.dart';
+import 'suggestions.dart';
 
 class UploadPage extends StatefulWidget {
   const UploadPage({super.key});
 
   @override
-  // ignore: library_private_types_in_public_api
   _UploadPageState createState() => _UploadPageState();
 }
 
 class _UploadPageState extends State<UploadPage> {
   bool isUploading = false;
   bool uploadComplete = false;
-
   Uint8List? uploadedImage;
   final ImagePicker _picker = ImagePicker();
 
@@ -50,68 +49,50 @@ class _UploadPageState extends State<UploadPage> {
     return Scaffold(
       body: Stack(
         children: [
-          // Top image with curved bottom
-          ClipPath(
-            clipper: CurvedBottomClipper(),
-            child: Container(
-              height: MediaQuery.of(context).size.height * 0.7,
-              decoration: const BoxDecoration(
-                image: DecorationImage(
-                  image: AssetImage(
-                      'assets/images/image19.jpeg'), // Replace with your image path
-                  fit: BoxFit.cover,
+          // Animated Background - Centered Horizontally
+          Positioned(
+            top: 50, // Move it slightly up
+            left: 0,
+            right: 0,
+            child: Center(
+              // Centering Horizontally
+              child: SizedBox(
+                height:
+                    MediaQuery.of(context).size.height * 0.7, // Adjust height
+                child: Lottie.asset(
+                  'assets/animations/Animation11.json', // Replace with your animation file
+                  fit: BoxFit.contain,
                 ),
               ),
             ),
           ),
-          // Content overlay
-          Positioned.fill(
-            child: Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10),
-              child: Column(
-                children: [
-                  const Spacer(),
-                  GestureDetector(
-                    onTap: () => showImageSourceSelection(context),
-                    child: Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(30),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.withOpacity(0.2),
-                            blurRadius: 10,
-                            spreadRadius: 5,
-                            offset: const Offset(0, 3),
-                          ),
-                        ],
-                      ),
-                      child: isUploading
-                          ? buildUploadingPhase()
-                          : uploadComplete
-                              ? buildCompletedPhase()
-                              : buildInitialPhase(),
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                ],
-              ),
-            ),
-          ),
-          // Text added to the bottom white area
+
+          // Upload Button Section
           Positioned(
-            bottom: 0.1, // Adjust vertical positioning
-            left: 16,
-            right: 16,
-            child: Text(
-              "",
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: const Color.fromARGB(255, 0, 0, 0),
+            bottom: 80,
+            left: 20,
+            right: 20,
+            child: GestureDetector(
+              onTap: () => showImageSourceSelection(context),
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.8),
+                  borderRadius: BorderRadius.circular(30),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      blurRadius: 10,
+                      spreadRadius: 5,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: isUploading
+                    ? buildUploadingPhase()
+                    : uploadComplete
+                        ? buildCompletedPhase()
+                        : buildInitialPhase(),
               ),
             ),
           ),
@@ -211,24 +192,4 @@ class _UploadPageState extends State<UploadPage> {
       },
     );
   }
-}
-
-class CurvedBottomClipper extends CustomClipper<Path> {
-  @override
-  Path getClip(Size size) {
-    Path path = Path();
-    path.lineTo(0, size.height - 80);
-    path.quadraticBezierTo(
-      size.width / 2,
-      size.height,
-      size.width,
-      size.height - 80,
-    );
-    path.lineTo(size.width, 0);
-    path.close();
-    return path;
-  }
-
-  @override
-  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
 }

@@ -1,12 +1,26 @@
 import 'package:flutter/material.dart';
-import 'editprofile.dart';
+import 'userprofilepage.dart'; // Import your UserProfilePage
 import 'helpcenter.dart'; // Ensure this file exists
+import 'favorite.dart'; // Import the FavoritePage
 
 class ProfilePage extends StatelessWidget {
-  const ProfilePage({super.key});
+  final Set<ProductCardData> favorites; // Add favorites parameter
+
+  const ProfilePage({super.key, required this.favorites});
 
   @override
   Widget build(BuildContext context) {
+    // Define user data here
+    Map<String, String> userData = {
+      'name': 'Jack William',
+      'email': 'jackwilliam1704@gmail.com',
+      'role': 'Fashion Enthusiast', // Add a role or other details if needed
+      'birthday': 'January 1, 1990',
+      'phoneNumber': '+1 818 123 4567',
+      'address': '123 Fashion Street, Style City',
+      'password': '********', // Added password field
+    };
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -36,12 +50,12 @@ class ProfilePage extends StatelessWidget {
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    "Jack William",
+                    userData['name']!, // Use user data
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 5),
                   Text(
-                    "jackwilliam1704@gmail.com",
+                    userData['email']!, // Use user data
                     style: TextStyle(color: Colors.grey),
                   ),
                 ],
@@ -49,11 +63,21 @@ class ProfilePage extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             _buildMenuItem(
-                context, Icons.person, "Edit Profile", const EditProfilePage()),
+                context,
+                Icons.person,
+                "Edit Profile",
+                UserProfilePage(
+                    userData: userData)), // Pass user data to UserProfilePage
             _buildMenuItem(context, Icons.payment, "Payment Method", null),
             _buildMenuItem(context, Icons.language, "Language", null),
             _buildMenuItem(context, Icons.history, "Order History", null),
-            _buildMenuItem(context, Icons.favorite, "Favourites", null),
+            _buildMenuItem(
+              context,
+              Icons.favorite,
+              "Favourites",
+              FavoritePage(
+                  favorites: favorites), // Pass favorites to FavoritePage
+            ),
             _buildMenuItem(
                 context, Icons.help, "Help Center", const HelpPage()),
           ],
