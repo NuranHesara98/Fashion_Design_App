@@ -1,7 +1,8 @@
 import { Request, Response } from 'express';
 import asyncHandler from 'express-async-handler';
 import Design from '../models/designModel';
-import { AppError } from '../middleware/errorMiddleware';
+import { AppError, NotFoundError } from '../utils/errors';
+import mongoose from 'mongoose';
 
 // @desc    Get designs by user ID
 // @route   GET /api/designs/user/:userId
@@ -9,16 +10,17 @@ import { AppError } from '../middleware/errorMiddleware';
 export const getUserDesigns = asyncHandler(async (req: Request, res: Response) => {
   const { userId } = req.params;
 
-  if (!userId) {
-    throw new AppError('User ID is required', 400);
+  // Validate userId format
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    throw new AppError('Invalid user ID format', 400);
   }
 
   const designs = await Design.find({ userId })
     .sort({ createdAt: -1 }) // Sort by newest first
     .select('-__v'); // Exclude version key
 
-  if (!designs) {
-    throw new AppError('No designs found for this user', 404);
+  if (!designs || designs.length === 0) {
+    throw new NotFoundError('No designs found for this user');
   }
 
   res.status(200).json({
