@@ -122,7 +122,7 @@ export const updateProfile = async (
           await cleanupOldImage(currentUser.profilePictureUrl);
         }
       } catch (error) {
-        throw new FileUploadError('Error processing profile picture');
+        throw new FileUploadError('Failed to process profile picture: ' + (error instanceof Error ? error.message : 'Unknown error'));
       }
     }
 
@@ -130,7 +130,7 @@ export const updateProfile = async (
     if (!req.file && profilePictureUrl && !profilePictureUrl.startsWith('/uploads/')) {
       // Validate profile picture URL only for external URLs
       if (!/^https?:\/\/.+/.test(profilePictureUrl)) {
-        throw new ValidationError('Profile picture URL must be a valid URL');
+        throw new ValidationError('Profile picture URL must be a valid URL starting with http:// or https://');
       }
     }
 
@@ -144,51 +144,50 @@ export const updateProfile = async (
       socialLinks
     } = req.body;
 
-    // Validate input lengths
+    // Enhanced validation with detailed error messages
     if (name && (typeof name !== 'string' || name.length > 50)) {
-      throw new ValidationError('Name must be a string and cannot exceed 50 characters');
+      throw new ValidationError(`Name validation failed: ${typeof name !== 'string' ? 'Must be text' : 'Cannot exceed 50 characters'}`);
     }
 
     if (bio && (typeof bio !== 'string' || bio.length > 500)) {
-      throw new ValidationError('Bio must be a string and cannot exceed 500 characters');
+      throw new ValidationError(`Bio validation failed: ${typeof bio !== 'string' ? 'Must be text' : 'Cannot exceed 500 characters'}`);
     }
 
     if (location && (typeof location !== 'string' || location.length > 100)) {
-      throw new ValidationError('Location must be a string and cannot exceed 100 characters');
+      throw new ValidationError(`Location validation failed: ${typeof location !== 'string' ? 'Must be text' : 'Cannot exceed 100 characters'}`);
     }
 
     if (specialization && (typeof specialization !== 'string' || specialization.length > 100)) {
-      throw new ValidationError('Specialization must be a string and cannot exceed 100 characters');
+      throw new ValidationError(`Specialization validation failed: ${typeof specialization !== 'string' ? 'Must be text' : 'Cannot exceed 100 characters'}`);
     }
 
-    // Validate phone number format
     if (phoneNumber && (typeof phoneNumber !== 'string' || !/^\+?[\d\s-]{10,}$/.test(phoneNumber))) {
-      throw new ValidationError('Please enter a valid phone number');
+      throw new ValidationError('Phone number must be valid (minimum 10 digits, can include +, spaces, and hyphens)');
     }
 
-    // Validate social links
+    // Enhanced social links validation
     if (socialLinks) {
       if (typeof socialLinks !== 'object') {
-        throw new ValidationError('Social links must be an object');
+        throw new ValidationError('Social links must be provided as an object');
       }
 
       const { instagram, linkedin, website } = socialLinks;
       const urlRegex = /^https?:\/\/.+/;
 
       if (instagram && (typeof instagram !== 'string' || !urlRegex.test(instagram))) {
-        throw new ValidationError('Instagram link must be a valid URL');
+        throw new ValidationError('Instagram link must be a valid URL starting with http:// or https://');
       }
 
       if (linkedin && (typeof linkedin !== 'string' || !urlRegex.test(linkedin))) {
-        throw new ValidationError('LinkedIn link must be a valid URL');
+        throw new ValidationError('LinkedIn link must be a valid URL starting with http:// or https://');
       }
 
       if (website && (typeof website !== 'string' || !urlRegex.test(website))) {
-        throw new ValidationError('Website link must be a valid URL');
+        throw new ValidationError('Website link must be a valid URL starting with http:// or https://');
       }
     }
 
-    // Update user profile
+    // Update user profile with validated data
     const user = await User.findByIdAndUpdate(
       userId,
       {
@@ -210,9 +209,10 @@ export const updateProfile = async (
     ).lean();
 
     if (!user) {
-      throw new NotFoundError('User profile not found');
+      throw new NotFoundError('Failed to update user profile');
     }
 
+    // Send detailed success response
     res.status(200).json({
       success: true,
       message: 'Profile updated successfully',
@@ -233,6 +233,7 @@ export const updateProfile = async (
       }
     });
   } catch (error) {
+    // Pass error to error handling middleware
     next(error);
   }
 };
