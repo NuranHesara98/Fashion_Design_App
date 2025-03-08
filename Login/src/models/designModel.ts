@@ -2,14 +2,13 @@ import mongoose from 'mongoose';
 
 export interface IDesign {
   userId: mongoose.Types.ObjectId;
-  title: string;
-  description: string;
+  name: string;  // design name
   imageUrl: string;
-  category: string;
-  tags: string[];
-  likes: number;
   createdAt: Date;
   updatedAt: Date;
+  description?: string;
+  category?: string;
+  tags?: string[];
 }
 
 const designSchema = new mongoose.Schema<IDesign>({
@@ -18,44 +17,28 @@ const designSchema = new mongoose.Schema<IDesign>({
     ref: 'User',
     required: [true, 'User ID is required']
   },
-  title: {
+  name: {
     type: String,
-    required: [true, 'Title is required']
-  },
-  description: {
-    type: String,
-    default: ''
+    required: [true, 'Design name is required']
   },
   imageUrl: {
     type: String,
     required: [true, 'Image URL is required']
   },
+  description: {
+    type: String,
+    default: ''
+  },
   category: {
     type: String,
-    required: [true, 'Category is required']
+    default: 'uncategorized'
   },
   tags: {
     type: [String],
     default: []
-  },
-  likes: {
-    type: Number,
-    default: 0
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now
-  },
-  updatedAt: {
-    type: Date,
-    default: Date.now
   }
-});
-
-// Update the updatedAt timestamp before saving
-designSchema.pre('save', function(next) {
-  this.updatedAt = new Date();
-  next();
+}, {
+  timestamps: true // This automatically adds createdAt and updatedAt fields
 });
 
 const Design = mongoose.model<IDesign>('Design', designSchema);
