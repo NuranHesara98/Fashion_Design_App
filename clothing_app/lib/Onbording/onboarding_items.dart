@@ -20,17 +20,5 @@ class OnboardingItems {
           "Once you're satisfied with your design, you can place your order directly through the app. Select a trusted tailor or shop from our list of verified vendors to produce your garment.So Enjoy a seamless experience from concept to creation!",
       image: "assets/images/image13.jpg",
     ),
-    OnboardingInfo(
-      title: "Seamless Experience",
-      description:
-          "Once you're satisfied with your design, you can place your order directly through the app. Select a trusted tailor or shop from our list of verified vendors to produce your garment.So Enjoy a seamless experience from concept to creation!",
-      image: "assets/images/image13.jpg",
-    ),
-    OnboardingInfo(
-      title: "Seamless Experience",
-      description:
-          "Once you're satisfied with your design, you can place your order directly through the app. Select a trusted tailor or shop from our list of verified vendors to produce your garment.So Enjoy a seamless experience from concept to creation!",
-      image: "assets/images/image13.jpg",
-    ),
   ];
 }
