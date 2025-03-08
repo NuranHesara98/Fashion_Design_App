@@ -1,5 +1,7 @@
 import 'package:clothing_app/Onbording/onboarding_items.dart';
 import 'package:flutter/material.dart';
+// ignore: unused_import
+import 'package:clothing_app/pages/home.dart';
 
 class OnboardingView extends StatefulWidget {
   const OnboardingView({super.key});
@@ -116,7 +118,7 @@ class _OnboardingViewState extends State<OnboardingView> {
                           );
                         } else {
                           // Navigate to WelcomeScreen instead of LoginPage
-                          Navigator.pushReplacementNamed(context, '/welcome');
+                          Navigator.pushReplacementNamed(context, '/home');
                         }
                       },
                       child: Text(

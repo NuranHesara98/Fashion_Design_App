@@ -38,7 +38,7 @@ class _SignUpPageState extends State<SignUpPage> {
     } else if (password != confirmPassword) {
       _showSnackBar("Passwords do not match. Please try again.");
     } else {
-      Navigator.pushReplacementNamed(context, '/home');
+      Navigator.pushReplacementNamed(context, '/onboarding');
     }
   }
 
