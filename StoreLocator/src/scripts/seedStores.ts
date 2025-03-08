@@ -73,6 +73,21 @@ const storeData: IStore[] = [
       saturday: '9:30 AM–6 PM',
       sunday: 'Closed'
     }
+  },
+  {
+    name: 'Rayman Custom Tailors (Pvt) Ltd',
+    address: 'VV9R+9G6, 184 High Level Rd, Nugegoda 10250',
+    phone: '0112820271',
+    website: 'http://www.raymancustomtailor.com/',
+    openingHours: {
+      monday: '9 AM–8 PM',
+      tuesday: '9 AM–8 PM',
+      wednesday: '9 AM–8 PM',
+      thursday: '9 AM–8 PM',
+      friday: '9 AM–8 PM',
+      saturday: '9 AM–8 PM',
+      sunday: '9 AM–2 PM'
+    }
   }
 ];
 
