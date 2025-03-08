@@ -93,9 +93,11 @@ const userSchema = new Schema<IUserDocument>({
     type: String,
     validate: {
       validator: function(v: string) {
-        return !v || /^https?:\/\/.+/.test(v);
+        if (!v) return true; // Allow empty/undefined values
+        // Accept both URLs and local file paths
+        return /^(https?:\/\/|\/uploads\/).+/.test(v) || v.startsWith('/uploads/');
       },
-      message: 'Profile picture URL must be a valid URL'
+      message: 'Profile picture URL must be a valid URL or local file path'
     }
   },
   phoneNumber: {

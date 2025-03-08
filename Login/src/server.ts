@@ -1,57 +1,52 @@
-import express from 'express';
-import cors from 'cors';
-import authRoutes from './routes/authRoutes';
-import userRoutes from './routes/userRoutes';
 import dotenv from 'dotenv';
 import connectDB from './config/db';
+import app from './app';
 
 // Load environment variables
 dotenv.config();
 
-const app = express();
+let PORT = parseInt(process.env.PORT || '5004');
 
-// Middleware
-app.use(express.json());
-app.use(cors());
-
-// Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/users', userRoutes);
-
-// Basic route for testing
-app.get('/', (_req, res) => {
-  res.json({ message: 'Server is running' });
-});
-
-const PORT = process.env.PORT || 5004;
-
+// Function to start server
 const startServer = async () => {
   try {
     // Connect to MongoDB
-    const isConnected = await connectDB();
-    if (!isConnected) {
-      console.error('Failed to connect to MongoDB');
-      process.exit(1);
-    }
-    
-    app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
-      console.log(`Test the server at http://localhost:${PORT}`);
-      console.log('Available endpoints:');
-      console.log('- POST /api/auth/register (email, password, confirmPassword)');
-      console.log('- POST /api/auth/login (email, password)');
-      console.log('- GET /api/users/profile (Protected - Requires Bearer Token)');
+    await connectDB();
+
+    // Function to try starting server on a port
+    const tryPort = (port: number): Promise<void> => {
+      return new Promise((resolve, reject) => {
+        const server = app.listen(port)
+          .on('listening', () => {
+            console.log(`Server is running on port ${port}`);
+            resolve();
+          })
+          .on('error', (err: NodeJS.ErrnoException) => {
+            if (err.code === 'EADDRINUSE') {
+              console.log(`Port ${port} is in use, trying ${port + 1}`);
+              server.close();
+              // Try next port
+              tryPort(port + 1).then(resolve).catch(reject);
+            } else {
+              reject(err);
+            }
+          });
+      });
+    };
+
+    // Start trying ports
+    await tryPort(PORT);
+
+    // Handle process termination
+    process.on('SIGTERM', () => {
+      console.log('SIGTERM received. Shutting down gracefully...');
+      process.exit(0);
     });
+
   } catch (error) {
-    console.error('Server startup error:', error);
+    console.error('Failed to start server:', error);
     process.exit(1);
   }
 };
-
-// Handle server errors
-process.on('unhandledRejection', (error) => {
-  console.error('Unhandled Rejection:', error);
-  process.exit(1);
-});
 
 startServer();

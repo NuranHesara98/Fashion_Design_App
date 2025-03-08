@@ -20,7 +20,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"email\": \"test@example.com\",\n    \"password\": \"test123\",\n    \"confirmPassword\": \"test123\"\n}"
+							"raw": "{\n    \"email\": \"test@example.com\",\n    \"password\": \"Test123!\",\n    \"confirmPassword\": \"Test123!\",\n    \"name\": \"Test User\",\n    \"bio\": \"Fashion designer specializing in sustainable fashion\"\n}"
 						},
 						"url": {
 							"raw": "http://localhost:5004/api/auth/register",
@@ -43,7 +43,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"email\": \"test@example.com\",\n    \"password\": \"test123\"\n}"
+							"raw": "{\n    \"email\": \"test@example.com\",\n    \"password\": \"Test123!\"\n}"
 						},
 						"url": {
 							"raw": "http://localhost:5004/api/auth/login",
@@ -63,7 +63,12 @@
 					"name": "Get Profile",
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
 						"url": {
 							"raw": "http://localhost:5004/api/users/profile",
 							"protocol": "http",
@@ -74,18 +79,22 @@
 					}
 				},
 				{
-					"name": "Update Profile",
+					"name": "Update Profile - JSON Data",
 					"request": {
 						"method": "PUT",
 						"header": [
 							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							},
+							{
 								"key": "Content-Type",
 								"value": "application/json"
 							}
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": \"Test User\",\n    \"bio\": \"I love fashion design!\",\n    \"profilePictureUrl\": \"https://example.com/profile.jpg\"\n}"
+							"raw": "{\n    \"name\": \"Updated User\",\n    \"bio\": \"Updated bio with new information\",\n    \"phoneNumber\": \"+94771234567\",\n    \"location\": \"Colombo, Sri Lanka\",\n    \"specialization\": \"Sustainable Fashion\",\n    \"socialLinks\": {\n        \"instagram\": \"https://instagram.com/user\",\n        \"linkedin\": \"https://linkedin.com/in/user\",\n        \"website\": \"https://user.com\"\n    }\n}"
 						},
 						"url": {
 							"raw": "http://localhost:5004/api/users/profile",
@@ -97,10 +106,53 @@
 					}
 				},
 				{
-					"name": "Add Design to History",
+					"name": "Update Profile - With Image",
 					"request": {
-						"method": "POST",
+						"method": "PUT",
 						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "profilePicture",
+									"type": "file",
+									"src": ""
+								},
+								{
+									"key": "name",
+									"value": "User With Image",
+									"type": "text"
+								},
+								{
+									"key": "bio",
+									"value": "Profile updated with new image",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:5004/api/users/profile",
+							"protocol": "http",
+							"host": ["localhost"],
+							"port": "5004",
+							"path": ["api", "users", "profile"]
+						}
+					}
+				},
+				{
+					"name": "Update Profile - Invalid Data",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}"
+							},
 							{
 								"key": "Content-Type",
 								"value": "application/json"
@@ -108,14 +160,14 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"designId\": \"design123\",\n    \"title\": \"Summer Collection 2025\",\n    \"imageUrl\": \"https://example.com/designs/summer2025.jpg\"\n}"
+							"raw": "{\n    \"bio\": \"This is a very long bio that exceeds 500 characters. This is a very long bio that exceeds 500 characters. This is a very long bio that exceeds 500 characters. This is a very long bio that exceeds 500 characters. This is a very long bio that exceeds 500 characters. This is a very long bio that exceeds 500 characters. This is a very long bio that exceeds 500 characters. This is a very long bio that exceeds 500 characters. This is a very long bio that exceeds 500 characters.\"\n}"
 						},
 						"url": {
-							"raw": "http://localhost:5004/api/users/profile/designs",
+							"raw": "http://localhost:5004/api/users/profile",
 							"protocol": "http",
 							"host": ["localhost"],
 							"port": "5004",
-							"path": ["api", "users", "profile", "designs"]
+							"path": ["api", "users", "profile"]
 						}
 					}
 				}
