@@ -83,37 +83,6 @@ class _UserProfilePageState extends State<UserProfilePage> {
               SliverAppBar(
                 floating: true,
                 snap: true,
-                title: Text('Profile', style: theme.textTheme.headlineMedium),
-                actions: [
-                  Padding(
-                    padding: EdgeInsets.only(right: 16),
-                    child: FilledButton.icon(
-                      onPressed: toggleEdit,
-                      icon: AnimatedSwitcher(
-                        duration: Duration(milliseconds: 200),
-                        child: Icon(
-                          isEditing ? Icons.check : Icons.edit,
-                          key: ValueKey<bool>(isEditing),
-                          size: 20,
-                          color: Colors.white,
-                        ),
-                      ),
-                      label: Text(
-                        isEditing ? 'Save' : 'Edit',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                      style: FilledButton.styleFrom(
-                        backgroundColor: Colors.black,
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      ),
-                    ),
-                  ),
-                ],
               ),
               SliverPadding(
                 padding: EdgeInsets.symmetric(horizontal: 20),
@@ -131,11 +100,20 @@ class _UserProfilePageState extends State<UserProfilePage> {
           ),
         ),
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: toggleEdit,
+        backgroundColor: Colors.black,
+        child: Icon(
+          isEditing ? Icons.check : Icons.edit,
+          color: Colors.white,
+        ),
+      ),
     );
   }
 
   Widget _buildProfileSection(ThemeData theme) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.center, // Center align
       children: [
         Stack(
           alignment: Alignment.bottomCenter,
@@ -167,58 +145,31 @@ class _UserProfilePageState extends State<UserProfilePage> {
                       ),
               ),
             ),
-            if (isEditing)
-              Positioned(
-                bottom: 0,
-                child: GestureDetector(
-                  onTap: _pickImage, // Call _pickImage when tapped
-                  child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.7),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.camera_alt_rounded,
-                            color: Colors.white, size: 16),
-                        SizedBox(width: 4),
-                        Text(
-                          'Change',
-                          style: TextStyle(color: Colors.white, fontSize: 12),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
           ],
         ),
         SizedBox(height: 16),
         if (isEditing) ...[
-          _buildEditableField(
-            controllers['name']!,
-            style: theme.textTheme.headlineMedium,
-            textAlign: TextAlign.center,
+          Center(
+            // Center text fields in edit mode
+            child: _buildEditableField(controllers['name']!,
+                style: theme.textTheme.headlineMedium),
           ),
           SizedBox(height: 8),
-          _buildEditableField(
-            controllers['role']!,
-            style: theme.textTheme.bodyLarge?.copyWith(color: Colors.grey[600]),
-            textAlign: TextAlign.center,
+          Center(
+            child: _buildEditableField(controllers['role']!,
+                style: theme.textTheme.bodyLarge
+                    ?.copyWith(color: Colors.grey[600])),
           ),
         ] else ...[
-          Text(
-            userData['name']!,
-            style: theme.textTheme.headlineMedium,
-            textAlign: TextAlign.center,
+          Center(
+            child:
+                Text(userData['name']!, style: theme.textTheme.headlineMedium),
           ),
           SizedBox(height: 4),
-          Text(
-            userData['role']!,
-            style: theme.textTheme.bodyLarge?.copyWith(color: Colors.grey[600]),
-            textAlign: TextAlign.center,
+          Center(
+            child: Text(userData['role']!,
+                style: theme.textTheme.bodyLarge
+                    ?.copyWith(color: Colors.grey[600])),
           ),
         ],
       ],
@@ -230,106 +181,57 @@ class _UserProfilePageState extends State<UserProfilePage> {
       child: Padding(
         padding: EdgeInsets.all(24),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildDetailItem(
-              theme: theme,
-              icon: Icons.cake_rounded,
-              label: 'Birthday',
-              controller: controllers['birthday']!,
-            ),
+            _buildDetailItem(theme, Icons.cake_rounded, 'Birthday',
+                controllers['birthday']!),
+            _buildDivider(),
+            _buildDetailItem(theme, Icons.phone_rounded, 'Phone',
+                controllers['phoneNumber']!),
             _buildDivider(),
             _buildDetailItem(
-              theme: theme,
-              icon: Icons.phone_rounded,
-              label: 'Phone',
-              controller: controllers['phoneNumber']!,
-            ),
+                theme, Icons.email_rounded, 'Email', controllers['email']!),
+            _buildDivider(),
+            _buildDetailItem(theme, Icons.location_on_rounded, 'Address',
+                controllers['address']!),
             _buildDivider(),
             _buildDetailItem(
-              theme: theme,
-              icon: Icons.email_rounded,
-              label: 'Email',
-              controller: controllers['email']!,
-            ),
-            _buildDivider(),
-            _buildDetailItem(
-              theme: theme,
-              icon: Icons.location_on_rounded,
-              label: 'Address',
-              controller: controllers['address']!,
-            ),
-            _buildDivider(),
-            _buildDetailItem(
-              theme: theme,
-              icon: Icons.lock_rounded,
-              label: 'Password',
-              controller: controllers['password']!,
-              isPassword: true,
-            ),
+                theme, Icons.lock_rounded, 'Password', controllers['password']!,
+                isPassword: true),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildDetailItem({
-    required ThemeData theme,
-    required IconData icon,
-    required String label,
-    required TextEditingController controller,
-    bool isPassword = false,
-  }) {
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        children: [
-          Icon(icon, size: 24, color: Colors.grey[400]),
-          SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: Colors.grey[600],
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                SizedBox(height: 4),
-                if (isEditing)
-                  _buildEditableField(
-                    controller,
-                    isPassword: isPassword,
-                  )
-                else
-                  Text(
-                    isPassword ? '********' : controller.text,
-                    style: theme.textTheme.bodyLarge,
-                  ),
-              ],
-            ),
-          ),
-        ],
-      ),
+  Widget _buildDetailItem(ThemeData theme, IconData icon, String label,
+      TextEditingController controller,
+      {bool isPassword = false}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label,
+            style: theme.textTheme.bodyMedium?.copyWith(
+                color: Colors.grey[600], fontWeight: FontWeight.w500)),
+        SizedBox(height: 4),
+        if (isEditing)
+          _buildEditableField(controller, isPassword: isPassword)
+        else
+          Text(isPassword ? '********' : controller.text,
+              style: theme.textTheme.bodyLarge),
+      ],
     );
   }
 
-  Widget _buildEditableField(
-    TextEditingController controller, {
-    TextStyle? style,
-    TextAlign textAlign = TextAlign.start,
-    bool isPassword = false,
-  }) {
+  Widget _buildEditableField(TextEditingController controller,
+      {TextStyle? style, bool isPassword = false}) {
     return TextField(
       controller: controller,
       style: style,
-      textAlign: textAlign,
       obscureText: isPassword,
       decoration: InputDecoration(
-        isDense: true,
-        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      ),
+          isDense: true,
+          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8)),
     );
   }
 
