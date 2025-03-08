@@ -19,7 +19,7 @@ class ProductPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Center( 
+            Center(
               child: Image.asset(
                 'assets/images/image33.png',
                 height: 300,

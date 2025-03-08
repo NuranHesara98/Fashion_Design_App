@@ -19,10 +19,22 @@ class _HomePageState extends State<HomePage> {
   ];
 
   final List<Map<String, String>> products = [
-    {"image": "assets/images/Sketch1.png", "category": "Short frock"},
-    {"image": "assets/images/Sketch2.png", "category": "Long frock"},
-    {"image": "assets/images/Sketch3.png", "category": "Tops"},
-    {"image": "assets/images/Sketch5.png", "category": "Skirts"},
+    {"image": "assets/images/Sketch1.jpeg", "category": "Long frock"},
+    {"image": "assets/images/Sketch3.jpeg", "category": "Tops"},
+    {"image": "assets/images/Sketch4.jpeg", "category": "Long frock"},
+    {"image": "assets/images/Sketch6.jpeg", "category": "Long frock"},
+    {"image": "assets/images/Sketch7.jpeg", "category": "Long frock"},
+    {"image": "assets/images/Sketch9.jpeg", "category": "Tops"},
+    {"image": "assets/images/Sketch2.jpeg", "category": "Short frock"},
+    {"image": "assets/images/Sketch5.jpeg", "category": "Long frock"},
+    {"image": "assets/images/Sketch8.jpeg", "category": "Tops"},
+    {"image": "assets/images/Sketch9.jpeg", "category": "Tops"},
+    {"image": "assets/images/Sketch10.jpeg", "category": "Tops"},
+    {"image": "assets/images/Sketch11.jpeg", "category": "Long frock"},
+    {"image": "assets/images/Sketch12.jpeg", "category": "Tops"},
+    {"image": "assets/images/Sketch13.jpeg", "category": "Tops"},
+    {"image": "assets/images/Sketch14.jpeg", "category": "Skirts"},
+    {"image": "assets/images/Sketch15.jpeg", "category": "Skirts"},
   ];
 
   String selectedCategory = "All";
@@ -31,6 +43,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    // Filter products based on selected category and search query.
     final filteredProducts = products.where((product) {
       final matchesCategory =
           selectedCategory == "All" || product['category'] == selectedCategory;
@@ -39,6 +52,21 @@ class _HomePageState extends State<HomePage> {
           .contains(searchQuery.toLowerCase());
       return matchesCategory && matchesSearch;
     }).toList();
+
+    // Calculate the required height for the grid.
+    // Assume a fixed horizontal padding of 16 on each side (total 32) and 8 spacing between columns.
+    final screenWidth = MediaQuery.of(context).size.width;
+    final totalHorizontalPadding = 32.0;
+    final crossAxisSpacing = 8.0;
+    final crossAxisCount = 2;
+    final cellWidth =
+        (screenWidth - totalHorizontalPadding - crossAxisSpacing) /
+            crossAxisCount;
+    // With a childAspectRatio of 0.75, cellHeight = cellWidth / 0.75.
+    final cellHeight = cellWidth / 0.75;
+    final rowCount = (filteredProducts.length / crossAxisCount).ceil();
+    // Also add spacing between rows (rowCount - 1 times 8.0).
+    final gridHeight = rowCount * cellHeight + (rowCount - 1) * 8.0;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -66,15 +94,15 @@ class _HomePageState extends State<HomePage> {
                   color: const Color.fromARGB(255, 238, 238, 238),
                   borderRadius: BorderRadius.circular(30),
                   border: Border.all(
-                    color: Colors.black, // Black border color
-                    width: 1, // Border width
+                    color: Colors.black,
+                    width: 1,
                   ),
                 ),
                 child: TextField(
                   controller: searchController,
                   decoration: const InputDecoration(
                     hintText: "Search...",
-                    border: InputBorder.none, // Remove the default border
+                    border: InputBorder.none,
                     icon: Icon(Icons.search, color: Colors.black),
                   ),
                   onChanged: (value) {
@@ -87,6 +115,7 @@ class _HomePageState extends State<HomePage> {
 
               const SizedBox(height: 20),
 
+              // Banner Image
               Container(
                 width: double.infinity,
                 decoration: BoxDecoration(
@@ -98,8 +127,7 @@ class _HomePageState extends State<HomePage> {
                       'assets/images/image36.jpg',
                       fit: BoxFit.cover,
                       alignment: const Alignment(0, -0.5),
-                      width:
-                          MediaQuery.of(context).size.width, // Ensure full widt
+                      width: MediaQuery.of(context).size.width,
                       height: 400,
                     ),
                     Positioned(
@@ -140,6 +168,7 @@ class _HomePageState extends State<HomePage> {
 
               const SizedBox(height: 24.0),
 
+              // Categories Row
               const Text(
                 "Categories",
                 style: TextStyle(
@@ -182,35 +211,42 @@ class _HomePageState extends State<HomePage> {
                   }).toList(),
                 ),
               ),
+
               const SizedBox(height: 16.0),
 
-              GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: filteredProducts.length,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 8.0,
-                  mainAxisSpacing: 8.0,
-                  childAspectRatio: 0.75,
+              // Wrap the GridView.builder in a Container with explicit height
+              SizedBox(
+                height: gridHeight,
+                child: GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: filteredProducts.length,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 8.0,
+                    mainAxisSpacing: 8.0,
+                    childAspectRatio: 0.75,
+                  ),
+                  itemBuilder: (context, index) {
+                    final product = filteredProducts[index];
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => CustomizePage(),
+                          ),
+                        );
+                      },
+                      child: _buildProductCard(product['image']!),
+                    );
+                  },
                 ),
-                itemBuilder: (context, index) {
-                  final product = filteredProducts[index];
-                  return GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => CustomizePage(),
-                        ),
-                      );
-                    },
-                    child: _buildProductCard(product['image']!),
-                  );
-                },
               ),
+
               const SizedBox(height: 16.0),
 
+              // Suggest Sketch Button
               Padding(
                 padding: const EdgeInsets.only(bottom: 20.0),
                 child: Center(
@@ -275,9 +311,12 @@ class _HomePageState extends State<HomePage> {
         padding: const EdgeInsets.all(8.0),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(12.0),
-          child: Image.asset(
-            imagePath,
-            fit: BoxFit.cover,
+          child: SizedBox(
+            height: 120, // Adjust this height as needed
+            child: Image.asset(
+              imagePath,
+              fit: BoxFit.contain,
+            ),
           ),
         ),
       ),
