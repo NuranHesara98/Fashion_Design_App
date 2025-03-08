@@ -17,9 +17,3 @@ This is a backend application for managing clothing items, uploading images, gen
 - **AWS S3**: Cloud storage for uploaded images.
 - **TypeScript**: Language for type-safe development.
 
-## Setup Instructions
-
-1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/your-username/fashion-app.git
-   cd fashion-app
