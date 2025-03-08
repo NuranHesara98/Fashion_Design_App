@@ -71,9 +71,8 @@ export const createDesign = asyncHandler(async (
 // @access  Private
 export const getUserDesigns = asyncHandler(async (
   req: Request,
-  res: Response<GetDesignsResponse>,
-  next: NextFunction
-): Promise<void> => {
+  res: Response<GetDesignsResponse>
+) => {
   const { userId } = req.params;
 
   // Validate userId format
@@ -85,35 +84,27 @@ export const getUserDesigns = asyncHandler(async (
     return;
   }
 
-  try {
-    // Query designs for the user
-    const designs = await Design.find({ userId })
-      .sort({ createdAt: -1 }) // Sort by newest first
-      .select('-__v') // Exclude version key
-      .lean(); // Convert to plain JavaScript objects
+  // Query designs for the user
+  const designs = await Design.find({ userId })
+    .sort({ createdAt: -1 }) // Sort by newest first
+    .select('-__v') // Exclude version key
+    .lean(); // Convert to plain JavaScript objects
 
-    // Format the response data
-    const formattedDesigns: DesignResponse[] = designs.map(design => ({
-      id: design._id.toString(),
-      name: design.name,
-      imageUrl: design.imageUrl,
-      createdAt: design.createdAt.toISOString(),
-      description: design.description,
-      category: design.category,
-      tags: design.tags
-    }));
+  // Format the response data
+  const formattedDesigns: DesignResponse[] = designs.map(design => ({
+    id: design._id.toString(),
+    name: design.name,
+    imageUrl: design.imageUrl,
+    createdAt: design.createdAt.toISOString(),
+    description: design.description,
+    category: design.category,
+    tags: design.tags
+  }));
 
-    // Return the formatted designs
-    res.status(200).json({
-      success: true,
-      count: formattedDesigns.length,
-      data: formattedDesigns
-    });
-  } catch (error) {
-    console.error('Error fetching designs:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error fetching designs'
-    });
-  }
+  // Return the formatted designs
+  res.status(200).json({
+    success: true,
+    count: formattedDesigns.length,
+    data: formattedDesigns
+  });
 }); 
