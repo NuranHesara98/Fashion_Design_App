@@ -1,6 +1,6 @@
 import { Response } from 'express';
 import { AuthRequest } from '../middleware/authMiddleware';
-import User, { IUserProfile, IUserDocument } from '../models/userModel';
+import User, { IUserProfile, IUserDocument, IDesign } from '../models/userModel';
 import mongoose from 'mongoose';
 
 interface ProfileResponse {
@@ -30,6 +30,13 @@ interface ProfileResponse {
     createdAt: Date;
     updatedAt: Date;
   };
+}
+
+interface DesignResponse {
+  success: boolean;
+  message?: string;
+  design?: IDesign;
+  designs?: IDesign[];
 }
 
 // Get user profile with detailed information
@@ -205,6 +212,100 @@ export const updateProfile = async (
     return res.status(500).json({
       success: false,
       message: 'Error updating user profile'
+    });
+  }
+};
+
+// Add a new design to user's history
+export const addDesign = async (
+  req: AuthRequest & { body: { title: string; imageUrl: string } },
+  res: Response<DesignResponse>
+): Promise<Response<DesignResponse>> => {
+  try {
+    const { title, imageUrl } = req.body;
+
+    // Validate required fields
+    if (!title || !imageUrl) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide both title and image URL'
+      });
+    }
+
+    // Validate URL format
+    if (!/^https?:\/\/.+/.test(imageUrl)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide a valid image URL'
+      });
+    }
+
+    const newDesign: IDesign = {
+      designId: new mongoose.Types.ObjectId().toString(),
+      title,
+      imageUrl,
+      createdAt: new Date()
+    };
+
+    // Add design to user's designs array
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      {
+        $push: { designs: newDesign }
+      },
+      {
+        new: true,
+        runValidators: true
+      }
+    ).lean();
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    return res.status(201).json({
+      success: true,
+      message: 'Design added successfully',
+      design: newDesign
+    });
+  } catch (error: unknown) {
+    console.error('Add design error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Error adding design to profile'
+    });
+  }
+};
+
+// Get user's design history
+export const getDesigns = async (
+  req: AuthRequest,
+  res: Response<DesignResponse>
+): Promise<Response<DesignResponse>> => {
+  try {
+    const user = await User.findById(req.user._id)
+      .select('designs')
+      .lean();
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      designs: user.designs || []
+    });
+  } catch (error: unknown) {
+    console.error('Get designs error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Error retrieving designs'
     });
   }
 };
