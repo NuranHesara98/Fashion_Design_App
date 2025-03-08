@@ -43,6 +43,36 @@ const storeData: IStore[] = [
       saturday: '9:30 AM–7 PM',
       sunday: '9:30 AM–2 PM'
     }
+  },
+  {
+    name: 'Imtiaz Designers',
+    address: '38 S. De. S Jayasinghe Rd, 10350',
+    phone: '0711118888',
+    website: 'https://www.imtiazdesigners.lk/',
+    openingHours: {
+      monday: '10 AM–7:30 PM',
+      tuesday: '10 AM–7:30 PM',
+      wednesday: '10 AM–7:30 PM',
+      thursday: '10 AM–7:30 PM',
+      friday: '10 AM–7:30 PM',
+      saturday: '10 AM–7:30 PM',
+      sunday: '10:30 AM–3:30 PM'
+    }
+  },
+  {
+    name: 'Hercules Tailors',
+    address: 'NO 30,1ST FLOOR, Dickmans Rd, Colombo 00500',
+    phone: '0112586287',
+    website: 'http://www.herculestailors.lk/',
+    openingHours: {
+      monday: '9:30 AM–6:30 PM',
+      tuesday: '9:30 AM–6:30 PM',
+      wednesday: '9:30 AM–6:30 PM',
+      thursday: '9:30 AM–6:30 PM',
+      friday: '9:30 AM–6:30 PM',
+      saturday: '9:30 AM–6 PM',
+      sunday: 'Closed'
+    }
   }
 ];
 
