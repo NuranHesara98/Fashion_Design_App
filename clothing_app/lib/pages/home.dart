@@ -43,7 +43,6 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    // Filter products based on selected category and search query.
     final filteredProducts = products.where((product) {
       final matchesCategory =
           selectedCategory == "All" || product['category'] == selectedCategory;
@@ -53,8 +52,6 @@ class _HomePageState extends State<HomePage> {
       return matchesCategory && matchesSearch;
     }).toList();
 
-    // Calculate the required height for the grid.
-    // Assume a fixed horizontal padding of 16 on each side (total 32) and 8 spacing between columns.
     final screenWidth = MediaQuery.of(context).size.width;
     final totalHorizontalPadding = 32.0;
     final crossAxisSpacing = 8.0;
@@ -62,10 +59,8 @@ class _HomePageState extends State<HomePage> {
     final cellWidth =
         (screenWidth - totalHorizontalPadding - crossAxisSpacing) /
             crossAxisCount;
-    // With a childAspectRatio of 0.75, cellHeight = cellWidth / 0.75.
     final cellHeight = cellWidth / 0.75;
     final rowCount = (filteredProducts.length / crossAxisCount).ceil();
-    // Also add spacing between rows (rowCount - 1 times 8.0).
     final gridHeight = rowCount * cellHeight + (rowCount - 1) * 8.0;
 
     return Scaffold(
@@ -75,9 +70,7 @@ class _HomePageState extends State<HomePage> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.menu, color: Colors.black),
-          onPressed: () {
-            // Handle menu button press
-          },
+          onPressed: () {},
         ),
       ),
       body: SingleChildScrollView(
@@ -86,7 +79,6 @@ class _HomePageState extends State<HomePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Search Bar
               Container(
                 margin: const EdgeInsets.symmetric(vertical: 10),
                 padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -112,10 +104,7 @@ class _HomePageState extends State<HomePage> {
                   },
                 ),
               ),
-
               const SizedBox(height: 20),
-
-              // Banner Image
               Container(
                 width: double.infinity,
                 decoration: BoxDecoration(
@@ -165,10 +154,7 @@ class _HomePageState extends State<HomePage> {
                   ],
                 ),
               ),
-
               const SizedBox(height: 24.0),
-
-              // Categories Row
               const Text(
                 "Categories",
                 style: TextStyle(
@@ -211,10 +197,7 @@ class _HomePageState extends State<HomePage> {
                   }).toList(),
                 ),
               ),
-
               const SizedBox(height: 16.0),
-
-              // Wrap the GridView.builder in a Container with explicit height
               SizedBox(
                 height: gridHeight,
                 child: GridView.builder(
@@ -245,55 +228,7 @@ class _HomePageState extends State<HomePage> {
                   },
                 ),
               ),
-
               const SizedBox(height: 16.0),
-
-              // Suggest Sketch Button
-              Padding(
-                padding: const EdgeInsets.only(bottom: 20.0),
-                child: Center(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => CustomizePage(
-                            selectedProductImage: '',
-                          ),
-                        ),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.transparent,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                        side: const BorderSide(color: Colors.black, width: 2),
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 32.0, vertical: 10.0),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: const [
-                        Text(
-                          "Let me suggest a sketch",
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 16.0,
-                          ),
-                        ),
-                        SizedBox(width: 8.0),
-                        Icon(
-                          Icons.arrow_forward,
-                          color: Colors.black,
-                          size: 18.0,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
             ],
           ),
         ),
@@ -316,7 +251,7 @@ class _HomePageState extends State<HomePage> {
         child: ClipRRect(
           borderRadius: BorderRadius.circular(12.0),
           child: SizedBox(
-            height: 120, // Adjust this height as needed
+            height: 120,
             child: Image.asset(
               imagePath,
               fit: BoxFit.contain,

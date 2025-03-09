@@ -1,5 +1,5 @@
 import 'package:clothing_app/Onbording/onbording_view.dart';
-import 'package:clothing_app/pages/singup.dart';
+import 'package:clothing_app/pages/signup.dart';
 import 'package:clothing_app/pages/login.dart';
 import 'package:clothing_app/pages/home.dart';
 import 'package:clothing_app/pages/customizing.dart'; // Import CustomizePage
