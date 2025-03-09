@@ -41,10 +41,16 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.generateTextWithOpenAI = exports.analyzeSketchWithOpenAI = exports.generateImageWithOpenAI = void 0;
 const openai_1 = require("openai");
 const fs = __importStar(require("fs"));
+const path = __importStar(require("path"));
+const uuid_1 = require("uuid");
+const axios_1 = __importDefault(require("axios"));
 /**
  * Generates an image using OpenAI's DALL-E API
  *
@@ -100,9 +106,13 @@ const generateImageWithOpenAI = (prompt, sketchPath) => __awaiter(void 0, void 0
             throw new Error('No image URL returned from OpenAI API');
         }
         console.log('Image generated successfully with OpenAI DALL-E');
+        // Download and save the image locally
+        const localImagePath = yield downloadAndSaveImage(imageUrl);
         return {
             success: true,
             imageUrl: imageUrl,
+            localImagePath: localImagePath, // Add the local path to the result
+            enhancedPrompt: enhancedPrompt, // Include the enhanced prompt in the result
             provider: 'openai'
         };
     }
@@ -124,6 +134,56 @@ const generateImageWithOpenAI = (prompt, sketchPath) => __awaiter(void 0, void 0
     }
 });
 exports.generateImageWithOpenAI = generateImageWithOpenAI;
+/**
+ * Downloads an image from a URL and saves it to the local filesystem
+ *
+ * @param imageUrl URL of the image to download
+ * @returns Path to the saved image file
+ */
+function downloadAndSaveImage(imageUrl) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            // Create a unique filename with timestamp
+            const filename = `image_${Date.now()}_${(0, uuid_1.v4)().substring(0, 8)}.png`;
+            // Define the path to save the image
+            const savePath = path.resolve(__dirname, '../../public/generated-images', filename);
+            const saveDir = path.dirname(savePath);
+            // Ensure the directory exists
+            if (!fs.existsSync(saveDir)) {
+                fs.mkdirSync(saveDir, { recursive: true });
+                console.log(`Created directory: ${saveDir}`);
+            }
+            console.log(`Downloading image from ${imageUrl} to ${savePath}`);
+            // Download the image
+            const response = yield (0, axios_1.default)({
+                method: 'GET',
+                url: imageUrl,
+                responseType: 'stream'
+            });
+            // Create a write stream to save the image
+            const writer = fs.createWriteStream(savePath);
+            // Pipe the image data to the file
+            response.data.pipe(writer);
+            // Return a promise that resolves when the file is saved
+            return new Promise((resolve, reject) => {
+                writer.on('finish', () => {
+                    console.log(`Image saved successfully to ${savePath}`);
+                    // Return the relative path from the public folder for use in URLs
+                    const relativePath = `/generated-images/${filename}`;
+                    resolve(relativePath);
+                });
+                writer.on('error', (err) => {
+                    console.error(`Error saving image: ${err.message}`);
+                    reject(err);
+                });
+            });
+        }
+        catch (error) {
+            console.error('Error downloading and saving image:', error);
+            throw error;
+        }
+    });
+}
 /**
  * Analyzes a sketch image using OpenAI's GPT-4 Vision API
  *

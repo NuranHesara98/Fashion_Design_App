@@ -13,6 +13,16 @@ export interface ImageGenerationResult {
   imageUrl?: string;
   
   /**
+   * Path to the locally saved image file, if available
+   */
+  localImagePath?: string;
+  
+  /**
+   * Enhanced prompt with sketch analysis, if available
+   */
+  enhancedPrompt?: string;
+  
+  /**
    * Text response from the AI model, if no image was generated
    */
   textResponse?: string;

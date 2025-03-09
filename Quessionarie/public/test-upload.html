@@ -315,6 +315,19 @@
     </div>
 
     <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">ChatGPT Enhanced Prompt</h5>
+                </div>
+                <div class="card-body">
+                    <pre id="enhancedPrompt" class="mb-0">The enhanced prompt with sketch analysis will appear here...</pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
         <div class="col-md-6">
             <div class="card">
                 <div class="card-header bg-info text-white">
@@ -350,6 +363,7 @@
             const uploadedSketch = document.getElementById('uploadedSketch');
             const noSketchMessage = document.getElementById('noSketchMessage');
             const generatedPrompt = document.getElementById('generatedPrompt');
+            const enhancedPrompt = document.getElementById('enhancedPrompt');
             const generatedImage = document.getElementById('generatedImage');
             const noImageMessage = document.getElementById('noImageMessage');
             const aiResponse = document.getElementById('aiResponse');
@@ -396,6 +410,7 @@
                 
                 // Reset previous results
                 generatedPrompt.textContent = 'Generating prompt...';
+                enhancedPrompt.textContent = 'Enhanced prompt will appear here...';
                 
                 try {
                     // Create an object with the form data
@@ -438,12 +453,16 @@
                     generatedPrompt.textContent = data.prompt;
                     currentPrompt = data.prompt;
                     
+                    // Display the enhanced prompt
+                    enhancedPrompt.textContent = data.enhancedPrompt;
+                    
                     // Enable the generate image button
                     generateImageButton.disabled = false;
                     
                 } catch (error) {
                     console.error('Error:', error);
                     generatedPrompt.textContent = `Error: ${error.message}`;
+                    enhancedPrompt.textContent = `Error: ${error.message}`;
                 } finally {
                     // Reset loading state
                     generatePromptButton.disabled = false;
@@ -495,6 +514,11 @@
                         uploadedSketch.src = data.sketchImage.url;
                         uploadedSketch.style.display = 'block';
                         noSketchMessage.style.display = 'none';
+                    }
+                    
+                    // Display the enhanced prompt if available
+                    if (data.enhancedPrompt) {
+                        enhancedPrompt.textContent = data.enhancedPrompt;
                     }
                     
                     // Display the generated image if available
