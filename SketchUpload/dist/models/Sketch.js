@@ -59,4 +59,4 @@ const SketchSchema = new mongoose_1.Schema({
     }
 });
 // Create and export the model
-exports.default = mongoose_1.default.model('Sketch', SketchSchema);
+exports.default = mongoose_1.default.model('Sketch', SketchSchema, 'sketchers');

@@ -35,4 +35,4 @@ const SketchSchema: Schema = new Schema({
 });
 
 // Create and export the model
-export default mongoose.model<ISketch>('Sketch', SketchSchema);
+export default mongoose.model<ISketch>('Sketch', SketchSchema, 'sketchers');
