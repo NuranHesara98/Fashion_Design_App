@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:clothing_app/pages/customizing.dart';
+import 'menu.dart'; // Import the ProfilePage
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -70,7 +71,15 @@ class _HomePageState extends State<HomePage> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.menu, color: Colors.black),
-          onPressed: () {},
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ProfilePage(
+                    favorites: {}), // Pass actual favorites if needed
+              ),
+            );
+          },
         ),
       ),
       body: SingleChildScrollView(
