@@ -1,21 +1,19 @@
 import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import User, { IUser, IUserProfile } from '../models/userModel';
+import OTP from '../models/otpModel';
 import bcrypt from 'bcryptjs';
 import mongoose from 'mongoose';
 import nodemailer from 'nodemailer';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
-// Add OTP storage (in production, use Redis or database)
-const otpStore: { [key: string]: { otp: string; expires: Date } } = {};
-
 // Configure nodemailer
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
     user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_APP_PASSWORD // Use App Password from Google Account
+    pass: process.env.EMAIL_APP_PASSWORD
   }
 });
 
@@ -108,6 +106,7 @@ interface VerifyOTPBody {
   email: string;
   otp: string;
   newPassword: string;
+  confirmPassword: string;
 }
 
 // Register new user
@@ -320,21 +319,25 @@ export const forgotPassword = async (
     // Check if user exists
     const user = await User.findOne({ email });
     if (!user) {
-      // Don't reveal if user exists
       return res.status(200).json({
         success: true,
         message: 'If an account exists with this email, you will receive a password reset code.'
       });
     }
 
-    // Generate 4-digit OTP
-    const otp = generateOTP();
+    // Generate OTP
+    const otp = Math.floor(1000 + Math.random() * 9000).toString();
     
-    // Store OTP with expiration (5 minutes)
-    otpStore[email] = {
-      otp,
-      expires: new Date(Date.now() + 5 * 60 * 1000) // 5 minutes
-    };
+    // Store OTP in MongoDB
+    await OTP.findOneAndUpdate(
+      { email },
+      { 
+        email,
+        otp,
+        expires: new Date(Date.now() + 5 * 60 * 1000) // 5 minutes
+      },
+      { upsert: true, new: true }
+    );
 
     // Send OTP via email
     const emailSent = await sendOTPEmail(email, otp);
@@ -345,7 +348,6 @@ export const forgotPassword = async (
       });
     }
 
-    // Return success without exposing OTP
     return res.status(200).json({
       success: true,
       message: 'Password reset code has been sent to your email.'
@@ -365,19 +367,35 @@ export const verifyOTPAndResetPassword = async (
   res: Response
 ): Promise<Response> => {
   try {
-    const { email, otp, newPassword } = req.body;
+    const { email, otp, newPassword, confirmPassword } = req.body;
 
     // Validate inputs
-    if (!email || !otp || !newPassword) {
+    if (!email || !otp || !newPassword || !confirmPassword) {
       return res.status(400).json({
         success: false,
-        message: 'Please provide email, OTP and new password'
+        message: 'Please provide email, OTP, new password and confirm password'
       });
     }
 
-    // Check if OTP exists and is valid
-    const storedOTP = otpStore[email];
-    if (!storedOTP || storedOTP.otp !== otp) {
+    // Check if passwords match
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json({
+        success: false,
+        message: 'Passwords do not match'
+      });
+    }
+
+    // Find OTP in MongoDB
+    const storedOTP = await OTP.findOne({ email });
+    if (!storedOTP) {
+      return res.status(400).json({
+        success: false,
+        message: 'No OTP found. Please request a new one.'
+      });
+    }
+
+    // Verify OTP
+    if (storedOTP.otp !== otp) {
       return res.status(400).json({
         success: false,
         message: 'Invalid OTP. Please try again.'
@@ -386,7 +404,7 @@ export const verifyOTPAndResetPassword = async (
 
     // Check if OTP is expired
     if (new Date() > storedOTP.expires) {
-      delete otpStore[email];
+      await OTP.deleteOne({ email });
       return res.status(400).json({
         success: false,
         message: 'OTP has expired. Please request a new one.'
@@ -411,8 +429,8 @@ export const verifyOTPAndResetPassword = async (
       { password: hashedPassword }
     );
 
-    // Clear OTP
-    delete otpStore[email];
+    // Delete used OTP
+    await OTP.deleteOne({ email });
 
     return res.status(200).json({
       success: true,
