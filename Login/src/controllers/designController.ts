@@ -29,21 +29,32 @@ export const createDesign = asyncHandler(async (
   next: NextFunction
 ) => {
   try {
-    const { name, imageUrl, description, category, tags } = req.body;
+    const { name, imageUrl = '', description = '', category = 'uncategorized', tags = [] } = req.body;
     
     // Get userId from authenticated user
     const userId = (req as any).user._id;
 
+    if (!name) {
+      res.status(400).json({
+        success: false,
+        message: 'Design name is required'
+      });
+      return;
+    }
+
+    // Set a default image URL if none provided
+    const finalImageUrl = imageUrl || 'https://via.placeholder.com/300x300?text=Design+Image';
+
     const design = await Design.create({
       userId,
       name,
-      imageUrl,
+      imageUrl: finalImageUrl,
       description,
       category,
       tags
     });
 
-    const formattedDesign: DesignResponse = {
+    const formattedDesign = {
       id: design._id.toString(),
       name: design.name,
       imageUrl: design.imageUrl,
@@ -55,13 +66,14 @@ export const createDesign = asyncHandler(async (
 
     res.status(201).json({
       success: true,
+      message: 'Design created successfully',
       data: formattedDesign
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating design:', error);
     res.status(500).json({
       success: false,
-      message: 'Error creating design'
+      message: error.message || 'Error creating design'
     });
   }
 });
@@ -74,9 +86,11 @@ export const getUserDesigns = asyncHandler(async (
   res: Response<GetDesignsResponse>
 ) => {
   const { userId } = req.params;
+  console.log('Fetching designs for userId:', userId);
 
   // Validate userId format
   if (!mongoose.Types.ObjectId.isValid(userId)) {
+    console.log('Invalid userId format:', userId);
     res.status(400).json({
       success: false,
       message: 'Invalid user ID format'
@@ -85,10 +99,13 @@ export const getUserDesigns = asyncHandler(async (
   }
 
   // Query designs for the user
+  console.log('Querying designs with userId:', userId);
   const designs = await Design.find({ userId })
     .sort({ createdAt: -1 }) // Sort by newest first
     .select('-__v') // Exclude version key
     .lean(); // Convert to plain JavaScript objects
+
+  console.log('Found designs:', designs);
 
   // Format the response data
   const formattedDesigns: DesignResponse[] = designs.map(design => ({
@@ -100,6 +117,8 @@ export const getUserDesigns = asyncHandler(async (
     category: design.category,
     tags: design.tags
   }));
+
+  console.log('Formatted designs:', formattedDesigns);
 
   // Return the formatted designs
   res.status(200).json({

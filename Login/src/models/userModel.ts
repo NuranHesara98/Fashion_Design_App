@@ -32,6 +32,11 @@ export interface IUser extends IUserProfile {
   password: string;
   designs?: IDesign[];
   isActive: boolean;
+  isEmailVerified: boolean;
+  verificationToken?: string;
+  emailPreferences?: {
+    accountActivity: boolean;
+  };
   lastLogin?: Date;
 }
 
@@ -73,10 +78,10 @@ const userSchema = new Schema<IUserDocument>({
     minlength: [8, 'Password must be at least 8 characters'],
     validate: {
       validator: function(v: string) {
-        // Password must contain at least one uppercase letter, one lowercase letter, and one number
-        return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/.test(v);
+        // Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character
+        return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{8,}$/.test(v);
       },
-      message: 'Password must contain at least one uppercase letter, one lowercase letter, and one number'
+      message: 'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character'
     }
   },
   name: {
@@ -127,7 +132,20 @@ const userSchema = new Schema<IUserDocument>({
   designs: [designSchema],
   isActive: {
     type: Boolean,
-    default: true
+    default: false
+  },
+  isEmailVerified: {
+    type: Boolean,
+    default: false
+  },
+  verificationToken: {
+    type: String
+  },
+  emailPreferences: {
+    accountActivity: {
+      type: Boolean,
+      default: true
+    }
   },
   lastLogin: {
     type: Date
