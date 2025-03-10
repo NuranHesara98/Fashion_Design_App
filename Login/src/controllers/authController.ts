@@ -24,50 +24,149 @@ const generateOTP = (): string => {
 };
 
 // Send OTP via email
-const sendOTPEmail = async (email: string, otp: string): Promise<boolean> => {
+const sendOTPEmail = async (email: string, otp: string, name?: string): Promise<boolean> => {
   try {
-    // Log email configuration
-    console.log('Attempting to send email with config:', {
-      service: 'gmail',
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: 'APP_PASSWORD_EXISTS: ' + !!process.env.EMAIL_APP_PASSWORD
-      }
-    });
-
+    const greeting = name ? `Hello ${name},` : 'Hello,';
+    
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: email,
-      subject: 'Password Reset Code - Fashion Design App',
+      subject: 'Password Reset Code - DressMe',
       html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-          <h2 style="color: #333; text-align: center;">Password Reset Code</h2>
-          <div style="background-color: #f9f9f9; padding: 20px; border-radius: 5px; margin: 20px 0;">
-            <p style="margin: 0;">Your verification code is:</p>
-            <h1 style="color: #4CAF50; font-size: 32px; letter-spacing: 5px; margin: 20px 0; text-align: center;">${otp}</h1>
-            <p style="color: #666;">This code will expire in 5 minutes.</p>
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px;">
+          <h2 style="color: #333; text-align: center; border-bottom: 2px solid #ddd; padding-bottom: 10px;">Password Reset Request</h2>
+          
+          <div style="padding: 20px 0; color: #555;">
+            <p>${greeting}</p>
+            <p>We received a request to reset your password for your DressMe account.</p>
+            <p>Your password reset code is:</p>
+            
+            <div style="background-color: #f5f5f5; padding: 15px; text-align: center; margin: 20px 0; border-radius: 5px;">
+              <h1 style="color: #333; letter-spacing: 5px; margin: 0;">${otp}</h1>
+            </div>
+            
+            <p><strong>Important:</strong></p>
+            <ul style="color: #666;">
+              <li>This code will expire in 5 minutes</li>
+              <li>If you didn't request this password reset, please ignore this email</li>
+              <li>Never share this code with anyone</li>
+            </ul>
+            
+            <p style="margin-top: 30px;">Best regards,<br>DressMe Team</p>
           </div>
-          <p style="color: #666; font-size: 12px; text-align: center;">If you didn't request this code, please ignore this email.</p>
-          <hr style="border: 1px solid #eee; margin: 20px 0;">
-          <p style="color: #999; font-size: 12px; text-align: center;">This is an automated message from Fashion Design App. Please do not reply.</p>
+          
+          <div style="text-align: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid #ddd; color: #888; font-size: 12px;">
+            <p>This is an automated message, please do not reply to this email.</p>
+          </div>
         </div>
       `
     };
 
-    console.log('Sending email to:', email);
     await transporter.sendMail(mailOptions);
-    console.log('Email sent successfully');
     return true;
   } catch (error: any) {
-    console.error('Detailed send email error:', error);
-    if (error?.code === 'EAUTH') {
-      console.error('Authentication failed. Please check your email and app password.');
-    }
+    console.error('Email sending error:', error.message);
     return false;
   }
 };
 
-interface RegisterBody extends IUserProfile {
+// Send verification email
+const sendVerificationEmail = async (email: string, verificationToken: string): Promise<boolean> => {
+  try {
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: 'Welcome to DressMe - Verify Your Email',
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px;">
+          <h2 style="color: #333; text-align: center; border-bottom: 2px solid #ddd; padding-bottom: 10px;">Welcome to DressMe!</h2>
+          
+          <div style="padding: 20px 0; color: #555;">
+            <p>Hello,</p>
+            <p>Thank you for registering with DressMe. To complete your registration and start using our services, please verify your email address.</p>
+            
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${process.env.FRONTEND_URL}/verify-email?token=${verificationToken}" 
+                 style="background-color: #4CAF50; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold;">
+                Verify Email Address
+              </a>
+            </div>
+
+            <div style="background-color: #f5f5f5; padding: 15px; margin: 20px 0; border-radius: 5px;">
+              <p style="margin: 0;"><strong>For testing (copy this token):</strong></p>
+              <p style="word-break: break-all; margin: 10px 0 0 0;">${verificationToken}</p>
+            </div>
+            
+            <p><strong>Important:</strong></p>
+            <ul style="color: #666;">
+              <li>This verification link will expire in 24 hours</li>
+              <li>If you didn't create an account with DressMe, please ignore this email</li>
+            </ul>
+            
+            <p style="margin-top: 30px;">Best regards,<br>DressMe Team</p>
+          </div>
+          
+          <div style="text-align: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid #ddd; color: #888; font-size: 12px;">
+            <p>This is an automated message, please do not reply to this email.</p>
+          </div>
+        </div>
+      `
+    };
+
+    await transporter.sendMail(mailOptions);
+    return true;
+  } catch (error: any) {
+    console.error('Email sending error:', error.message);
+    return false;
+  }
+};
+
+// Send account activity notification
+const sendActivityNotification = async (email: string, activity: string, location?: string): Promise<boolean> => {
+  try {
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: 'DressMe Account Activity Alert',
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px;">
+          <h2 style="color: #333; text-align: center; border-bottom: 2px solid #ddd; padding-bottom: 10px;">Account Activity Alert</h2>
+          
+          <div style="padding: 20px 0; color: #555;">
+            <p>Hello,</p>
+            <p>We detected the following activity on your DressMe account:</p>
+            
+            <div style="background-color: #f5f5f5; padding: 15px; margin: 20px 0; border-radius: 5px;">
+              <p><strong>Activity:</strong> ${activity}</p>
+              ${location ? `<p><strong>Location:</strong> ${location}</p>` : ''}
+              <p><strong>Time:</strong> ${new Date().toLocaleString()}</p>
+            </div>
+            
+            <p>If this wasn't you, please secure your account by:</p>
+            <ol style="color: #666;">
+              <li>Changing your password immediately</li>
+              <li>Contacting our support team</li>
+            </ol>
+            
+            <p style="margin-top: 30px;">Best regards,<br>DressMe Team</p>
+          </div>
+          
+          <div style="text-align: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid #ddd; color: #888; font-size: 12px;">
+            <p>This is an automated message, please do not reply to this email.</p>
+          </div>
+        </div>
+      `
+    };
+
+    await transporter.sendMail(mailOptions);
+    return true;
+  } catch (error: any) {
+    console.error('Email sending error:', error.message);
+    return false;
+  }
+};
+
+interface RegisterBody {
   email: string;
   password: string;
   confirmPassword: string;
@@ -115,31 +214,69 @@ export const register = async (
   res: Response<AuthResponse>
 ): Promise<Response<AuthResponse>> => {
   try {
-    const {
-      email,
-      password,
-      confirmPassword,
-      name,
-      bio,
-      profilePictureUrl,
-      phoneNumber,
-      location,
-      specialization,
-      socialLinks
-    } = req.body;
+    const { email, password, confirmPassword } = req.body;
 
     // Validate required fields
     if (!email || !password || !confirmPassword) {
       return res.status(400).json({
         success: false,
-        message: 'Please provide all required fields'
+        message: 'Please provide email, password and confirm password'
       });
     }
 
+    // Validate email format
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide a valid email address'
+      });
+    }
+
+    // Check if passwords match
     if (password !== confirmPassword) {
       return res.status(400).json({
         success: false,
         message: 'Passwords do not match'
+      });
+    }
+
+    // Enhanced password validation
+    if (password.length < 8) {
+      return res.status(400).json({
+        success: false,
+        message: 'Password must be at least 8 characters long'
+      });
+    }
+
+    // Check for at least one number
+    if (!/\d/.test(password)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Password must contain at least one number'
+      });
+    }
+
+    // Check for at least one uppercase letter
+    if (!/[A-Z]/.test(password)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Password must contain at least one uppercase letter'
+      });
+    }
+
+    // Check for at least one lowercase letter
+    if (!/[a-z]/.test(password)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Password must contain at least one lowercase letter'
+      });
+    }
+
+    // Check for at least one special character
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Password must contain at least one special character'
       });
     }
 
@@ -152,65 +289,44 @@ export const register = async (
       });
     }
 
-    // Validate optional fields
-    if (bio && bio.length > 500) {
-      return res.status(400).json({
-        success: false,
-        message: 'Bio cannot exceed 500 characters'
-      });
-    }
+    // Generate verification token
+    const verificationToken = jwt.sign(
+      { email },
+      JWT_SECRET,
+      { expiresIn: '24h' }
+    );
 
-    if (phoneNumber && !/^\+?[\d\s-]{10,}$/.test(phoneNumber)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Please enter a valid phone number'
-      });
-    }
-
-    if (profilePictureUrl && !/^https?:\/\/.+/.test(profilePictureUrl)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Profile picture URL must be a valid URL'
-      });
-    }
-
-    // Create user with all fields
+    // Create user with verification status
     const user = await User.create({
       email,
       password,
-      name,
-      bio,
-      profilePictureUrl,
-      phoneNumber,
-      location,
-      specialization,
-      socialLinks,
-      designs: [],
-      isActive: true,
+      isActive: false, // User starts as inactive until email is verified
+      isEmailVerified: false,
+      verificationToken,
       lastLogin: new Date()
     });
 
-    // Generate token
-    const token = jwt.sign(
-      { id: user._id },
-      JWT_SECRET,
-      { expiresIn: '30d' }
-    );
+    // Send verification email
+    const emailSent = await sendVerificationEmail(email, verificationToken);
+    if (!emailSent) {
+      // If email fails, still create account but notify user to request new verification email
+      return res.status(201).json({
+        success: true,
+        message: 'Account created but verification email could not be sent. Please request a new verification email.',
+        user: {
+          id: user._id.toString(),
+          email: user.email
+        }
+      });
+    }
 
     return res.status(201).json({
       success: true,
-      message: 'User registered successfully',
+      message: 'Registration successful! Please check your email to verify your account.',
       user: {
         id: user._id.toString(),
-        email: user.email,
-        name: user.name,
-        bio: user.bio,
-        phoneNumber: user.phoneNumber,
-        location: user.location,
-        specialization: user.specialization,
-        socialLinks: user.socialLinks
-      },
-      token
+        email: user.email
+      }
     });
   } catch (error: unknown) {
     console.error('Registration error:', error);
@@ -261,7 +377,7 @@ export const login = async (
     if (!isMatch) {
       return res.status(401).json({
         success: false,
-        message: 'Invalid credentials'
+        message: 'Invalid password. If you recently reset your password, please use your new password. You can request another password reset if needed.'
       });
     }
 
@@ -339,8 +455,8 @@ export const forgotPassword = async (
       { upsert: true, new: true }
     );
 
-    // Send OTP via email
-    const emailSent = await sendOTPEmail(email, otp);
+    // Send OTP via email with user's name
+    const emailSent = await sendOTPEmail(email, otp, user.name);
     if (!emailSent) {
       return res.status(500).json({
         success: false,
@@ -385,6 +501,46 @@ export const verifyOTPAndResetPassword = async (
       });
     }
 
+    // Enhanced password validation
+    if (newPassword.length < 8) {
+      return res.status(400).json({
+        success: false,
+        message: 'Password must be at least 8 characters long'
+      });
+    }
+
+    // Check for at least one number
+    if (!/\d/.test(newPassword)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Password must contain at least one number'
+      });
+    }
+
+    // Check for at least one uppercase letter
+    if (!/[A-Z]/.test(newPassword)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Password must contain at least one uppercase letter'
+      });
+    }
+
+    // Check for at least one lowercase letter
+    if (!/[a-z]/.test(newPassword)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Password must contain at least one lowercase letter'
+      });
+    }
+
+    // Check for at least one special character
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(newPassword)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Password must contain at least one special character'
+      });
+    }
+
     // Find OTP in MongoDB
     const storedOTP = await OTP.findOne({ email });
     if (!storedOTP) {
@@ -411,14 +567,6 @@ export const verifyOTPAndResetPassword = async (
       });
     }
 
-    // Validate password
-    if (newPassword.length < 6) {
-      return res.status(400).json({
-        success: false,
-        message: 'Password must be at least 6 characters long'
-      });
-    }
-
     // Hash new password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(newPassword, salt);
@@ -441,6 +589,53 @@ export const verifyOTPAndResetPassword = async (
     return res.status(500).json({
       success: false,
       message: 'Error resetting password. Please try again.'
+    });
+  }
+};
+
+// Verify email
+export const verifyEmail = async (
+  req: Request<{}, {}, { token: string }>,
+  res: Response
+): Promise<Response> => {
+  try {
+    const { token } = req.body;
+
+    // Verify token
+    const decoded = jwt.verify(token, JWT_SECRET) as { email: string };
+    const email = decoded.email;
+
+    // Update user verification status
+    const user = await User.findOneAndUpdate(
+      { email, verificationToken: token },
+      { 
+        isEmailVerified: true,
+        isActive: true,
+        verificationToken: null,
+        $set: { 'emailPreferences.accountActivity': true }
+      },
+      { new: true }
+    );
+
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid or expired verification token'
+      });
+    }
+
+    // Send welcome email
+    await sendActivityNotification(email, 'Email verification successful. Welcome to DressMe!');
+
+    return res.status(200).json({
+      success: true,
+      message: 'Email verified successfully! You can now log in.'
+    });
+  } catch (error) {
+    console.error('Email verification error:', error);
+    return res.status(400).json({
+      success: false,
+      message: 'Invalid or expired verification token'
     });
   }
 };
