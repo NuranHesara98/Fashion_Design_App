@@ -49,6 +49,23 @@ router.post('/generate', promptController_1.generateImagePrompt);
  */
 router.post('/generate-with-sketch', uploadMiddleware_1.default.single('sketch'), promptController_1.generateImagePromptWithSketch);
 /**
+ * POST /api/prompts/generate-from-cloth
+ *
+ * Generates an AI image using OpenAI DALL-E based on an uploaded cloth image
+ *
+ * Request body:
+ * - cloth: File (The uploaded cloth image)
+ * - enhanceDetails: boolean (Whether to enhance details in the generated image)
+ * - preserveColors: boolean (Whether to preserve colors from the original image)
+ * - styleKeywords: string (optional)
+ *
+ * Response:
+ * - prompt: string (The generated AI image prompt)
+ * - generatedImage: object (Information about the generated image, if available)
+ * - aiResponse: string (Text response from the AI, if no image was generated)
+ */
+router.post('/generate-from-cloth', uploadMiddleware_1.default.single('cloth'), promptController_1.generateImageFromCloth);
+/**
  * GET /api/prompts/check-api-config
  *
  * Checks if the OpenAI API key is properly configured
