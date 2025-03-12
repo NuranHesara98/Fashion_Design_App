@@ -51,14 +51,16 @@ const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
 const uuid_1 = require("uuid");
 const axios_1 = __importDefault(require("axios"));
+const imageStorageService_1 = require("./imageStorageService");
 /**
  * Generates an image using OpenAI's DALL-E API
  *
  * @param prompt The text prompt to generate an image from
  * @param sketchPath Optional path to a sketch image to use as a reference
+ * @param metadata Optional metadata about the image generation request
  * @returns Promise with the result containing either an image URL or error
  */
-const generateImageWithOpenAI = (prompt, sketchPath) => __awaiter(void 0, void 0, void 0, function* () {
+const generateImageWithOpenAI = (prompt, sketchPath, metadata) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const apiKey = process.env.OPENAI_API_KEY;
         if (!apiKey) {
@@ -108,6 +110,15 @@ const generateImageWithOpenAI = (prompt, sketchPath) => __awaiter(void 0, void 0
         console.log('Image generated successfully with OpenAI DALL-E');
         // Download and save the image locally
         const localImagePath = yield downloadAndSaveImage(imageUrl);
+        // Store the generated image in MongoDB and AWS S3
+        try {
+            const storedImage = yield (0, imageStorageService_1.storeGeneratedImage)(imageUrl, localImagePath, prompt, enhancedPrompt, sketchPath, metadata);
+            console.log(`Image stored successfully in MongoDB and S3. MongoDB ID: ${storedImage._id}, S3 URL: ${storedImage.s3Url}`);
+        }
+        catch (storageError) {
+            console.error('Error storing image in MongoDB and S3:', storageError);
+            // Continue even if storage fails, as we still have the local image
+        }
         return {
             success: true,
             imageUrl: imageUrl,
@@ -246,7 +257,7 @@ const analyzeSketchWithOpenAI = (sketchPath) => __awaiter(void 0, void 0, void 0
         };
     }
     catch (error) {
-        console.error('Error analyzing sketch with OpenAI Vision:', error);
+        console.error('Error analyzing sketch with OpenAI Vision API:', error);
         let errorMessage = 'Failed to analyze sketch with OpenAI';
         if (error.response) {
             console.error('OpenAI API error response:', error.response.data);
@@ -285,6 +296,10 @@ const generateTextWithOpenAI = (prompt) => __awaiter(void 0, void 0, void 0, fun
         const requestOptions = {
             model: "gpt-4o", // You can also use "gpt-3.5-turbo" for a more cost-effective option
             messages: [
+                {
+                    role: "system",
+                    content: "You are a helpful assistant specializing in fashion design and clothing descriptions."
+                },
                 {
                     role: "user",
                     content: prompt

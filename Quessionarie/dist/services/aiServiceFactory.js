@@ -53,11 +53,12 @@ dotenv.config({ path: path.resolve(__dirname, '../../.env') });
  *
  * @param prompt The text prompt to generate an image from
  * @param sketchPath Optional path to a sketch image to use as a reference
+ * @param metadata Optional metadata about the image generation request
  * @returns Promise with the result containing either an image URL or text response
  */
-const generateImage = (prompt, sketchPath) => __awaiter(void 0, void 0, void 0, function* () {
+const generateImage = (prompt, sketchPath, metadata) => __awaiter(void 0, void 0, void 0, function* () {
     console.log('Using OpenAI for image generation');
-    return (0, openaiService_1.generateImageWithOpenAI)(prompt, sketchPath);
+    return (0, openaiService_1.generateImageWithOpenAI)(prompt, sketchPath, metadata);
 });
 exports.generateImage = generateImage;
 /**

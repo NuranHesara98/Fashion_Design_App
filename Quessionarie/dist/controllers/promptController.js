@@ -153,8 +153,15 @@ const generateImagePromptWithSketch = (req, res) => __awaiter(void 0, void 0, vo
         });
         console.log('Generated prompt:', prompt);
         try {
-            // Generate the image using AI service factory
-            const result = yield (0, aiServiceFactory_1.generateImage)(prompt, sketchPath);
+            // Generate the image using AI service factory with metadata
+            const result = yield (0, aiServiceFactory_1.generateImage)(prompt, sketchPath, {
+                primaryPurpose,
+                occasion,
+                materialPreference,
+                timeOfDay,
+                skinTone,
+                styleKeywords
+            });
             // Prepare the response
             const response = {
                 prompt,
@@ -291,35 +298,33 @@ const generateImageFromCloth = (req, res) => __awaiter(void 0, void 0, void 0, f
         }
         console.log('Received cloth image generation request');
         // Extract parameters from request
-        const { enhanceDetails = 'false', preserveColors = 'false', styleKeywords = '' } = req.body;
-        // Convert string boolean values to actual booleans
+        const { enhanceDetails = 'true', preserveColors = 'true', styleKeywords = '' } = req.body;
+        // Convert string parameters to boolean
         const shouldEnhanceDetails = enhanceDetails === 'true';
         const shouldPreserveColors = preserveColors === 'true';
-        console.log('Parameters:', {
-            enhanceDetails: shouldEnhanceDetails,
-            preserveColors: shouldPreserveColors,
-            styleKeywords
-        });
-        // Get the path to the uploaded cloth image
+        // Process the uploaded cloth image
         const clothImagePath = req.file.path;
-        // Construct a prompt for the cloth image
+        const processedImage = yield (0, imageProcessingService_1.processImage)(clothImagePath);
+        // Generate a prompt based on the parameters and cloth image
         const prompt = constructClothImagePrompt({
             clothImagePath,
             enhanceDetails: shouldEnhanceDetails,
             preserveColors: shouldPreserveColors,
-            styleKeywords: styleKeywords || ''
+            styleKeywords
         });
-        console.log('Generated prompt for cloth image:', prompt);
+        console.log('Generated cloth image prompt:', prompt);
         try {
-            // Generate the image using AI service factory
-            const result = yield (0, aiServiceFactory_1.generateImage)(prompt, clothImagePath);
+            // Generate the image using AI service factory with metadata
+            const result = yield (0, aiServiceFactory_1.generateImage)(prompt, clothImagePath, {
+                styleKeywords,
+                enhanceDetails: shouldEnhanceDetails.toString(),
+                preserveColors: shouldPreserveColors.toString()
+            });
             // Prepare the response
             const response = {
                 prompt,
-                enhancedPrompt: result.enhancedPrompt || prompt,
-                originalImage: {
-                    url: (0, imageProcessingService_1.getImageUrl)(req, clothImagePath)
-                }
+                enhancedPrompt: result.enhancedPrompt || prompt, // Include the enhanced prompt
+                clothImage: Object.assign({ url: (0, imageProcessingService_1.getImageUrl)(req, clothImagePath) }, processedImage)
             };
             // Add the generated image URL if available
             if (result.imageUrl) {
@@ -358,9 +363,9 @@ const generateImageFromCloth = (req, res) => __awaiter(void 0, void 0, void 0, f
         }
     }
     catch (error) {
-        console.error('Error in cloth image generation:', error);
+        console.error('Error generating image from cloth:', error);
         res.status(500).json({
-            error: 'Failed to process cloth image',
+            error: 'Failed to generate image from cloth',
             details: error instanceof Error ? error.message : 'Unknown error'
         });
     }

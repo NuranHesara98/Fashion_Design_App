@@ -3,18 +3,22 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import { ImageGenerationResult } from '../types/imageTypes';
+import { ImageGenerationMetadata } from '../types/metadataTypes';
 import axios from 'axios';
+import { storeGeneratedImage } from './imageStorageService';
 
 /**
  * Generates an image using OpenAI's DALL-E API
  * 
  * @param prompt The text prompt to generate an image from
  * @param sketchPath Optional path to a sketch image to use as a reference
+ * @param metadata Optional metadata about the image generation request
  * @returns Promise with the result containing either an image URL or error
  */
 export const generateImageWithOpenAI = async (
   prompt: string,
-  sketchPath?: string
+  sketchPath?: string,
+  metadata?: ImageGenerationMetadata
 ): Promise<ImageGenerationResult> => {
   try {
     const apiKey = process.env.OPENAI_API_KEY;
@@ -75,6 +79,23 @@ export const generateImageWithOpenAI = async (
     
     // Download and save the image locally
     const localImagePath = await downloadAndSaveImage(imageUrl);
+    
+    // Store the generated image in MongoDB and AWS S3
+    try {
+      const storedImage = await storeGeneratedImage(
+        imageUrl,
+        localImagePath,
+        prompt,
+        enhancedPrompt,
+        sketchPath,
+        metadata
+      );
+      
+      console.log(`Image stored successfully in MongoDB and S3. MongoDB ID: ${storedImage._id}, S3 URL: ${storedImage.s3Url}`);
+    } catch (storageError) {
+      console.error('Error storing image in MongoDB and S3:', storageError);
+      // Continue even if storage fails, as we still have the local image
+    }
     
     return {
       success: true,
@@ -231,7 +252,7 @@ export const analyzeSketchWithOpenAI = async (
       provider: 'openai'
     };
   } catch (error: any) {
-    console.error('Error analyzing sketch with OpenAI Vision:', error);
+    console.error('Error analyzing sketch with OpenAI Vision API:', error);
     
     let errorMessage = 'Failed to analyze sketch with OpenAI';
     
@@ -275,6 +296,10 @@ export const generateTextWithOpenAI = async (prompt: string): Promise<ImageGener
     const requestOptions: any = {
       model: "gpt-4o", // You can also use "gpt-3.5-turbo" for a more cost-effective option
       messages: [
+        {
+          role: "system",
+          content: "You are a helpful assistant specializing in fashion design and clothing descriptions."
+        },
         {
           role: "user",
           content: prompt

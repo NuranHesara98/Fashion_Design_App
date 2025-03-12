@@ -1,5 +1,6 @@
 import { generateImageWithOpenAI, generateTextWithOpenAI } from './openaiService';
 import { ImageGenerationResult } from '../types/imageTypes';
+import { ImageGenerationMetadata } from '../types/metadataTypes';
 import * as dotenv from 'dotenv';
 import * as path from 'path';
 
@@ -11,14 +12,16 @@ dotenv.config({ path: path.resolve(__dirname, '../../.env') });
  * 
  * @param prompt The text prompt to generate an image from
  * @param sketchPath Optional path to a sketch image to use as a reference
+ * @param metadata Optional metadata about the image generation request
  * @returns Promise with the result containing either an image URL or text response
  */
 export const generateImage = async (
   prompt: string,
-  sketchPath?: string
+  sketchPath?: string,
+  metadata?: ImageGenerationMetadata
 ): Promise<ImageGenerationResult> => {
   console.log('Using OpenAI for image generation');
-  return generateImageWithOpenAI(prompt, sketchPath);
+  return generateImageWithOpenAI(prompt, sketchPath, metadata);
 };
 
 /**

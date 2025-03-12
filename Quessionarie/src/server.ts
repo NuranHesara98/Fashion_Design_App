@@ -5,6 +5,7 @@ import path from 'path';
 import indexRoutes from './routes/index';
 import promptRoutes from './routes/promptRoutes';
 import fs from 'fs';
+import { connectToDatabase } from './config/database';
 
 // Load environment variables with explicit path
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
@@ -18,6 +19,10 @@ console.log('PORT:', process.env.PORT);
 console.log('NODE_ENV:', process.env.NODE_ENV);
 console.log('OPENAI_API_KEY exists:', !!OPENAI_API_KEY);
 console.log('OPENAI_API_KEY length:', OPENAI_API_KEY ? OPENAI_API_KEY.length : 0);
+console.log('MONGODB_URI exists:', !!process.env.MONGODB_URI);
+console.log('AWS_S3_BUCKET_NAME exists:', !!process.env.AWS_S3_BUCKET_NAME);
+console.log('AWS_ACCESS_KEY_ID exists:', !!process.env.AWS_ACCESS_KEY_ID);
+console.log('AWS_SECRET_ACCESS_KEY exists:', !!process.env.AWS_SECRET_ACCESS_KEY);
 
 // Log API key status
 if (!OPENAI_API_KEY) {
@@ -82,9 +87,15 @@ app.use((err: any, req: Request, res: Response, next: any) => {
 
 // Start server with error handling
 try {
-  app.listen(port, () => {
-    console.log(`Server is running on port ${port}`);
-    console.log(`Test the upload functionality at: http://localhost:${port}/test-upload.html`);
+  // Connect to MongoDB before starting the server
+  connectToDatabase().then(() => {
+    app.listen(port, () => {
+      console.log(`Server is running on port ${port}`);
+      console.log(`Test the upload functionality at: http://localhost:${port}/test-upload.html`);
+    });
+  }).catch(error => {
+    console.error('Failed to connect to MongoDB:', error);
+    process.exit(1);
   });
 } catch (error) {
   console.error('Failed to start server:', error);
