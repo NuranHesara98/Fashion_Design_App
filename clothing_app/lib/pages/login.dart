@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
-import 'home.dart'; // Import HomePage
+import 'twoOptions.dart'; // Import HomePage
 
 class LoginPage extends StatelessWidget {
   const LoginPage({super.key});
@@ -15,7 +15,10 @@ class LoginPage extends StatelessWidget {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () {
-            Navigator.pushReplacementNamed(context, '/welcome');
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const TwoOptionsPage()),
+            );
           },
         ),
       ),
@@ -103,7 +106,8 @@ class LoginPage extends StatelessWidget {
                   // Navigate to HomePage
                   Navigator.pushReplacement(
                     context,
-                    MaterialPageRoute(builder: (context) => const HomePage()),
+                    MaterialPageRoute(
+                        builder: (context) => const TwoOptionsPage()),
                   );
                 },
                 style: ElevatedButton.styleFrom(

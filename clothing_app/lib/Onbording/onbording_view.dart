@@ -89,7 +89,7 @@ class _OnboardingViewState extends State<OnboardingView> {
                   controller.items.length,
                   (index) => AnimatedContainer(
                     duration: const Duration(milliseconds: 300),
-                    margin: const EdgeInsets.symmetric(horizontal: 5.0),
+                    margin: const EdgeInsets.symmetric(horizontal: 6.0),
                     height: 8.0,
                     width: currentPage == index ? 16.0 : 8.0,
                     decoration: BoxDecoration(
@@ -118,7 +118,8 @@ class _OnboardingViewState extends State<OnboardingView> {
                           );
                         } else {
                           // Navigate to WelcomeScreen instead of LoginPage
-                          Navigator.pushReplacementNamed(context, '/home');
+                          Navigator.pushReplacementNamed(
+                              context, '/twoOptions');
                         }
                       },
                       child: Text(
