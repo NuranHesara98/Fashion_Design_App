@@ -100,7 +100,7 @@ class LoginPage extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: 5),
+              const SizedBox(height: 8),
               ElevatedButton(
                 onPressed: () {
                   // Navigate to HomePage
@@ -119,34 +119,8 @@ class LoginPage extends StatelessWidget {
                   style: TextStyle(color: Colors.white),
                 ),
               ),
-              const SizedBox(height: 10),
-              ElevatedButton(
-                onPressed: () {},
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white, // White background
-                  padding: const EdgeInsets.symmetric(vertical: 12.0),
-                  side: const BorderSide(color: Colors.black, width: 2),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(25.0),
-                  ),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Image.asset(
-                      'assets/images/google_icon.png',
-                      height: 20,
-                      width: 20,
-                    ),
-                    const SizedBox(width: 10),
-                    const Text(
-                      'Continue with Google',
-                      style: TextStyle(color: Colors.black),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 1),
+              const SizedBox(height: 2),
               TextButton(
                 onPressed: () {
                   // Navigate to Sign Up Page

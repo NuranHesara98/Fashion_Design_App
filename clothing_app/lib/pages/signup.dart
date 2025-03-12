@@ -36,6 +36,9 @@ class _SignUpPageState extends State<SignUpPage> {
       _showSnackBar("Please enter a valid email address.");
     } else if (password.length < 6) {
       _showSnackBar("Password must be at least 6 characters.");
+    } else if (!RegExp(r'^(?=.*[a-z])(?=.*[A-Z]).+$').hasMatch(password)) {
+      _showSnackBar(
+          "Password must contain at least one uppercase and one lowercase letter.");
     } else if (password != confirmPassword) {
       _showSnackBar("Passwords do not match. Please try again.");
     } else {
