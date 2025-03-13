@@ -1,37 +1,32 @@
 import { Response, NextFunction } from 'express';
 import { AuthRequest } from '../middleware/authMiddleware';
-import User, { IUserProfile, IUserDocument, IDesign } from '../models/userModel';
+import User, { IUserDocument, IDesign, ISocialLinks } from '../models/userModel';
 import mongoose from 'mongoose';
 import { uploadImage, cleanupOldImage } from '../utils/fileUpload';
 import fs from 'fs/promises';
 import { ValidationError, NotFoundError, AuthenticationError, FileUploadError } from '../utils/errors';
+import path from 'path';
+import AWS from 'aws-sdk';
+import { Request } from 'express';
+import dotenv from 'dotenv';
+import multer from 'multer';
+import bcrypt from 'bcryptjs';
+
+dotenv.config();
 
 interface ProfileResponse {
   success: boolean;
   message?: string;
   profile?: {
     id: string;
+    profilePictureBase64: string | null;
+    name: string | null;
+    bio: string | null;
+    birthday: Date | null;
+    phoneNumber: string | null;
     email: string;
-    name?: string;
-    bio?: string;
-    profilePictureUrl?: string;
-    phoneNumber?: string;
-    location?: string;
-    specialization?: string;
-    socialLinks?: {
-      instagram?: string;
-      linkedin?: string;
-      website?: string;
-    };
-    designs?: Array<{
-      designId: string;
-      title: string;
-      imageUrl: string;
-      createdAt: Date;
-    }>;
-    lastLogin?: Date;
-    createdAt: Date;
-    updatedAt: Date;
+    address: string | null;
+    canChangePassword: boolean;
   };
 }
 
@@ -42,59 +37,57 @@ interface DesignResponse {
   designs?: IDesign[];
 }
 
+// Configure AWS S3
+const s3 = new AWS.S3({
+  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  region: process.env.AWS_REGION
+});
+
+// Configure multer for file uploads
+const upload = multer({
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB limit
+  }
+});
+
+async function uploadImageToS3(file: Express.Multer.File): Promise<string> {
+  const bucketName = process.env.AWS_S3_BUCKET;
+  
+  if (!bucketName) {
+    throw new Error('S3 bucket name is not defined in environment variables');
+  }
+
+  const timestamp = Date.now();
+  const fileName = `profile-pictures/${timestamp}-${file.originalname.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+
+  console.log('Starting S3 upload:', {
+    bucket: bucketName,
+    fileName,
+    contentType: file.mimetype,
+    fileSize: file.size
+  });
+
+  const params = {
+    Bucket: bucketName,
+    Key: fileName,
+    Body: file.buffer,
+    ContentType: file.mimetype
+  };
+
+  try {
+    const uploadResult = await s3.upload(params).promise();
+    console.log('S3 upload successful:', uploadResult);
+    return uploadResult.Location;
+  } catch (error) {
+    console.error('S3 upload failed:', error);
+    throw new FileUploadError('Failed to upload image to S3');
+  }
+}
+
 // Get user profile with detailed information
 export const getProfile = async (
   req: AuthRequest,
-  res: Response<ProfileResponse>,
-  next: NextFunction
-): Promise<void> => {
-  try {
-    // Explicitly verify token and extract user_id
-    const userId = req.user._id;
-    if (!userId) {
-      throw new AuthenticationError('Invalid or missing authentication token');
-    }
-
-    // Query user profile with specific field selection
-    const user = await User.findById(userId)
-      .select('-password')
-      .select('email name bio profilePictureUrl phoneNumber location specialization socialLinks designs lastLogin createdAt updatedAt')
-      .lean();
-    
-    if (!user) {
-      throw new NotFoundError('User profile not found');
-    }
-
-    // Update last login time
-    await User.findByIdAndUpdate(userId, { lastLogin: new Date() });
-
-    // Format the response
-    res.status(200).json({
-      success: true,
-      profile: {
-        id: user._id.toString(),
-        email: user.email,
-        name: user.name || '',
-        bio: user.bio || '',
-        profilePictureUrl: user.profilePictureUrl || '',
-        phoneNumber: user.phoneNumber || '',
-        location: user.location || '',
-        specialization: user.specialization || '',
-        socialLinks: user.socialLinks || {},
-        designs: user.designs || [],
-        lastLogin: user.lastLogin,
-        createdAt: user.createdAt as Date,
-        updatedAt: user.updatedAt as Date
-      }
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-// Update user profile
-export const updateProfile = async (
-  req: AuthRequest & { body: IUserProfile, file?: Express.Multer.File },
   res: Response<ProfileResponse>,
   next: NextFunction
 ): Promise<void> => {
@@ -104,107 +97,185 @@ export const updateProfile = async (
       throw new AuthenticationError('Invalid or missing authentication token');
     }
 
-    // Get current user to check old profile picture
-    const currentUser = await User.findById(userId).select('profilePictureUrl').lean();
-    if (!currentUser) {
-      throw new NotFoundError('User not found');
+    console.log('Getting profile for user:', userId);
+
+    // Query user profile with specific field selection
+    const user = await User.findById(userId)
+      .select('email name bio profilePictureUrl profilePictureBase64 phoneNumber birthday address')
+      .lean();
+    
+    if (!user) {
+      throw new NotFoundError('User profile not found');
     }
 
-    // Handle file upload if present
-    let profilePictureUrl = req.body.profilePictureUrl;
-    if (req.file) {
+    console.log('Profile retrieved successfully for user:', userId);
+
+    // Format the response
+    res.status(200).json({
+      success: true,
+      profile: {
+        id: user._id.toString(),
+        profilePictureBase64: user.profilePictureBase64 || user.profilePictureUrl || null,
+        name: user.name || null,
+        bio: user.bio || null,
+        birthday: user.birthday || null,
+        phoneNumber: user.phoneNumber || null,
+        email: user.email,
+        address: user.address || null,
+        canChangePassword: true
+      }
+    });
+  } catch (error) {
+    console.error('Error in getProfile:', error);
+    next(error);
+  }
+};
+
+// Update user profile
+export const updateProfile = async (
+  req: AuthRequest & { 
+    body: { 
+      name?: string;
+      bio?: string;
+      birthday?: string;
+      phoneNumber?: string;
+      email?: string;
+      address?: string;
+      password?: string;
+    };
+    file?: Express.Multer.File;
+  },
+  res: Response<ProfileResponse>,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const userId = req.user?._id;
+    if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
+      throw new AuthenticationError('Invalid or missing authentication token');
+    }
+
+    const currentTime = new Date();
+    const updateData: any = {};
+
+    // Step 1: Handle profile picture update
+    if (req.file && req.file.buffer) {
       try {
-        // Upload new image
-        profilePictureUrl = await uploadImage(req.file);
+        const profilePictureUrl = await uploadImageToS3(req.file);
         
         // Clean up old image if exists
-        if (currentUser.profilePictureUrl) {
+        const currentUser = await User.findById(userId).select('profilePictureUrl').lean();
+        if (currentUser?.profilePictureUrl) {
           await cleanupOldImage(currentUser.profilePictureUrl);
         }
+        
+        updateData.profilePictureUrl = profilePictureUrl;
+        updateData.profilePictureBase64 = profilePictureUrl;
       } catch (error) {
-        throw new FileUploadError('Failed to process profile picture: ' + (error instanceof Error ? error.message : 'Unknown error'));
+        throw new FileUploadError('Failed to process profile picture');
       }
     }
 
-    // Skip URL validation if we're uploading a file
-    if (!req.file && profilePictureUrl && !profilePictureUrl.startsWith('/uploads/')) {
-      // Validate profile picture URL only for external URLs
-      if (!/^https?:\/\/.+/.test(profilePictureUrl)) {
-        throw new ValidationError('Profile picture URL must be a valid URL starting with http:// or https://');
+    // Step 2: Handle name and bio updates
+    const { name, bio } = req.body;
+    
+    if (name !== undefined) {
+      if (typeof name !== 'string') {
+        throw new ValidationError('Name must be text');
       }
+      if (name.length > 50) {
+        throw new ValidationError('Name cannot exceed 50 characters');
+      }
+      updateData.name = name || null;
     }
 
-    // Validate and update other fields
-    const {
-      name,
-      bio,
-      phoneNumber,
-      location,
-      specialization,
-      socialLinks
-    } = req.body;
-
-    // Enhanced validation with detailed error messages
-    if (name && (typeof name !== 'string' || name.length > 50)) {
-      throw new ValidationError(`Name validation failed: ${typeof name !== 'string' ? 'Must be text' : 'Cannot exceed 50 characters'}`);
+    if (bio !== undefined) {
+      if (typeof bio !== 'string') {
+        throw new ValidationError('Bio must be text');
+      }
+      if (bio.length > 500) {
+        throw new ValidationError('Bio cannot exceed 500 characters');
+      }
+      updateData.bio = bio || null;
     }
 
-    if (bio && (typeof bio !== 'string' || bio.length > 500)) {
-      throw new ValidationError(`Bio validation failed: ${typeof bio !== 'string' ? 'Must be text' : 'Cannot exceed 500 characters'}`);
+    // Step 3: Handle personal information updates
+    const { birthday, phoneNumber, email, address } = req.body;
+
+    if (birthday !== undefined) {
+      if (isNaN(Date.parse(birthday))) {
+        throw new ValidationError('Birthday must be a valid date');
+      }
+      updateData.birthday = birthday ? new Date(birthday) : null;
     }
 
-    if (location && (typeof location !== 'string' || location.length > 100)) {
-      throw new ValidationError(`Location validation failed: ${typeof location !== 'string' ? 'Must be text' : 'Cannot exceed 100 characters'}`);
+    if (phoneNumber !== undefined) {
+      if (typeof phoneNumber !== 'string') {
+        throw new ValidationError('Phone number must be text');
+      }
+      if (!/^\+?[\d\s-]{10,}$/.test(phoneNumber)) {
+        throw new ValidationError('Phone number must be valid (minimum 10 digits, can include +, spaces, and hyphens)');
+      }
+      updateData.phoneNumber = phoneNumber || null;
     }
 
-    if (specialization && (typeof specialization !== 'string' || specialization.length > 100)) {
-      throw new ValidationError(`Specialization validation failed: ${typeof specialization !== 'string' ? 'Must be text' : 'Cannot exceed 100 characters'}`);
+    if (email !== undefined) {
+      if (typeof email !== 'string') {
+        throw new ValidationError('Email must be text');
+      }
+      if (!/^[\w-.]+@[\w-]+\.[a-z]{2,}$/.test(email)) {
+        throw new ValidationError('Please provide a valid email address');
+      }
+      updateData.email = email;
     }
 
-    if (phoneNumber && (typeof phoneNumber !== 'string' || !/^\+?[\d\s-]{10,}$/.test(phoneNumber))) {
-      throw new ValidationError('Phone number must be valid (minimum 10 digits, can include +, spaces, and hyphens)');
+    if (address !== undefined) {
+      if (typeof address !== 'string') {
+        throw new ValidationError('Address must be text');
+      }
+      if (address.length > 200) {
+        throw new ValidationError('Address cannot exceed 200 characters');
+      }
+      updateData.address = address || null;
     }
 
-    // Enhanced social links validation
-    if (socialLinks) {
-      if (typeof socialLinks !== 'object') {
-        throw new ValidationError('Social links must be provided as an object');
+    // Step 4: Handle password update
+    const { password } = req.body;
+    if (password !== undefined) {
+      if (typeof password !== 'string') {
+        throw new ValidationError('Password must be text');
+      }
+      if (password.length < 8) {
+        throw new ValidationError('Password must be at least 8 characters long');
+      }
+      if (!/\d/.test(password)) {
+        throw new ValidationError('Password must contain at least one number');
+      }
+      if (!/[A-Z]/.test(password)) {
+        throw new ValidationError('Password must contain at least one uppercase letter');
+      }
+      if (!/[a-z]/.test(password)) {
+        throw new ValidationError('Password must contain at least one lowercase letter');
+      }
+      if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+        throw new ValidationError('Password must contain at least one special character');
       }
 
-      const { instagram, linkedin, website } = socialLinks;
-      const urlRegex = /^https?:\/\/.+/;
-
-      if (instagram && (typeof instagram !== 'string' || !urlRegex.test(instagram))) {
-        throw new ValidationError('Instagram link must be a valid URL starting with http:// or https://');
-      }
-
-      if (linkedin && (typeof linkedin !== 'string' || !urlRegex.test(linkedin))) {
-        throw new ValidationError('LinkedIn link must be a valid URL starting with http:// or https://');
-      }
-
-      if (website && (typeof website !== 'string' || !urlRegex.test(website))) {
-        throw new ValidationError('Website link must be a valid URL starting with http:// or https://');
-      }
+      const salt = await bcrypt.genSalt(10);
+      updateData.password = await bcrypt.hash(password, salt);
+      updateData.passwordLastChanged = currentTime;
     }
 
-    // Update user profile with validated data
+    // Update user data
     const user = await User.findByIdAndUpdate(
       userId,
-      {
-        $set: {
-          ...(name && { name }),
-          ...(bio && { bio }),
-          ...(profilePictureUrl && { profilePictureUrl }),
-          ...(phoneNumber && { phoneNumber }),
-          ...(location && { location }),
-          ...(specialization && { specialization }),
-          ...(socialLinks && { socialLinks })
-        }
+      { 
+        $set: updateData,
+        $currentDate: { updatedAt: true }
       },
       {
         new: true,
         runValidators: true,
-        select: '-password'
+        select: 'email name bio profilePictureUrl profilePictureBase64 phoneNumber birthday address'
       }
     ).lean();
 
@@ -212,28 +283,23 @@ export const updateProfile = async (
       throw new NotFoundError('Failed to update user profile');
     }
 
-    // Send detailed success response
+    // Send success response
     res.status(200).json({
       success: true,
       message: 'Profile updated successfully',
       profile: {
         id: user._id.toString(),
+        profilePictureBase64: user.profilePictureBase64 || user.profilePictureUrl || null,
+        name: user.name || null,
+        bio: user.bio || null,
+        birthday: user.birthday || null,
+        phoneNumber: user.phoneNumber || null,
         email: user.email,
-        name: user.name || '',
-        bio: user.bio || '',
-        profilePictureUrl: user.profilePictureUrl || '',
-        phoneNumber: user.phoneNumber || '',
-        location: user.location || '',
-        specialization: user.specialization || '',
-        socialLinks: user.socialLinks || {},
-        designs: user.designs || [],
-        lastLogin: user.lastLogin,
-        createdAt: user.createdAt as Date,
-        updatedAt: user.updatedAt as Date
+        address: user.address || null,
+        canChangePassword: true
       }
     });
   } catch (error) {
-    // Pass error to error handling middleware
     next(error);
   }
 };
