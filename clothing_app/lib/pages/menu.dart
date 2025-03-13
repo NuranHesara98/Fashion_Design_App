@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'userprofilepage.dart';
 import 'helpcenter.dart';
 import 'favorite.dart';
+import 'login.dart';
 
 class ProfilePage extends StatefulWidget {
   final Set<ProductCardData> favorites;
@@ -47,6 +48,9 @@ class _ProfilePageState extends State<ProfilePage> {
                 FavoritePage(favorites: widget.favorites)),
             _buildMenuItem(
                 context, Icons.help, "Help Center", const HelpPage()),
+            const SizedBox(height: 30),
+            _buildLogoutButton(context),
+            const SizedBox(height: 20),
           ],
         ),
       ),
@@ -124,6 +128,52 @@ class _ProfilePageState extends State<ProfilePage> {
               const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLogoutButton(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: ElevatedButton(
+        onPressed: () {
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text("Log Out"),
+              content: const Text("Are you sure you want to log out?"),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text("Cancel"),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const LoginPage()),
+                    );
+                  },
+                  child: const Text("Log Out",
+                      style: TextStyle(color: Colors.red)),
+                ),
+              ],
+            ),
+          );
+        },
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color.fromARGB(255, 23, 67, 92),
+          foregroundColor: Colors.white,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+          padding: const EdgeInsets.symmetric(vertical: 15),
+        ),
+        child: const Center(
+          child: Text("Log Out",
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
         ),
       ),
     );

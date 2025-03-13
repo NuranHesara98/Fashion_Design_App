@@ -15,8 +15,7 @@ class _HomePageState extends State<HomePage> {
     "Short frock",
     "Long frock",
     "Tops",
-    "Skirts",
-    "Lehengas"
+    "Skirts"
   ];
 
   final List<Map<String, String>> products = [
