@@ -1,5 +1,5 @@
 import 'package:clothing_app/Onbording/onbording_view.dart';
-import 'package:clothing_app/pages/singup.dart';
+import 'package:clothing_app/pages/signup.dart';
 import 'package:clothing_app/pages/login.dart';
 import 'package:clothing_app/pages/home.dart';
 import 'package:clothing_app/pages/customizing.dart'; // Import CustomizePage
@@ -8,6 +8,7 @@ import 'package:clothing_app/pages/suggestions.dart';
 // ignore: duplicate_import
 import 'package:clothing_app/pages/store.dart';
 import 'package:clothing_app/pages/getstart.dart'; // Import SuggestionPage
+import 'package:clothing_app/pages/twoOptions.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 
@@ -45,6 +46,7 @@ class MyApp extends StatelessWidget {
         '/suggestion': (context) => const SuggestionPage(),
         '/welcome': (context) => const WelcomeScreen(),
         '/store': (context) => const StorePage(),
+        '/twoOptions': (context) => const TwoOptionsPage(),
       },
       onUnknownRoute: (settings) {
         return MaterialPageRoute(

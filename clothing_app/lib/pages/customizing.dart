@@ -80,7 +80,7 @@ class _CustomizePageState extends State<CustomizePage> {
   Widget _buildImageSection() {
     return Center(
       child: Container(
-        height: 180, // Reduced height for better fit
+        height: 180,
         width: double.infinity,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
@@ -89,7 +89,7 @@ class _CustomizePageState extends State<CustomizePage> {
           borderRadius: BorderRadius.circular(16),
           child: Image.asset(
             widget.selectedProductImage,
-            fit: BoxFit.contain, // Ensures the image fits within the container
+            fit: BoxFit.contain,
           ),
         ),
       ),
@@ -203,16 +203,27 @@ class _CustomizePageState extends State<CustomizePage> {
         const Text('Select Your Skin Tone', style: TextStyle(fontSize: 16)),
         const SizedBox(height: 8),
         Row(
-          children: tones
-              .map((color) => GestureDetector(
-                    onTap: () => setState(() =>
-                        selectedTone = (selectedTone == color) ? null : color),
-                    child: Padding(
-                      padding: const EdgeInsets.only(right: 10),
-                      child: CircleAvatar(radius: 20, backgroundColor: color),
-                    ),
-                  ))
-              .toList(),
+          children: tones.map((color) {
+            bool isSelected = selectedTone == color;
+            return GestureDetector(
+              onTap: () => setState(() => selectedTone = color),
+              child: Padding(
+                padding: const EdgeInsets.only(right: 10),
+                child: Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: isSelected
+                        ? Border.all(color: Colors.black, width: 2)
+                        : null,
+                  ),
+                  child: CircleAvatar(
+                    radius: 20,
+                    backgroundColor: color,
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
         ),
       ],
     );
