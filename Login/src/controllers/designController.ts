@@ -85,7 +85,7 @@ export const getUserDesigns = asyncHandler(async (
   req: Request,
   res: Response<GetDesignsResponse>
 ) => {
-  const { userId } = req.params;
+  const { userId } = req.params;0
   console.log('Fetching designs for userId:', userId);
 
   // Validate userId format
