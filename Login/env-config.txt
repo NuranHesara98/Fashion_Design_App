@@ -1,0 +1,9 @@
+PORT=5010
+MONGO_URI=mongodb+srv://supun:2028@cluster1.uegcy.mongodb.net/User_infomation?retryWrites=true&w=majority
+JWT_SECRET=c3df679b37c47c425c61f4c30302aef399cff6adfe699fb55d74a9f2f855cf54a2adb61fed24ff12830902526d6aeac4b717f505d47f4f0166209dc5010e4628
+NODE_ENV=development
+EMAIL_USER=dresssme2024@gmail.com     
+EMAIL_APP_PASSWORD=mtye epmv hqhw iqks
+FRONTEND_URL=http://localhost:3000   
+AWS_REGION=eu-north-1
+AWS_S3_BUCKET=dressme-profilepic
