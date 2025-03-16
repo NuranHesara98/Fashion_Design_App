@@ -225,6 +225,23 @@ export const updateProfile = async (
       if (!/^[\w-.]+@[\w-]+\.[a-z]{2,}$/.test(email)) {
         throw new ValidationError('Please provide a valid email address');
       }
+      
+      // Get the current user's email
+      const currentUser = await User.findById(userId).select('email').lean();
+      
+      // Only check for duplicate if the email is different from current email
+      if (email !== currentUser?.email) {
+        // Check if email already exists for another user
+        const existingUser = await User.findOne({ email, _id: { $ne: userId } });
+        if (existingUser) {
+          res.status(400).json({
+            success: false,
+            message: 'This email is already associated with another account. Please use a different email address.'
+          });
+          return;
+        }
+      }
+      
       updateData.email = email;
     }
 
@@ -265,41 +282,67 @@ export const updateProfile = async (
       updateData.passwordLastChanged = currentTime;
     }
 
-    // Update user data
-    const user = await User.findByIdAndUpdate(
-      userId,
-      { 
-        $set: updateData,
-        $currentDate: { updatedAt: true }
-      },
-      {
-        new: true,
-        runValidators: true,
-        select: 'email name bio profilePictureUrl profilePictureBase64 phoneNumber birthday address'
-      }
-    ).lean();
-
-    if (!user) {
-      throw new NotFoundError('Failed to update user profile');
+    // Check if there are any updates to make
+    if (Object.keys(updateData).length === 0) {
+      res.status(400).json({
+        success: false,
+        message: 'No valid updates provided'
+      });
+      return;
     }
 
-    // Send success response
-    res.status(200).json({
-      success: true,
-      message: 'Profile updated successfully',
-      profile: {
-        id: user._id.toString(),
-        profilePictureBase64: user.profilePictureBase64 || user.profilePictureUrl || null,
-        name: user.name || null,
-        bio: user.bio || null,
-        birthday: user.birthday || null,
-        phoneNumber: user.phoneNumber || null,
-        email: user.email,
-        address: user.address || null,
-        canChangePassword: true
+    try {
+      // Update user data
+      const user = await User.findByIdAndUpdate(
+        userId,
+        { 
+          $set: updateData,
+          $currentDate: { updatedAt: true }
+        },
+        {
+          new: true,
+          runValidators: true,
+          select: 'email name bio profilePictureUrl profilePictureBase64 phoneNumber birthday address'
+        }
+      ).lean();
+
+      if (!user) {
+        throw new NotFoundError('User profile not found');
       }
-    });
+
+      // Send success response
+      res.status(200).json({
+        success: true,
+        message: 'Profile updated successfully',
+        profile: {
+          id: user._id.toString(),
+          profilePictureBase64: user.profilePictureBase64 || user.profilePictureUrl || null,
+          name: user.name || null,
+          bio: user.bio || null,
+          birthday: user.birthday || null,
+          phoneNumber: user.phoneNumber || null,
+          email: user.email,
+          address: user.address || null,
+          canChangePassword: true
+        }
+      });
+    } catch (error: any) {
+      // Handle MongoDB duplicate key error (E11000)
+      if (error.name === 'MongoServerError' && error.code === 11000) {
+        if (error.keyPattern && error.keyPattern.email) {
+          res.status(400).json({
+            success: false,
+            message: 'This email is already associated with another account. Please use a different email address.'
+          });
+          return;
+        }
+      }
+      
+      // Re-throw other errors to be handled by the error middleware
+      throw error;
+    }
   } catch (error) {
+    console.error('Profile update error:', error);
     next(error);
   }
 };
