@@ -1,4 +1,4 @@
-import { connectDB } from '../config/db';
+import { connectDB, disconnectDB } from '../config/db';
 import { StoreModel, IStore } from '../models/Store';
 
 const storeData: IStore[] = [
@@ -91,22 +91,31 @@ const storeData: IStore[] = [
   }
 ];
 
-const seedStores = async () => {
+async function seedStores() {
   try {
+    // Connect to MongoDB
+    console.log('Connecting to MongoDB...');
     await connectDB();
-    
+
     // Clear existing stores
+    console.log('Clearing existing stores...');
     await StoreModel.deleteMany({});
-    
-    // Insert all stores
+    console.log('Existing stores cleared');
+
+    // Insert new stores
+    console.log('Inserting new stores...');
     const stores = await StoreModel.insertMany(storeData);
-    console.log('Stores seeded successfully:', stores);
+    console.log(`Successfully inserted ${stores.length} stores`);
+
+    // Disconnect from MongoDB
+    await disconnectDB();
     
     process.exit(0);
   } catch (error) {
     console.error('Error seeding stores:', error);
     process.exit(1);
   }
-};
+}
 
+// Run the seeding function
 seedStores();

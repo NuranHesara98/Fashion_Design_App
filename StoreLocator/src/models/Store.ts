@@ -36,22 +36,10 @@ export interface IStore {
 
 // MongoDB Schema
 const storeSchema = new mongoose.Schema<IStore>({
-  name: {
-    type: String,
-    required: true,
-  },
-  address: {
-    type: String,
-    required: true,
-  },
-  phone: {
-    type: String,
-    required: false,
-  },
-  website: {
-    type: String,
-    required: false,
-  },
+  name: { type: String, required: true },
+  address: { type: String, required: true },
+  phone: { type: String },
+  website: { type: String },
   openingHours: {
     monday: String,
     tuesday: String,
@@ -59,8 +47,8 @@ const storeSchema = new mongoose.Schema<IStore>({
     thursday: String,
     friday: String,
     saturday: String,
-    sunday: String,
-  },
+    sunday: String
+  }
 });
 
 export const StoreModel = mongoose.model<IStore>('Store', storeSchema);
