@@ -63,7 +63,15 @@ class HomePage extends StatelessWidget {
                             );
                           },
                         ),
-                       
+                        IconButton(
+                          icon: Icon(Icons.brightness_6, color: Colors.white),
+                          onPressed: () {
+                            final isDark =
+                                Theme.of(context).brightness == Brightness.dark;
+                            onThemeToggle(!isDark);
+                          },
+                        ),
+                      ],
                     ),
                   ],
                 ),
