@@ -1,0 +1,123 @@
+{
+  "client": "Thunder Client",
+  "collectionName": "Fashion Design App",
+  "dateExported": "2024-03-08T01:56:53.123Z",
+  "version": "1.1",
+  "folders": [
+    {
+      "name": "Auth",
+      "id": "auth-folder",
+      "containerId": ""
+    },
+    {
+      "name": "Profile",
+      "id": "profile-folder",
+      "containerId": ""
+    }
+  ],
+  "requests": [
+    {
+      "name": "Register User",
+      "id": "register-user",
+      "containerId": "auth-folder",
+      "method": "POST",
+      "url": "http://localhost:5004/api/auth/register",
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"email\": \"designer2025@gmail.com\",\n  \"password\": \"Fashion2025!\",\n  \"confirmPassword\": \"Fashion2025!\",\n  \"name\": \"Emma Wilson\",\n  \"bio\": \"Creative fashion designer with passion for sustainable fashion\",\n  \"phoneNumber\": \"+94-777-123456\",\n  \"location\": \"Colombo, Sri Lanka\",\n  \"specialization\": \"Modern Fashion Design\"\n}"
+      }
+    },
+    {
+      "name": "Login User",
+      "id": "login-user",
+      "containerId": "auth-folder",
+      "method": "POST",
+      "url": "http://localhost:5004/api/auth/login",
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"email\": \"designer2025@gmail.com\",\n  \"password\": \"Fashion2025!\"\n}"
+      }
+    },
+    {
+      "name": "Get Profile",
+      "id": "get-profile",
+      "containerId": "profile-folder",
+      "method": "GET",
+      "url": "http://localhost:5004/api/users/profile",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer YOUR_TOKEN_HERE"
+        }
+      ]
+    },
+    {
+      "name": "Update Profile",
+      "id": "update-profile",
+      "containerId": "profile-folder",
+      "method": "PUT",
+      "url": "http://localhost:5004/api/users/profile",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer YOUR_TOKEN_HERE"
+        }
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"name\": \"Emma Wilson\",\n  \"bio\": \"Award-winning fashion designer specializing in sustainable and modern Sri Lankan fashion\",\n  \"profilePictureUrl\": \"https://example.com/emma-profile.jpg\",\n  \"phoneNumber\": \"+94-777-123456\",\n  \"location\": \"Colombo, Sri Lanka\",\n  \"specialization\": \"Sustainable Fashion Design\",\n  \"socialLinks\": {\n    \"instagram\": \"https://instagram.com/emma.designs\",\n    \"linkedin\": \"https://linkedin.com/in/emma-wilson\",\n    \"website\": \"https://emmadesigns.com\"\n  }\n}"
+      }
+    },
+    {
+      "name": "Test Bio Length",
+      "id": "test-bio-length",
+      "containerId": "profile-folder",
+      "method": "PUT",
+      "url": "http://localhost:5004/api/users/profile",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer YOUR_TOKEN_HERE"
+        }
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"bio\": \"This is a very long bio that exceeds 500 characters. This is a very long bio that exceeds 500 characters. This is a very long bio that exceeds 500 characters. This is a very long bio that exceeds 500 characters. This is a very long bio that exceeds 500 characters. This is a very long bio that exceeds 500 characters. This is a very long bio that exceeds 500 characters. This is a very long bio that exceeds 500 characters. This is a very long bio that exceeds 500 characters. This is a very long bio that exceeds 500 characters.\"\n}"
+      }
+    },
+    {
+      "name": "Test Phone Format",
+      "id": "test-phone-format",
+      "containerId": "profile-folder",
+      "method": "PUT",
+      "url": "http://localhost:5004/api/users/profile",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer YOUR_TOKEN_HERE"
+        }
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"phoneNumber\": \"invalid-phone\"\n}"
+      }
+    },
+    {
+      "name": "Test URL Format",
+      "id": "test-url-format",
+      "containerId": "profile-folder",
+      "method": "PUT",
+      "url": "http://localhost:5004/api/users/profile",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer YOUR_TOKEN_HERE"
+        }
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"profilePictureUrl\": \"invalid-url\"\n}"
+      }
+    }
+  ]
+}
