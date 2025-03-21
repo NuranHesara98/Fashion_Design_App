@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: fashion-design-app
+    env: node
+    buildCommand: chmod +x ./build.sh && ./build.sh
+    startCommand: chmod +x ./start.sh && ./start.sh
+    envVars:
+      - key: NODE_ENV
+        value: production
