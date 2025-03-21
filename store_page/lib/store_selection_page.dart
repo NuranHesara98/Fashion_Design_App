@@ -99,6 +99,15 @@ class _StoreSelectionPageState extends State<StoreSelectionPage> {
                   );
                 }
 
+                onTap: () {
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) => StoreDetailsPage(store: store),
+    ),
+  );
+},
+
                 return SliverList(
                   delegate: SliverChildBuilderDelegate(
                     (context, index) {
