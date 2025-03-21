@@ -25,7 +25,37 @@ class FavoritesPage extends StatelessWidget {
               ),
             );
           }
-          
+          return ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: favoriteStores.length,
+            itemBuilder: (context, index) {
+              final store = favoriteStores[index];
+              return Card(
+                elevation: 4,
+                margin: const EdgeInsets.only(bottom: 16),
+                child: ListTile(
+                  leading: Image.asset(
+                    store.imageUrl,
+                    width: 50,
+                    height: 50,
+                    fit: BoxFit.cover,
+                  ),
+                  title: Text(store.name),
+                  subtitle: Text(store.address),
+                  trailing: IconButton(
+                    icon: Icon(
+                      Icons.favorite,
+                      color: Colors.red,
+                    ),
+                    onPressed: () {
+                      storeProvider.toggleFavorite(store.id);
+                    },
+                  ),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => StoreDetailsPage(store: store),
                       ),
                     );
                   },
