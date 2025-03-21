@@ -16,6 +16,16 @@ void main() {
   );
 }
 
+// HomePage.dart
+class HomePage extends StatelessWidget {
+  final Function(bool) onThemeToggle;
+
+  HomePage({required this.onThemeToggle});
+
+    );
+  }
+}
+
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
