@@ -1,0 +1,40 @@
+// favorites_page.dart
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'store_provider.dart';
+import 'store_model.dart';
+
+class FavoritesPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Favorites'),
+        backgroundColor: Colors.black,
+      ),
+      body: Consumer<StoreProvider>(
+        builder: (context, storeProvider, child) {
+          final favoriteStores = storeProvider.stores.where((store) => store.isFavorite).toList();
+          if (favoriteStores.isEmpty) {
+            return Center(
+              child: Text(
+                'No favorites yet!',
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      color: Colors.grey[600],
+                    ),
+              ),
+            );
+          }
+          
+                      ),
+                    );
+                  },
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+}
