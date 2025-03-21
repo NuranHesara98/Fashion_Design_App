@@ -3,7 +3,38 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'store_provider.dart';
 
-class StoreSelectionPage extends StatelessWidget {
+class StoreSelectionPage extends StatefulWidget {
+  @override
+  _StoreSelectionPageState createState() => _StoreSelectionPageState();
+}
+
+class _StoreSelectionPageState extends State<StoreSelectionPage> {
+  TextEditingController _searchController = TextEditingController();
+  List<Store> _filteredStores = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _filteredStores = context.read<StoreProvider>().stores;
+    _searchController.addListener(_onSearchChanged);
+  }
+
+  void _onSearchChanged() {
+    String query = _searchController.text.toLowerCase();
+    setState(() {
+      _filteredStores = context.read<StoreProvider>().stores.where((store) {
+        return store.name.toLowerCase().contains(query);
+      }).toList();
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchController.removeListener(_onSearchChanged);
+    _searchController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -38,6 +69,24 @@ class StoreSelectionPage extends StatelessWidget {
           ),
           SliverPadding(
             padding: const EdgeInsets.all(16),
+            sliver: SliverList(
+              delegate: SliverChildListDelegate([
+                TextField(
+                  controller: _searchController,
+                  decoration: InputDecoration(
+                    hintText: 'Search stores...',
+                    prefixIcon: Icon(Icons.search),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 16),
+              ]),
+            ),
+          ),
+          SliverPadding(
+            padding: const EdgeInsets.all(16),
             sliver: Consumer<StoreProvider>(
               builder: (context, storeProvider, child) {
                 if (storeProvider.stores.isEmpty) {
@@ -53,7 +102,7 @@ class StoreSelectionPage extends StatelessWidget {
                 return SliverList(
                   delegate: SliverChildBuilderDelegate(
                     (context, index) {
-                      final store = storeProvider.stores[index];
+                      final store = _filteredStores[index];
                       return Hero(
                         tag: 'store-${store.id}',
                         child: Card(
@@ -181,7 +230,7 @@ class StoreSelectionPage extends StatelessWidget {
                         ),
                       );
                     },
-                    childCount: storeProvider.stores.length,
+                    childCount: _filteredStores.length,
                   ),
                 );
               },
