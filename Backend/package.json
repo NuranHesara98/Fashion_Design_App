@@ -7,7 +7,7 @@
     "start": "node src/server.ts",
     "dev": "nodemon src/server.ts",
     "build": "tsc",
-    "test": "jest",
+    "test": "echo \"Error: no test specified\" && exit 1",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage"
   },
