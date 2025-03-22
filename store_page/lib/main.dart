@@ -75,8 +75,14 @@ class HomePage extends StatelessWidget {
                     Text(
                       'DRESS ME',
                       style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                            color: Colors.white,
+                        color: Colors.white,
+                        shadows: [
+                          Shadow(
+                            blurRadius: 10,
+                            color: Colors.white.withOpacity(0.3),
                           ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -130,7 +136,8 @@ class HomePage extends StatelessWidget {
                             );
                           }
                         },
-                        child: Container(
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
                           padding: const EdgeInsets.symmetric(
                             horizontal: 40,
                             vertical: 20,
