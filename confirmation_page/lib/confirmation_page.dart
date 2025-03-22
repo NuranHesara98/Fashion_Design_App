@@ -1,4 +1,3 @@
-// confirmation_page.dart
 import 'package:flutter/material.dart';
 
 class ConfirmationPage extends StatefulWidget {
@@ -34,13 +33,22 @@ class _ConfirmationPageState extends State<ConfirmationPage> {
       appBar: AppBar(
         title: Text('Order Confirmation'),
         centerTitle: true,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.black, Colors.grey[800]!],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
       ),
       body: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(30),
-            topRight: Radius.circular(30),
+          gradient: LinearGradient(
+            colors: [Colors.grey[50]!, Colors.white],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
           ),
         ),
         child: ListView(
@@ -48,9 +56,9 @@ class _ConfirmationPageState extends State<ConfirmationPage> {
           children: [
             _buildSectionTitle('Shipping Details'),
             Card(
-              elevation: 2,
+              elevation: 4,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(16),
               ),
               child: Padding(
                 padding: EdgeInsets.all(16),
@@ -107,9 +115,9 @@ class _ConfirmationPageState extends State<ConfirmationPage> {
             SizedBox(height: 24),
             _buildSectionTitle('Order Summary'),
             Card(
-              elevation: 2,
+              elevation: 4,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(16),
               ),
               child: Padding(
                 padding: EdgeInsets.all(16),
@@ -133,9 +141,9 @@ class _ConfirmationPageState extends State<ConfirmationPage> {
             SizedBox(height: 24),
             _buildSectionTitle('Payment Method'),
             Card(
-              elevation: 2,
+              elevation: 4,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(16),
               ),
               child: Padding(
                 padding: EdgeInsets.all(16),
@@ -180,11 +188,19 @@ class _ConfirmationPageState extends State<ConfirmationPage> {
             SizedBox(height: 32),
             ElevatedButton(
               onPressed: () => _handleOrderConfirmation(context),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.black,
+                padding: EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
               child: Text(
                 "Confirm Order",
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
+                  color: Colors.white,
                 ),
               ),
             ),
@@ -201,7 +217,7 @@ class _ConfirmationPageState extends State<ConfirmationPage> {
       child: Text(
         title,
         style: TextStyle(
-          fontSize: 18,
+          fontSize: 20,
           fontWeight: FontWeight.bold,
           color: Colors.black87,
         ),
@@ -218,7 +234,7 @@ class _ConfirmationPageState extends State<ConfirmationPage> {
           Text(
             label,
             style: TextStyle(
-              fontSize: isTotal ? 16 : 14,
+              fontSize: isTotal ? 18 : 16,
               fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
               color: Colors.black87,
             ),
@@ -226,7 +242,7 @@ class _ConfirmationPageState extends State<ConfirmationPage> {
           Text(
             value,
             style: TextStyle(
-              fontSize: isTotal ? 16 : 14,
+              fontSize: isTotal ? 18 : 16,
               fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
               color: isTotal ? Colors.green : Colors.black87,
             ),
@@ -240,13 +256,14 @@ class _ConfirmationPageState extends State<ConfirmationPage> {
     return RadioListTile<String>(
       title: Row(
         children: [
-          Icon(icon, size: 24),
+          Icon(icon, size: 24, color: Colors.black87),
           SizedBox(width: 12),
           Text(
             title,
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w500,
+              color: Colors.black87,
             ),
           ),
         ],
@@ -273,16 +290,17 @@ class _ConfirmationPageState extends State<ConfirmationPage> {
       keyboardType: keyboardType,
       decoration: InputDecoration(
         labelText: label,
+        labelStyle: TextStyle(color: Colors.grey[600]),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(color: Colors.grey.shade300),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(color: Colors.grey.shade300),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(color: Colors.black),
         ),
         filled: true,
@@ -320,7 +338,7 @@ class _ConfirmationPageState extends State<ConfirmationPage> {
                     controller: controller,
                     decoration: InputDecoration(
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(12),
                       ),
                       contentPadding: EdgeInsets.symmetric(
                         horizontal: 12,
@@ -385,7 +403,7 @@ class _ConfirmationPageState extends State<ConfirmationPage> {
       context: context,
       builder: (_) => AlertDialog(
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(16),
         ),
         title: Text(
           "Order Confirmed",
