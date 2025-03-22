@@ -27,15 +27,15 @@ class MyApp extends StatelessWidget {
         textTheme: const TextTheme(
           displayLarge: TextStyle(
             fontFamily: 'Montserrat',
-            fontSize: 24,
-            fontWeight: FontWeight.w600,
-            letterSpacing: 2,
+            fontSize: 28,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 1.5,
           ),
           bodyLarge: TextStyle(
             fontFamily: 'Poppins',
             fontSize: 16,
             fontWeight: FontWeight.w600,
-            letterSpacing: 1.5,
+            letterSpacing: 1.2,
           ),
           bodyMedium: TextStyle(
             fontFamily: 'Poppins',
