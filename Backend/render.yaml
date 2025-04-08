@@ -3,6 +3,7 @@ services:
     name: dressme-backend
     env: node
     plan: free
+    rootDir: .
     buildCommand: npm install && npm run build
     startCommand: node server.js
     envVars:
