@@ -2,9 +2,9 @@
   "name": "fashion-design-integrated-app",
   "version": "1.0.0",
   "description": "Integrated Fashion Design App with Authentication and AI-powered Questionnaire",
-  "main": "src/server.ts",
+  "main": "src/server.js",
   "scripts": {
-    "start": "ts-node src/server.js",
+    "start": "node src/server.js",
     "dev": "nodemon src/server.js",
     "build": "tsc",
     "test": "jest",
