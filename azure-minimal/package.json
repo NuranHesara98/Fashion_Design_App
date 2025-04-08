@@ -1,0 +1,15 @@
+{
+  "name": "dressme-azure-minimal",
+  "version": "1.0.0",
+  "description": "Minimal server for Azure deployment",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
