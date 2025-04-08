@@ -1,0 +1,19 @@
+# Azure App Service configuration
+name: dressme-backend
+schemaVersion: 1.0.0
+runtimeStack: node|18-lts
+appServicePlan:
+  name: dressme-plan
+  resourceGroup: dressme-resources
+  sku: B1
+configurations:
+  appSettings:
+    - name: SCM_DO_BUILD_DURING_DEPLOYMENT
+      value: true
+    - name: WEBSITE_NODE_DEFAULT_VERSION
+      value: "~18"
+    - name: WEBSITE_RUN_FROM_PACKAGE
+      value: "1"
+    - name: NODE_ENV
+      value: "production"
+entryPoint: dist/server.js
