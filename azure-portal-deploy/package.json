@@ -1,0 +1,12 @@
+{
+  "name": "dressme-azure-portal",
+  "version": "1.0.0",
+  "description": "Ultra-minimal server for Azure Portal deployment",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
