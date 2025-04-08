@@ -52,6 +52,24 @@ app.use(express.static(path.join(process.cwd(), 'public')));
 app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 // Routes
+// Root route for API status
+app.get('/', (req, res) => {
+  res.json({
+    success: true,
+    message: 'DressMe Fashion Design API is running',
+    version: '1.0.0',
+    endpoints: [
+      '/api/auth',
+      '/api/users',
+      '/api/designs',
+      '/api/prompts',
+      '/api/logger',
+      '/api/sketches',
+      '/api/proxy'
+    ]
+  });
+});
+
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/designs', designRoutes);
