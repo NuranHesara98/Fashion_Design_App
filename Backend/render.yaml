@@ -1,0 +1,36 @@
+services:
+  - type: web
+    name: dressme-backend
+    env: node
+    plan: free
+    buildCommand: chmod +x ./build.sh && ./build.sh
+    startCommand: chmod +x ./start.sh && ./start.sh
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: SKIP_EMAIL_VERIFICATION
+        value: true
+      - key: MOCK_EMAILS
+        value: true
+      - key: MONGO_URI
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: EMAIL_USER
+        sync: false
+      - key: EMAIL_APP_PASSWORD
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: AWS_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false
+      - key: AWS_REGION
+        sync: false
+      - key: AWS_S3_BUCKET_NAME
+        sync: false
+      - key: FRONTEND_URL
+        value: https://dressme-frontend.onrender.com # Update this with your actual frontend URL
