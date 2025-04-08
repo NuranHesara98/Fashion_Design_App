@@ -11,7 +11,7 @@ import { ImageGenerationMetadata } from '../types/metadataTypes';
  * Stores a generated image in both MongoDB (gencloths collection) and AWS S3
  * 
  * @param localImagePath Local path where the image is saved
- * @param metadata Additional metadata about the image generation request
+ * @param metadata Additional metadata about the image genderation request
  * @param userId Optional user ID to associate the image with
  * @returns Promise with the S3 URL of the stored image
  */
