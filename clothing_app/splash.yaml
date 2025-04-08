@@ -1,6 +1,0 @@
-android_12:
-  color: "#ffffff" # Android 12 light theme background color
-  color_dark: "#272727" # Android 12 dark theme background color
-  image: assets\images\logo.png
-
-web: false # Disable web splash screen
