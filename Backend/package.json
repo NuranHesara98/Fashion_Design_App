@@ -4,8 +4,8 @@
   "description": "Integrated Fashion Design App with Authentication and AI-powered Questionnaire",
   "main": "src/server.ts",
   "scripts": {
-    "start": "ts-node src/server.ts",
-    "dev": "nodemon src/server.ts",
+    "start": "ts-node src/server.js",
+    "dev": "nodemon src/server.js",
     "build": "tsc",
     "test": "jest",
     "test:watch": "jest --watch",
