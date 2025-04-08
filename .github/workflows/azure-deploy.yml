@@ -22,18 +22,35 @@ jobs:
     - name: Install dependencies
       run: npm ci
       
-    - name: Build
-      run: npm run build
+    - name: Create simplified package.json for Azure
+      run: |
+        cat > azure-package.json << EOL
+        {
+          "name": "fashion-design-integrated-app",
+          "version": "1.0.0",
+          "description": "Integrated Fashion Design App with Authentication and AI-powered Questionnaire",
+          "main": "azure-server.js",
+          "scripts": {
+            "start": "node azure-server.js"
+          },
+          "dependencies": {
+            "express": "^4.21.2",
+            "cors": "^2.8.5"
+          }
+        }
+        EOL
       
-    - name: Create required directories
-      run: mkdir -p public/generated-images uploads
-      
-    - name: Zip artifact for deployment
-      run: zip -r release.zip . -x "node_modules/*" "src/*" ".git/*"
+    - name: Create deployment package
+      run: |
+        mkdir -p azure-deploy/public
+        cp azure-server.js azure-deploy/
+        cp azure-package.json azure-deploy/package.json
+        cp web.config azure-deploy/
+        cd azure-deploy && zip -r ../azure-release.zip .
       
     - name: Deploy to Azure Web App
-      uses: azure/webapps-deploy@v2
+      uses: azure/webapps-deploy@v3
       with:
         app-name: 'dressme-backend-h5dtc6gcgjbzfkax'
         publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-        package: release.zip
+        package: azure-release.zip
