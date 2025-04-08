@@ -1,0 +1,11 @@
+{
+  "name": "dressme-azure",
+  "version": "1.0.0",
+  "main": "azure-app.js",
+  "scripts": {
+    "start": "node azure-app.js"
+  },
+  "engines": {
+    "node": "18.x"
+  }
+}

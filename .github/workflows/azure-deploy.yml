@@ -14,11 +14,6 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - name: Azure Login
-      uses: azure/login@v1
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
-
     - name: Set up Node.js
       uses: actions/setup-node@v3
       with:
@@ -27,35 +22,75 @@ jobs:
     - name: Install dependencies
       run: npm ci
       
-    - name: Create simplified package.json for Azure
+    - name: Create minimal server file
       run: |
-        cat > azure-package.json << EOL
+        cat > minimal-server.js << EOL
+        // Minimal server for Azure deployment
+        const http = require('http');
+        
+        const server = http.createServer((req, res) => {
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({
+            status: 'online',
+            message: 'DressMe Fashion Design API is running',
+            timestamp: new Date().toISOString()
+          }));
+        });
+        
+        const PORT = process.env.PORT || 8080;
+        server.listen(PORT, () => {
+          console.log(`Server running on port ${PORT}`);
+        });
+        EOL
+      
+    - name: Create minimal package.json
+      run: |
+        cat > minimal-package.json << EOL
         {
-          "name": "fashion-design-integrated-app",
+          "name": "dressme-azure-minimal",
           "version": "1.0.0",
-          "description": "Integrated Fashion Design App with Authentication and AI-powered Questionnaire",
-          "main": "azure-server.js",
+          "main": "minimal-server.js",
           "scripts": {
-            "start": "node azure-server.js"
+            "start": "node minimal-server.js"
           },
-          "dependencies": {
-            "express": "^4.21.2",
-            "cors": "^2.8.5"
+          "engines": {
+            "node": "18.x"
           }
         }
         EOL
       
+    - name: Create minimal web.config
+      run: |
+        cat > minimal-web.config << EOL
+        <?xml version="1.0" encoding="utf-8"?>
+        <configuration>
+          <system.webServer>
+            <handlers>
+              <add name="iisnode" path="minimal-server.js" verb="*" modules="iisnode" />
+            </handlers>
+            <rewrite>
+              <rules>
+                <rule name="DynamicContent">
+                  <action type="Rewrite" url="minimal-server.js" />
+                </rule>
+              </rules>
+            </rewrite>
+          </system.webServer>
+        </configuration>
+        EOL
+      
     - name: Create deployment package
       run: |
-        mkdir -p azure-deploy/public
-        cp azure-server.js azure-deploy/
-        cp azure-package.json azure-deploy/package.json
-        cp web.config azure-deploy/
-        cd azure-deploy && zip -r ../azure-release.zip .
+        mkdir -p minimal-deploy
+        cp minimal-server.js minimal-deploy/
+        cp minimal-package.json minimal-deploy/package.json
+        cp minimal-web.config minimal-deploy/web.config
+        cd minimal-deploy && zip -r ../minimal-deploy.zip .
       
     - name: Deploy to Azure Web App
-      uses: azure/webapps-deploy@v3
+      uses: azure/webapps-deploy@v2
       with:
         app-name: 'dressme-backend-h5dtc6gcgjbzfkax'
         publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-        package: azure-release.zip
+        package: minimal-deploy.zip
+        startup-command: 'node minimal-server.js'
