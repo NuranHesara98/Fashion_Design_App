@@ -5,8 +5,8 @@
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
-    "dev": "nodemon src/server.js",
-    "build": "tsc",
+    "dev": "nodemon --exec ts-node src/server.ts",
+    "build": "tsc && cp -r src/*.js dist/ && mkdir -p public/generated-images uploads",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage"
